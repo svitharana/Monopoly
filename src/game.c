@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "include/game.h"
 #include "include/players.h"
+#include "include/board.h"
 #include "include/utils.h"
 
 void initial_msg(Player *players)
@@ -20,14 +21,9 @@ void start_game()
     Player players[MAX_PLAYERS] = {0};
     PlayerOrder playerOrder[MAX_PLAYERS] = {0};
 
-    intialize_board(board);
+    initialize_board(board);
     initialize_players(players, playerOrder);
-    initial_msg(players);
+    // initial_msg(players);
 
     determine_playerOrder(playerOrder);
-
-    // for (int i = 0; i < MAX_PLAYERS; i++)
-    // {
-    //     printf("%s", players[i].name);
-    // }
 }

@@ -3,6 +3,6 @@
 
 #include "types.h"
 
-void initilize_board(Square *board);
+void initialize_board(Square *board);
 
 #endif

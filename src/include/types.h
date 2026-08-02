@@ -13,7 +13,7 @@ typedef enum PlayerId
     PLAYER_2,
     PLAYER_3,
     PLAYER_4,
-    NONE
+    UNOWNED // intial ownership of squares
 } PlayerId;
 
 typedef enum PlayerStrategy
@@ -109,7 +109,7 @@ typedef struct Square
     int house_count;
 
     Hotel hotel;
-    int has_hotel
+    int has_hotel;
 
 } Square;
 

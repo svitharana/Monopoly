@@ -1,6 +1,6 @@
 #include "include/board.h"
 
-void intialize_board(Square *board)
+void initialize_board(Square *board)
 {
     board[0].square_name = "GO";
     board[0].square_type = SPECIAL;
@@ -164,7 +164,7 @@ void intialize_board(Square *board)
 
     for (int i = 0; i < MAX_SQUARES; i++)
     {
-        board[i].ownership = NONE;
+        board[i].ownership = UNOWNED;
 
         for (int j = 0; j < MAX_HOUSES; j++)
         {
