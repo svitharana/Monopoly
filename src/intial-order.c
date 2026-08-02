@@ -102,9 +102,12 @@ void determine_playerOrder(PlayerOrder *playerOrder)
     tie_breaker(playerOrder);
 
     printf("\n%s will begin the game.\n\n", playerOrder[0].player->player_name);
+
     printf("Turn order:\n");
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         printf("%s\n", playerOrder[i].player->player_name);
     }
+
+    printf("\n");
 }

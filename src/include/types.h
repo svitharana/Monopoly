@@ -61,6 +61,7 @@ typedef enum SquareType
     INSURANCE,
     TAX,
     EVENT,
+    JAIL,
     SPECIAL
 } SquareType;
 
@@ -110,7 +111,6 @@ typedef struct Square
     int house_count;
 
     Hotel hotel;
-    int has_hotel;
 
 } Square;
 
