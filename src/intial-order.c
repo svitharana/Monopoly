@@ -14,7 +14,7 @@ void display_players(PlayerOrder *playerOrder)
 {
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        printf("%s rolls %d.\n", playerOrder[i].player->name, playerOrder[i].rolled_value);
+        printf("%s rolls %d.\n", playerOrder[i].player->player_name, playerOrder[i].rolled_value);
     }
     printf("\n");
 }
@@ -86,7 +86,7 @@ void tie_breaker(PlayerOrder *playerOrder)
                 if (!playerOrder[i].isOrderCorrect)
                 {
                     playerOrder[i].rolled_value = roll_dice();
-                    printf("%s was tied so he rolled again and got %d\n", playerOrder[i].player->name, playerOrder[i].rolled_value);
+                    printf("%s was tied so he rolled again and got %d\n", playerOrder[i].player->player_name, playerOrder[i].rolled_value);
                 }
             }
             bubbleSort(playerOrder);
@@ -106,10 +106,10 @@ void determine_playerOrder(PlayerOrder *playerOrder)
 
     tie_breaker(playerOrder);
 
-    printf("\n%s will begin the game.\n\n", playerOrder[0].player->name);
+    printf("\n%s will begin the game.\n\n", playerOrder[0].player->player_name);
     printf("Turn order:\n");
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        printf("%s\n", playerOrder[i].player->name);
+        printf("%s\n", playerOrder[i].player->player_name);
     }
 }
