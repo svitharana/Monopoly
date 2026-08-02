@@ -8,6 +8,24 @@ int random_generator(int max)
     return value;
 }
 
+void print_heading(char *heading)
+{
+    int decoration_len = 30;
+    for (int x = 0; x < decoration_len; x++)
+    {
+        printf("#");
+    }
+
+    printf("\n\n%s\n\n", heading);
+
+    for (int x = 0; x < decoration_len; x++)
+    {
+        printf("#");
+    }
+
+    printf("\n\n");
+}
+
 void format_amount(int amount) // formats 30000 -> 30,000
 {
     int arr[5];
