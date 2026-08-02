@@ -6,13 +6,12 @@
 
 void initial_msg(Player *players)
 {
-    printf("MONOPOLY-LK Simulation\n\n");
+    print_heading("MONOPOLY-LK Simulation");
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         printf("Player %d: %s\n", i + 1, players[i].player_name);
     }
-    printf("\nEach player begins with ");
-    format_amount(30000);
+    printf("\nEach player begins with LKR 30000.\n");
 }
 
 int roll_dice()
@@ -22,12 +21,18 @@ int roll_dice()
 
 void play_turn(Player *players, PlayerId player_id, Square *board)
 {
-    Player player = players[player_id];
+    Player *player = &players[player_id];
     int dice_1 = roll_dice();
     int dice_2 = roll_dice();
 
-    player.rolled_value = dice_1 + dice_2;
-    printf("%s rolled %d.\n", player.player_name, player.rolled_value);
+    player->rolled_value = dice_1 + dice_2;
+    print_heading("Dice Roll");
+    printf("%s rolled %d.\n\n", player->player_name, player->rolled_value);
+
+    print_heading("Player Movement");
+    move_player(player);
+
+    resolve_landingSquare(&board[player->current_position], players, player);
 }
 
 void start_game()

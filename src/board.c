@@ -1,4 +1,25 @@
+#include <stdio.h>
 #include "include/board.h"
+
+void move_player(Player *player)
+{
+    int previous_position = player->current_position;
+    player->current_position += player->rolled_value;
+    printf("%s moves from Square %d to Square %d.\n\n", player->player_name, previous_position, player->current_position);
+}
+
+void resolve_landingSquare(Square *square, Player *players, Player *player)
+{
+    switch (square->square_type)
+    {
+    case PROPERTY:
+        resolve_property(square, players, player);
+        break;
+
+    default:
+        break;
+    }
+}
 
 void initialize_board(Square *board)
 {
@@ -43,7 +64,7 @@ void initialize_board(Square *board)
     board[9].property_group = LIGHT_BLUE;
 
     board[10].square_name = "Jail / Just Visiting";
-    board[10].square_type = SPECIAL;
+    board[10].square_type = JAIL;
     board[10].property_group = NONE;
 
     board[11].square_name = "Nugegoda";
@@ -123,7 +144,7 @@ void initialize_board(Square *board)
     board[29].property_group = YELLOW;
 
     board[30].square_name = "Go To Jail";
-    board[30].square_type = SPECIAL;
+    board[30].square_type = JAIL;
     board[30].property_group = NONE;
 
     board[31].square_name = "Jaffna Town";
@@ -173,4 +194,6 @@ void initialize_board(Square *board)
 
         board[i].hotel.condition = 1; // intialized condition of hotel to 100%
     }
+
+    board[9].base_rent = 100;
 }
