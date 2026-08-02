@@ -5,5 +5,6 @@
 #include "types.h"
 
 void start_game();
+int roll_dice();
 
 #endif

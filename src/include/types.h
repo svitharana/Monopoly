@@ -5,6 +5,7 @@
 #define MAX_PLAYERS 4
 #define MAX_SQUARES 40
 #define MAX_HOUSES 4
+#define MAX_ROUNDS 500
 
 // PLAYERS
 typedef enum PlayerId

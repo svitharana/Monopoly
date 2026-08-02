@@ -4,6 +4,6 @@
 
 int main()
 {
-    srand(200);
+    srand(20);
     start_game();
 }

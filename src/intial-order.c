@@ -1,14 +1,7 @@
 #include <stdio.h>
 #include "include/players.h"
+#include "include/game.h"
 #include "include/utils.h"
-
-int roll_dice()
-{
-    int dice_1 = random_generator(6);
-    int dice_2 = random_generator(6);
-
-    return dice_1 + dice_2;
-}
 
 void display_players(PlayerOrder *playerOrder)
 {
@@ -86,6 +79,7 @@ void tie_breaker(PlayerOrder *playerOrder)
                 if (!playerOrder[i].isOrderCorrect)
                 {
                     playerOrder[i].rolled_value = roll_dice();
+                    playerOrder[i].rolled_value += roll_dice();
                     printf("%s was tied so he rolled again and got %d\n", playerOrder[i].player->player_name, playerOrder[i].rolled_value);
                 }
             }
@@ -99,6 +93,7 @@ void determine_playerOrder(PlayerOrder *playerOrder)
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         playerOrder[i].rolled_value = roll_dice();
+        playerOrder[i].rolled_value += roll_dice();
     }
 
     bubbleSort(playerOrder);
