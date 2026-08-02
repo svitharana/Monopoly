@@ -36,9 +36,15 @@ typedef struct Player
 
     int isBankrupt;
 
-    int isOrderCorrect; // only for finding correct order
-
 } Player;
+
+typedef struct PlayerOrder
+{
+    Player *player;
+    int rolled_value;
+    int isOrderCorrect;
+
+} PlayerOrder;
 
 // SQUARES
 

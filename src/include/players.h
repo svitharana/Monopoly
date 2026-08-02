@@ -3,6 +3,7 @@
 
 #include "types.h"
 
-void initialize_players(Player *players);
+void initialize_players(Player *players, PlayerOrder *playerOrder);
+void determine_playerOrder(PlayerOrder *playerOrder);
 
 #endif

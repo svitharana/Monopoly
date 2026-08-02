@@ -1,7 +1,7 @@
 
 #include "include/players.h"
 
-void initialize_players(Player *players)
+void initialize_players(Player *players, PlayerOrder *playerOrder)
 {
     // Aggressive Investor
     players[AGGRESSIVE_INVESTOR].playerId = PLAYER_1;
@@ -23,7 +23,10 @@ void initialize_players(Player *players)
     {
         players[i].cash = 30000;
         players[i].rolled_value = 0;
-        players[i].isOrderCorrect = 0;
         players[i].current_position = 0;
+
+        playerOrder[i].player = &players[i];
+        playerOrder[i].rolled_value = 0;
+        playerOrder[i].isOrderCorrect = 0;
     }
 }
