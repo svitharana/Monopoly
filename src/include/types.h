@@ -3,6 +3,8 @@
 
 // constants
 #define MAX_PLAYERS 4
+#define MAX_SQUARES 40
+#define MAX_HOUSES 4
 
 // PLAYERS
 typedef enum PlayerId
@@ -11,6 +13,7 @@ typedef enum PlayerId
     PLAYER_2,
     PLAYER_3,
     PLAYER_4,
+    NONE
 } PlayerId;
 
 typedef enum PlayerStrategy
@@ -24,7 +27,7 @@ typedef enum PlayerStrategy
 typedef struct Player
 {
     PlayerId playerId;
-    char *name;
+    char *player_name;
     PlayerStrategy strategy;
 
     int cash;
@@ -53,7 +56,7 @@ typedef enum SquareType
     PROPERTY,
     RAILWAY,
     UTILITY,
-    BANK_SQUARE,
+    BANK,
     INSURANCE,
     TAX,
     EVENT,
@@ -73,39 +76,40 @@ typedef enum
     NONE
 } PropertyGroup;
 
-typedef enum BuildingType
+typedef struct House
 {
-    HOUSE_1,
-    HOUSE_2,
-    HOUSE_3,
-    HOUSE_4,
-    HOTEL,
-} BuildingType;
-
-typedef struct Buildings
-{
-    BuildingType building;
+    int hasBuild;
     float condition;
 
-} Buildings;
+} House;
+
+typedef struct Hotel
+{
+    int hasBuild;
+    float condition;
+} Hotel;
 
 typedef struct Square
 {
-    char *name;
-    SquareType type;
+    char *square_name;
+    SquareType square_type;
     PlayerId ownership;
 
     int purchase_price;
     int base_rent;
 
-    PropertyGroup group;
+    PropertyGroup property_group;
     int mortgage_value;
     int house_constructionCost;
     int hotel_constructionCost;
     int isMortgage;
     int isInsured;
 
-    Buildings buildings;
+    House houses[MAX_HOUSES];
+    int house_count;
+
+    Hotel hotel;
+    int has_hotel
 
 } Square;
 
