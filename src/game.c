@@ -11,7 +11,7 @@ void initial_msg(Player *players)
     {
         printf("Player %d: %s\n", i + 1, players[i].player_name);
     }
-    printf("\nEach player begins with LKR 30000.\n");
+    printf("\nEach player begins with LKR %d.\n", INITIAL_CASH);
 }
 
 int roll_dice()
@@ -30,7 +30,7 @@ void play_turn(Player *players, PlayerId player_id, Square *board)
     printf("%s rolled %d.\n\n", player->player_name, player->rolled_value);
 
     print_heading("Player Movement");
-    move_player(player);
+    move_player(player, player->rolled_value);
 
     resolve_landingSquare(&board[player->current_position], players, player);
 }

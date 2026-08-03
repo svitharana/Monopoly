@@ -4,7 +4,7 @@
 #include "types.h"
 
 void initialize_board(Square *board);
-void move_player(Player *player);
+void move_player(Player *player, int move_by);
 void resolve_landingSquare(Square *square, Player *players, Player *player);
 
 void resolve_property(Square *square, Player *players, Player *player);

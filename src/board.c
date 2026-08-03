@@ -1,10 +1,19 @@
 #include <stdio.h>
 #include "include/board.h"
 
-void move_player(Player *player)
+void move_player(Player *player, int move_by)
 {
     int previous_position = player->current_position;
-    player->current_position += player->rolled_value;
+    player->current_position = (previous_position + move_by) % 40;
+
+    if (player->current_position - previous_position <= 0)
+    {
+        printf("%s passed GO.\n", player->player_name);
+        printf("Collected LKR %d.\n", GO_PASSED_AMOUNT);
+        player->cash += GO_PASSED_AMOUNT;
+
+        printf("Current Balance : %d.\n\n", player->cash);
+    }
     printf("%s moves from Square %d to Square %d.\n\n", player->player_name, previous_position, player->current_position);
 }
 
