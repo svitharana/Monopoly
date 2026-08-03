@@ -6,4 +6,6 @@
 void initialize_players(Player *players, PlayerOrder *playerOrder);
 void determine_playerOrder(PlayerOrder *playerOrder);
 
+int decide_purchase(Square *square, Player *player);
+
 #endif

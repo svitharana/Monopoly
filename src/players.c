@@ -1,5 +1,9 @@
-
 #include "include/players.h"
+
+int decide_purchase(Square *square, Player *player)
+{
+    return player->cash >= (player->cash - square->purchase_price);
+}
 
 void initialize_players(Player *players, PlayerOrder *playerOrder)
 {

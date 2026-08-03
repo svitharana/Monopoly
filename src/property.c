@@ -1,11 +1,16 @@
 #include <stdio.h>
 #include "include/board.h"
+#include "include/players.h"
 #include "include/utils.h"
 
 void resolve_property(Square *square, Player *players, Player *player)
 {
     if (square->ownership == UNOWNED)
     {
+        if (!decide_purchase(square, player))
+        {
+            return;
+        }
         player->cash -= square->purchase_price;
         square->ownership = player->playerId;
 
