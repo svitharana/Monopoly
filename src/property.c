@@ -16,15 +16,38 @@ void resolve_property(Square *square, Player *players, Player *player)
     else if (square->ownership != player->playerId)
     {
         int rent = square->base_rent;
-        Player property_owner = players[square->ownership];
+        Player *property_owner = &players[square->ownership];
+
+        if (square->hotel.hasBuild)
+        {
+            rent *= 10;
+        }
+        else
+        {
+            switch (square->house_count)
+            {
+            case 1:
+                rent *= 2;
+                break;
+            case 2:
+                rent *= 3;
+                break;
+            case 3:
+                rent * 5;
+                break;
+            case 4:
+                rent * 7;
+                break;
+            }
+        }
 
         print_heading("Paying Rent");
         printf("%s landed on %s.\n\n", player->player_name, square->square_name);
         printf("Rent Paid : LKR %d.\n\n", rent);
-        printf("Owner : %s.\n\n", property_owner.player_name);
+        printf("Owner : %s.\n\n", property_owner->player_name);
 
         player->cash -= rent;
-        property_owner.cash += rent;
+        property_owner->cash += rent;
     }
     else
     {

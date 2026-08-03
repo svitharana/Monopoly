@@ -7,6 +7,9 @@
 #define MAX_HOUSES 4
 #define MAX_ROUNDS 500
 
+#define INITIAL_CASH 30000
+#define GO_PASSED_AMOUNT 2000
+
 // PLAYERS
 typedef enum PlayerId
 {
