@@ -17,12 +17,18 @@ void move_player(Player *player, int move_by)
     printf("%s moves from Square %d to Square %d.\n\n", player->player_name, previous_position, player->current_position);
 }
 
-void resolve_landingSquare(Square *square, Player *players, Player *player)
+void resolve_landingSquare(Square *board, Player *players, Player *player)
 {
+    // Square *square = &board[5];
+    Square *square = &board[player->current_position];
+
     switch (square->square_type)
     {
     case PROPERTY:
         resolve_property(square, players, player);
+        break;
+    case RAILWAY:
+        resolve_railwayStation(board, square, players, player);
         break;
 
     default:
@@ -65,8 +71,8 @@ void initialize_board(Square *board)
     board[5].square_name = "Colombo Fort Railway Station";
     board[5].square_type = RAILWAY;
     board[5].property_group = NONE;
-    board[5].purchase_price = 0;
-    board[5].base_rent = 0;
+    board[5].purchase_price = 200;
+    board[5].base_rent = 250;
 
     board[6].square_name = "Bambalapitiya";
     board[6].square_type = PROPERTY;
@@ -125,8 +131,8 @@ void initialize_board(Square *board)
     board[15].square_name = "Kandy Railway Station";
     board[15].square_type = RAILWAY;
     board[15].property_group = NONE;
-    board[15].purchase_price = 0;
-    board[15].base_rent = 0;
+    board[15].purchase_price = 200;
+    board[15].base_rent = 250;
 
     board[16].square_name = "Negombo";
     board[16].square_type = PROPERTY;
@@ -185,8 +191,8 @@ void initialize_board(Square *board)
     board[25].square_name = "Galle Railway Station";
     board[25].square_type = RAILWAY;
     board[25].property_group = NONE;
-    board[25].purchase_price = 0;
-    board[25].base_rent = 0;
+    board[25].purchase_price = 200;
+    board[25].base_rent = 250;
 
     board[26].square_name = "Galle Fort";
     board[26].square_type = PROPERTY;
@@ -245,8 +251,8 @@ void initialize_board(Square *board)
     board[35].square_name = "Jaffna Railway Station";
     board[35].square_type = RAILWAY;
     board[35].property_group = NONE;
-    board[35].purchase_price = 0;
-    board[35].base_rent = 0;
+    board[35].purchase_price = 200;
+    board[35].base_rent = 250;
 
     board[36].square_name = "National Event Card";
     board[36].square_type = EVENT;

@@ -26,13 +26,14 @@ void play_turn(Player *players, PlayerId player_id, Square *board)
     int dice_2 = roll_dice();
 
     player->rolled_value = dice_1 + dice_2;
+    // player->rolled_value = 5;
     print_heading("Dice Roll");
     printf("%s rolled %d.\n\n", player->player_name, player->rolled_value);
 
     print_heading("Player Movement");
     move_player(player, player->rolled_value);
 
-    resolve_landingSquare(&board[player->current_position], players, player);
+    resolve_landingSquare(board, players, player);
 }
 
 void start_game()
@@ -50,7 +51,7 @@ void start_game()
 
     determine_playerOrder(playerOrder);
 
-    while (round <= 2)
+    while (round <= 6)
     {
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
