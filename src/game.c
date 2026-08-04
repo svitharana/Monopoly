@@ -135,8 +135,8 @@ static void play_turn(Player *players, PlayerId player_id, Square *board)
     int dice_1 = roll_dice();
     int dice_2 = roll_dice();
 
-    player->rolled_value = 10;
-    // player->rolled_value = dice_1 + dice_2;
+    // player->rolled_value = 10;
+    player->rolled_value = dice_1 + dice_2;
 
     print_heading("Dice Roll");
     printf("%s rolled %d and %d with a total %d.\n", player->player_name, dice_1, dice_2, player->rolled_value);
@@ -182,7 +182,7 @@ void start_game()
     Player players[MAX_PLAYERS] = {0};
     PlayerOrder playerOrder[MAX_PLAYERS] = {0};
 
-    int round = 1;
+    int game_round = 1;
     int turn = 1;
 
     initialize_board(board);
@@ -191,12 +191,25 @@ void start_game()
 
     determine_playerOrder(playerOrder);
 
-    while (round <= MAX_ROUNDS)
+    while (game_round <= MAX_ROUNDS)
     {
+        int num_players_passed_go = 0;
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
             play_turn(players, playerOrder[i].player->playerId, board);
+            if (players[i].has_passed_go == 1)
+            {
+                num_players_passed_go++;
+            }
         }
-        round++;
+
+        if (num_players_passed_go == 4)
+        {
+            game_round++;
+            for (int i = 0; i < MAX_PLAYERS; i++)
+            {
+                players[i].has_passed_go = 0;
+            }
+        }
     }
 }

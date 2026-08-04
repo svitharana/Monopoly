@@ -123,6 +123,7 @@ static void resolve_jail(Square *square, Player *player)
 {
     if (player->current_position == GOTO_JAIL_SQUARE)
     {
+        player->has_passed_go = 1;              // doesn't go but overides this flag in order to calculate game rounds
         player->current_position = JAIL_SQUARE; // player moved to jail
         player->isInJail = 1;                   // player in jail
     }
@@ -165,6 +166,7 @@ void move_player(Player *player, int move_by)
         printf("%s passed GO.\n", player->player_name);
         printf("Collected LKR %d.\n", GO_PASSED_AMOUNT);
         player->cash += GO_PASSED_AMOUNT;
+        player->has_passed_go = 1;
 
         printf("Current Balance : %d.\n\n", player->cash);
     }

@@ -5,7 +5,7 @@
 #define MAX_PLAYERS 4
 #define MAX_SQUARES 40
 #define MAX_HOUSES 4
-#define MAX_ROUNDS 6
+#define MAX_ROUNDS 3
 
 #define INITIAL_CASH 30000
 #define GO_PASSED_AMOUNT 2000
@@ -46,6 +46,8 @@ typedef struct Player
     int inJail_turns;
 
     int isBankrupt;
+
+    int has_passed_go;
 
 } Player;
 
