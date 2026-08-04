@@ -19,7 +19,7 @@ static void resolve_property(Square *square, Player *players, Player *player)
         int rent = square->base_rent;
         Player *property_owner = &players[square->ownership];
 
-        if (square->hotel.hasBuild)
+        if (square->hotel_count == 1)
         {
             rent *= 10;
         }
@@ -143,7 +143,7 @@ void resolve_landingSquare(Square *board, Player *players, Player *player)
 void move_player(Player *player, int move_by)
 {
     int previous_position = player->current_position;
-    player->current_position = (previous_position + move_by) % 40;
+    player->current_position = (previous_position + move_by) % MAX_SQUARES;
 
     printf("%s moves from Square %d to Square %d.\n\n", player->player_name, previous_position, player->current_position);
 
@@ -402,12 +402,9 @@ void initialize_board(Square *board)
     for (int i = 0; i < MAX_SQUARES; i++)
     {
         board[i].ownership = UNOWNED;
+        board[i].house_count = 0;
+        board[i].hotel_count = 0;
 
-        for (int j = 0; j < MAX_HOUSES; j++)
-        {
-            board[i].houses[j].condition = 1; // intialized condition of all houses to 100%
-        }
-
-        board[i].hotel.condition = 1; // intialized condition of hotel to 100%
+        board[i].builing_condition = 100;
     }
 }

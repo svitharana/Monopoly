@@ -5,7 +5,7 @@
 #define MAX_PLAYERS 4
 #define MAX_SQUARES 40
 #define MAX_HOUSES 4
-#define MAX_ROUNDS 500
+#define MAX_ROUNDS 6
 
 #define INITIAL_CASH 30000
 #define GO_PASSED_AMOUNT 2000
@@ -110,10 +110,9 @@ typedef struct Square
     int isMortgage;
     int isInsured;
 
-    House houses[MAX_HOUSES];
     int house_count;
-
-    Hotel hotel;
+    int hotel_count;
+    int builing_condition;
 
 } Square;
 
