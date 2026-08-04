@@ -1,22 +1,18 @@
 #include <stdio.h>
 #include "include/board.h"
 #include "include/players.h"
+#include "include/finance.h"
 #include "include/utils.h"
 
 void resolve_property(Square *square, Player *players, Player *player)
 {
     if (square->ownership == UNOWNED)
     {
-        if (!decide_purchase(square, player))
+        if (decide_purchase(square, player) == 0)
         {
             return;
         }
-        player->cash -= square->purchase_price;
-        square->ownership = player->playerId;
-
-        print_heading("Purchasing Property");
-        printf("%s purchased %s for LKR %d.\n\n", player->player_name, square->square_name, square->purchase_price);
-        printf("Remaining Balance : LKR %d.\n\n", player->cash);
+        execute_purchase(square, player);
     }
     else if (square->ownership != player->playerId)
     {
@@ -38,21 +34,14 @@ void resolve_property(Square *square, Player *players, Player *player)
                 rent *= 3;
                 break;
             case 3:
-                rent * 5;
+                rent *= 5;
                 break;
             case 4:
-                rent * 7;
+                rent *= 7;
                 break;
             }
         }
-
-        print_heading("Paying Rent");
-        printf("%s landed on %s.\n\n", player->player_name, square->square_name);
-        printf("Rent Paid : LKR %d.\n\n", rent);
-        printf("Owner : %s.\n\n", property_owner->player_name);
-
-        player->cash -= rent;
-        property_owner->cash += rent;
+        pay_rent(square, player, property_owner, rent);
     }
     else
     {

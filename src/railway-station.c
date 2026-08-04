@@ -1,7 +1,6 @@
-#include <stdio.h>
 #include "include/board.h"
 #include "include/players.h"
-#include "include/utils.h"
+#include "include/finance.h"
 
 void resolve_railwayStation(Square *board, Square *square, Player *players, Player *player)
 {
@@ -11,12 +10,7 @@ void resolve_railwayStation(Square *board, Square *square, Player *players, Play
         {
             return;
         }
-        player->cash -= square->purchase_price;
-        square->ownership = player->playerId;
-
-        print_heading("Purchasing Property");
-        printf("%s purchased %s for LKR %d.\n\n", player->player_name, square->square_name, square->purchase_price);
-        printf("Remaining Balance : LKR %d.\n\n", player->cash);
+        execute_purchase(square, player);
     }
     else if (square->ownership != player->playerId)
     {
@@ -35,9 +29,6 @@ void resolve_railwayStation(Square *board, Square *square, Player *players, Play
 
         rent *= railwayStation_count;
 
-        print_heading("Paying Rent");
-        printf("%s landed on %s.\n\n", player->player_name, square->square_name);
-        printf("Rent Paid : LKR %d.\n\n", rent);
-        printf("Owner : %s.\n\n", railwayStation_owner->player_name);
+        pay_rent(square, player, railwayStation_owner, rent);
     }
 }
