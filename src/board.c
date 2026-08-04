@@ -1,20 +1,120 @@
 #include <stdio.h>
 #include "include/board.h"
+#include "include/finance.h"
+#include "include/players.h"
 
-void move_player(Player *player, int move_by)
+// PROPERTY
+static void resolve_property(Square *square, Player *players, Player *player)
 {
-    int previous_position = player->current_position;
-    player->current_position = (previous_position + move_by) % 40;
-
-    printf("%s moves from Square %d to Square %d.\n\n", player->player_name, previous_position, player->current_position);
-
-    if (previous_position + move_by >= 40)
+    if (square->ownership == UNOWNED)
     {
-        printf("%s passed GO.\n", player->player_name);
-        printf("Collected LKR %d.\n", GO_PASSED_AMOUNT);
-        player->cash += GO_PASSED_AMOUNT;
+        if (decide_purchase(square, player) == 0)
+        {
+            return;
+        }
+        execute_purchase(square, player);
+    }
+    else if (square->ownership != player->playerId)
+    {
+        int rent = square->base_rent;
+        Player *property_owner = &players[square->ownership];
 
-        printf("Current Balance : %d.\n\n", player->cash);
+        if (square->hotel.hasBuild)
+        {
+            rent *= 10;
+        }
+        else
+        {
+            switch (square->house_count)
+            {
+            case 1:
+                rent *= 2;
+                break;
+            case 2:
+                rent *= 3;
+                break;
+            case 3:
+                rent *= 5;
+                break;
+            case 4:
+                rent *= 7;
+                break;
+            }
+        }
+        pay_rent(square, player, property_owner, rent);
+    }
+}
+
+// RAILWAY STATION
+static void resolve_railwayStation(Square *board, Square *square, Player *players, Player *player)
+{
+    if (square->ownership == UNOWNED)
+    {
+        if (!decide_purchase(square, player))
+        {
+            return;
+        }
+        execute_purchase(square, player);
+    }
+    else if (square->ownership != player->playerId)
+    {
+        int rent = square->base_rent;
+
+        Player *railwayStation_owner = &players[square->ownership];
+        int railwayStation_count = 0;
+
+        for (int i = 0; i < MAX_SQUARES; i++)
+        {
+            if (board[i].square_type == RAILWAY && board[i].ownership == railwayStation_owner->playerId)
+            {
+                railwayStation_count++;
+            }
+        }
+
+        rent *= railwayStation_count;
+
+        pay_rent(square, player, railwayStation_owner, rent);
+    }
+}
+
+// UTILITY COMPANIES
+static void resolve_utilitySquare(Square *board, Square *square, Player *players, Player *player)
+{
+    if (square->ownership == UNOWNED)
+    {
+        if (decide_purchase(square, player) == 0)
+        {
+            return;
+        }
+        execute_purchase(square, player);
+    }
+    else if (square->ownership != player->playerId)
+    {
+        int rent = square->base_rent;
+
+        Player *utilityCompany_owner = &players[square->ownership];
+        int utilityCompany_count = 0;
+
+        for (int i = 0; i < MAX_SQUARES; i++)
+        {
+            if (board[i].square_type == UTILITY && board[i].ownership == utilityCompany_owner->playerId)
+            {
+                utilityCompany_count++;
+            }
+        }
+
+        switch (utilityCompany_count)
+        {
+        case 1:
+            rent *= 2;
+            break;
+        case 2:
+            rent *= 7;
+            break;
+        default:
+            break;
+        }
+        pay_rent(square, player, utilityCompany_owner, rent);
     }
 }
 
@@ -37,6 +137,23 @@ void resolve_landingSquare(Square *board, Player *players, Player *player)
 
     default:
         break;
+    }
+}
+
+void move_player(Player *player, int move_by)
+{
+    int previous_position = player->current_position;
+    player->current_position = (previous_position + move_by) % 40;
+
+    printf("%s moves from Square %d to Square %d.\n\n", player->player_name, previous_position, player->current_position);
+
+    if (previous_position + move_by >= 40)
+    {
+        printf("%s passed GO.\n", player->player_name);
+        printf("Collected LKR %d.\n", GO_PASSED_AMOUNT);
+        player->cash += GO_PASSED_AMOUNT;
+
+        printf("Current Balance : %d.\n\n", player->cash);
     }
 }
 

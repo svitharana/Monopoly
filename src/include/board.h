@@ -7,8 +7,4 @@ void initialize_board(Square *board);
 void move_player(Player *player, int move_by);
 void resolve_landingSquare(Square *board, Player *players, Player *player);
 
-void resolve_property(Square *square, Player *players, Player *player);
-void resolve_railwayStation(Square *board, Square *square, Player *players, Player *player);
-void resolve_utilitySquare(Square *board, Square *square, Player *players, Player *player);
-
 #endif
