@@ -2,7 +2,7 @@
 
 int decide_purchase(Square *square, Player *player)
 {
-    return player->cash >= (player->cash - square->purchase_price);
+    return player->cash >= square->purchase_price;
 }
 
 void initialize_players(Player *players, PlayerOrder *playerOrder)
@@ -29,7 +29,7 @@ void initialize_players(Player *players, PlayerOrder *playerOrder)
 
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        players[i].cash = 30000;
+        players[i].cash = INITIAL_CASH;
         players[i].rolled_value = 0;
         players[i].current_position = 0;
 
