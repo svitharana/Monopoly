@@ -8,20 +8,24 @@ int decide_purchase(Square *square, Player *player)
 void initialize_players(Player *players, PlayerOrder *playerOrder)
 {
     // Aggressive Investor
-    players[AGGRESSIVE_INVESTOR].playerId = PLAYER_1;
-    players[AGGRESSIVE_INVESTOR].player_name = "Aggressive Investor";
+    players[PLAYER_1].playerId = PLAYER_1;
+    players[PLAYER_1].player_name = "Aggressive Investor";
+    players[PLAYER_1].strategy = AGGRESSIVE_INVESTOR;
 
     // Conservative Banker
-    players[CONSERVATIVE_BANKER].playerId = PLAYER_2;
-    players[CONSERVATIVE_BANKER].player_name = "Conservative Banker";
+    players[PLAYER_2].playerId = PLAYER_2;
+    players[PLAYER_2].player_name = "Conservative Banker";
+    players[PLAYER_2].strategy = CONSERVATIVE_BANKER;
 
     // Risk Taker
-    players[RISK_TAKER].playerId = PLAYER_3;
-    players[RISK_TAKER].player_name = "Risk Taker";
+    players[PLAYER_3].playerId = PLAYER_3;
+    players[PLAYER_3].player_name = "Risk Taker";
+    players[PLAYER_3].strategy = RISK_TAKER;
 
     // Opportunistic Trader
-    players[OPPORTUNISTIC_TRADER].playerId = PLAYER_4;
-    players[OPPORTUNISTIC_TRADER].player_name = "Opportunistic Trader";
+    players[PLAYER_4].playerId = PLAYER_4;
+    players[PLAYER_4].player_name = "Opportunistic Trader";
+    players[PLAYER_4].strategy = AGGRESSIVE_INVESTOR;
 
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
