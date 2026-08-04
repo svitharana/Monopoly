@@ -6,6 +6,8 @@ void move_player(Player *player, int move_by)
     int previous_position = player->current_position;
     player->current_position = (previous_position + move_by) % 40;
 
+    printf("%s moves from Square %d to Square %d.\n\n", player->player_name, previous_position, player->current_position);
+
     if (previous_position + move_by >= 40)
     {
         printf("%s passed GO.\n", player->player_name);
@@ -14,7 +16,6 @@ void move_player(Player *player, int move_by)
 
         printf("Current Balance : %d.\n\n", player->cash);
     }
-    printf("%s moves from Square %d to Square %d.\n\n", player->player_name, previous_position, player->current_position);
 }
 
 void resolve_landingSquare(Square *board, Player *players, Player *player)

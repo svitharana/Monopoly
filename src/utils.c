@@ -10,17 +10,17 @@ int random_generator(int max)
 
 void print_heading(char *heading)
 {
-    int decoration_len = 30;
+    int decoration_len = 40;
     for (int x = 0; x < decoration_len; x++)
     {
-        printf("#");
+        printf("=");
     }
 
     printf("\n\n%s\n\n", heading);
 
     for (int x = 0; x < decoration_len; x++)
     {
-        printf("#");
+        printf("=");
     }
 
     printf("\n\n");
