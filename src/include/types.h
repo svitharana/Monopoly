@@ -10,6 +10,10 @@
 #define INITIAL_CASH 30000
 #define GO_PASSED_AMOUNT 2000
 
+#define MAX_TURNS_INJAIL 3
+#define GOTO_JAIL_SQUARE 30
+#define JAIL_SQUARE 10
+
 // PLAYERS
 typedef enum PlayerId
 {

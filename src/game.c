@@ -131,16 +131,47 @@ static void initial_msg(Player *players)
 static void play_turn(Player *players, PlayerId player_id, Square *board)
 {
     Player *player = &players[player_id];
+
     int dice_1 = roll_dice();
     int dice_2 = roll_dice();
 
-    player->rolled_value = dice_1 + dice_2;
-    // player->rolled_value = 5;
-    print_heading("Dice Roll");
-    printf("%s rolled %d.\n\n", player->player_name, player->rolled_value);
+    player->rolled_value = 10;
+    // player->rolled_value = dice_1 + dice_2;
 
-    print_heading("Player Movement");
-    move_player(player, player->rolled_value);
+    print_heading("Dice Roll");
+    printf("%s rolled %d and %d with a total %d.\n", player->player_name, dice_1, dice_2, player->rolled_value);
+
+    if (player->isInJail == 1)
+    {
+        player->inJail_turns++;
+
+        print_heading("In Jail");
+        if (player->inJail_turns < 3)
+        {
+            if (dice_1 == dice_2)
+            {
+                printf("%s rolls doubles gets out of jail.\n", player->player_name);
+                player->isInJail = 0;
+                player->inJail_turns = 0;
+            }
+            else
+            {
+                printf("%s remains in jail for %d more rounds.\n", player->player_name, MAX_TURNS_INJAIL - player->inJail_turns);
+            }
+        }
+        else
+        {
+            printf("%s gets out of jail after %d turns.\n", player->player_name, MAX_TURNS_INJAIL);
+            player->isInJail = 0;
+            player->inJail_turns = 0;
+        }
+    }
+
+    if (player->isInJail != 1)
+    {
+        print_heading("Player Movement");
+        move_player(player, player->rolled_value);
+    }
 
     resolve_landingSquare(board, players, player);
 }
@@ -160,7 +191,7 @@ void start_game()
 
     determine_playerOrder(playerOrder);
 
-    while (round <= 6)
+    while (round <= MAX_ROUNDS)
     {
         for (int i = 0; i < MAX_PLAYERS; i++)
         {

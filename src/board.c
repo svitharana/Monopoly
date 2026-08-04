@@ -78,7 +78,7 @@ static void resolve_railwayStation(Square *board, Square *square, Player *player
 }
 
 // UTILITY COMPANIES
-static void resolve_utilitySquare(Square *board, Square *square, Player *players, Player *player)
+static void resolve_utilityCompany(Square *board, Square *square, Player *players, Player *player)
 {
     if (square->ownership == UNOWNED)
     {
@@ -118,6 +118,16 @@ static void resolve_utilitySquare(Square *board, Square *square, Player *players
     }
 }
 
+// JAIL
+static void resolve_jail(Square *square, Player *player)
+{
+    if (player->current_position == GOTO_JAIL_SQUARE)
+    {
+        player->current_position = JAIL_SQUARE; // player moved to jail
+        player->isInJail = 1;                   // player in jail
+    }
+}
+
 void resolve_landingSquare(Square *board, Player *players, Player *player)
 {
     // Square *square = &board[5];
@@ -132,7 +142,10 @@ void resolve_landingSquare(Square *board, Player *players, Player *player)
         resolve_railwayStation(board, square, players, player);
         break;
     case UTILITY:
-        resolve_utilitySquare(board, square, players, player);
+        resolve_utilityCompany(board, square, players, player);
+        break;
+    case JAIL:
+        resolve_jail(square, player);
         break;
 
     default:
