@@ -17,7 +17,7 @@ typedef enum PlayerId
     PLAYER_2,
     PLAYER_3,
     PLAYER_4,
-    UNOWNED // intial ownership of squares
+    UNOWNED = -1 // intial ownership of squares
 } PlayerId;
 
 typedef enum PlayerStrategy

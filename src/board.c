@@ -6,7 +6,7 @@ void move_player(Player *player, int move_by)
     int previous_position = player->current_position;
     player->current_position = (previous_position + move_by) % 40;
 
-    if (player->current_position - previous_position <= 0)
+    if (previous_position + move_by >= 40)
     {
         printf("%s passed GO.\n", player->player_name);
         printf("Collected LKR %d.\n", GO_PASSED_AMOUNT);
@@ -29,6 +29,9 @@ void resolve_landingSquare(Square *board, Player *players, Player *player)
         break;
     case RAILWAY:
         resolve_railwayStation(board, square, players, player);
+        break;
+    case UTILITY:
+        resolve_utilitySquare(board, square, players, player);
         break;
 
     default:
