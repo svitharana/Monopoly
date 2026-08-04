@@ -89,7 +89,7 @@ static void tie_breaker(PlayerOrder *playerOrder)
                     printf("%s was tied so he rolled again and got %d\n", playerOrder[i].player->player_name, playerOrder[i].rolled_value);
                 }
             }
-            bubbleSort(playerOrder);
+            bubble_sort(playerOrder);
         }
     } while (tied);
 }
