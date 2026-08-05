@@ -5,7 +5,9 @@
 #define MAX_PLAYERS 4
 #define MAX_SQUARES 40
 #define MAX_HOUSES 4
-#define MAX_ROUNDS 3
+#define MAX_ROUNDS 500
+
+#define MAX_PROPERTY_GRPS 8
 
 #define INITIAL_CASH 30000
 #define GO_PASSED_AMOUNT 2000
@@ -102,6 +104,7 @@ typedef struct Hotel
 
 typedef struct Square
 {
+    int property_index;
     char *square_name;
     SquareType square_type;
     PlayerId ownership;

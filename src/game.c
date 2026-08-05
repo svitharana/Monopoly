@@ -132,6 +132,15 @@ static void play_turn(Player *players, PlayerId player_id, Square *board)
 {
     Player *player = &players[player_id];
 
+    for (int group = 0; group < MAX_PROPERTY_GRPS; group++)
+    {
+        if (player_has_monopoly(board, player->playerId, group))
+        {
+            print_heading("Monopoly");
+            printf("%s as a monopoly.\n\n", player->player_name);
+        }
+    }
+
     int dice_1 = roll_dice();
     int dice_2 = roll_dice();
 

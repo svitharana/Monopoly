@@ -154,6 +154,28 @@ void resolve_landingSquare(Square *board, Player *players, Player *player)
     }
 }
 
+int player_has_monopoly(Square board[], PlayerId playerId, PropertyGroup group)
+{
+    for (int i = 0; i < MAX_SQUARES; i++)
+    {
+        if (board[i].square_type != PROPERTY)
+        {
+            continue;
+        }
+        if (board[i].property_group != group)
+        {
+            continue;
+        }
+
+        if (board[i].ownership != playerId)
+        {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
 void move_player(Player *player, int move_by)
 {
     int previous_position = player->current_position;
@@ -416,6 +438,7 @@ void initialize_board(Square *board)
 
     for (int i = 0; i < MAX_SQUARES; i++)
     {
+        board[i].property_index = i;
         board[i].ownership = UNOWNED;
         board[i].house_count = 0;
         board[i].hotel_count = 0;
