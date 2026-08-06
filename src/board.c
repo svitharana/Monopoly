@@ -176,12 +176,12 @@ int player_has_monopoly(Square board[], PlayerId playerId, PropertyGroup group)
     return 1;
 }
 
-void move_player(Player *player, int move_by)
+void move_player(Player *player, int move_by, Square *board)
 {
     int previous_position = player->current_position;
     player->current_position = (previous_position + move_by) % MAX_SQUARES;
 
-    printf("%s moves from Square %d to Square %d.\n\n", player->player_name, previous_position, player->current_position);
+    printf("%s moves from Square %d (%s) to Square %d (%s).\n\n", player->player_name, previous_position, board[previous_position].square_name, player->current_position, board[player->current_position].square_name);
 
     if (previous_position + move_by >= 40)
     {

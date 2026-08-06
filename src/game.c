@@ -179,7 +179,7 @@ static void play_turn(Player *players, PlayerId player_id, Square *board)
     if (player->isInJail != 1)
     {
         print_heading("Player Movement");
-        move_player(player, player->rolled_value);
+        move_player(player, player->rolled_value, board);
     }
 
     resolve_landingSquare(board, players, player);
@@ -202,6 +202,7 @@ void start_game()
 
     while (game_round <= MAX_ROUNDS)
     {
+        printf("============ Round %d =================", game_round);
         int num_players_passed_go = 0;
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
@@ -209,15 +210,6 @@ void start_game()
             if (players[i].has_passed_go == 1)
             {
                 num_players_passed_go++;
-            }
-        }
-
-        if (num_players_passed_go == 4)
-        {
-            game_round++;
-            for (int i = 0; i < MAX_PLAYERS; i++)
-            {
-                players[i].has_passed_go = 0;
             }
         }
     }
