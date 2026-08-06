@@ -17,6 +17,7 @@ static void resolve_property(Square *square, Player *players, Player *player)
     else if (square->ownership != player->playerId)
     {
         int rent = square->base_rent;
+        int rent_multiplier[] = {0, 2, 3, 5, 7};
         Player *property_owner = &players[square->ownership];
 
         if (square->hotel_count == 1)
@@ -25,21 +26,7 @@ static void resolve_property(Square *square, Player *players, Player *player)
         }
         else
         {
-            switch (square->house_count)
-            {
-            case 1:
-                rent *= 2;
-                break;
-            case 2:
-                rent *= 3;
-                break;
-            case 3:
-                rent *= 5;
-                break;
-            case 4:
-                rent *= 7;
-                break;
-            }
+            rent *= rent_multiplier[square->house_count];
         }
         pay_rent(square, player, property_owner, rent);
     }
@@ -71,7 +58,10 @@ static void resolve_railwayStation(Square *board, Square *square, Player *player
             }
         }
 
-        rent *= railwayStation_count;
+        // rent multiplier
+        int multiplier = 1 << (railwayStation_count - 1);
+
+        rent *= multiplier;
 
         pay_rent(square, player, railwayStation_owner, rent);
     }
@@ -123,7 +113,6 @@ static void resolve_jail(Square *square, Player *player)
 {
     if (player->current_position == GOTO_JAIL_SQUARE)
     {
-        player->has_passed_go = 1;              // doesn't go but overides this flag in order to calculate game rounds
         player->current_position = JAIL_SQUARE; // player moved to jail
         player->isInJail = 1;                   // player in jail
     }
@@ -188,7 +177,6 @@ void move_player(Player *player, int move_by, Square *board)
         printf("%s passed GO.\n", player->player_name);
         printf("Collected LKR %d.\n", GO_PASSED_AMOUNT);
         player->cash += GO_PASSED_AMOUNT;
-        player->has_passed_go = 1;
 
         printf("Current Balance : %d.\n\n", player->cash);
     }
