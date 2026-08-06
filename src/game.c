@@ -4,12 +4,12 @@
 #include "include/board.h"
 #include "include/utils.h"
 
-static int roll_dice()
+int roll_dice()
 {
     return random_generator(6);
 }
 
-static void display_players(PlayerOrder *playerOrder)
+void display_players(PlayerOrder *playerOrder)
 {
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
@@ -18,7 +18,7 @@ static void display_players(PlayerOrder *playerOrder)
     printf("\n");
 }
 
-static void bubble_sort(PlayerOrder *playerOrder)
+void bubble_sort(PlayerOrder *playerOrder)
 {
     while (1)
     {
@@ -45,7 +45,7 @@ static void bubble_sort(PlayerOrder *playerOrder)
     }
 }
 
-static void tie_breaker(PlayerOrder *playerOrder)
+void tie_breaker(PlayerOrder *playerOrder)
 {
     int tied;
 
@@ -94,7 +94,7 @@ static void tie_breaker(PlayerOrder *playerOrder)
     } while (tied);
 }
 
-static void determine_playerOrder(PlayerOrder *playerOrder)
+void determine_playerOrder(PlayerOrder *playerOrder)
 {
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
@@ -118,7 +118,7 @@ static void determine_playerOrder(PlayerOrder *playerOrder)
     printf("\n");
 }
 
-static void initial_msg(Player *players)
+void initial_msg(Player *players)
 {
     print_heading("MONOPOLY-LK Simulation");
     for (int i = 0; i < MAX_PLAYERS; i++)
@@ -128,7 +128,7 @@ static void initial_msg(Player *players)
     printf("\nEach player begins with LKR %d.\n", INITIAL_CASH);
 }
 
-static void play_turn(Player *players, PlayerId player_id, Square *board)
+void play_turn(Player *players, PlayerId player_id, Square *board)
 {
     Player *player = &players[player_id];
 
@@ -221,6 +221,7 @@ void start_game()
 
     determine_playerOrder(playerOrder);
 
+    printf("board[0].square_name: %s\n", board[0].square_name);
     while (game_round <= MAX_ROUNDS)
     {
         printf("============ Round %d =================", game_round);
