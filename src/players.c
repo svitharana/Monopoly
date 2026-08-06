@@ -32,6 +32,7 @@ void initialize_players(Player *players, PlayerOrder *playerOrder)
         players[i].cash = INITIAL_CASH;
         players[i].rolled_value = 0;
         players[i].current_position = 0;
+        players[i].player_round = 1;
 
         playerOrder[i].player = &players[i];
         playerOrder[i].rolled_value = 0;
