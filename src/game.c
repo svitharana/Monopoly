@@ -185,6 +185,27 @@ static void play_turn(Player *players, PlayerId player_id, Square *board)
     resolve_landingSquare(board, players, player);
 }
 
+int check_game_round(Player *players, int game_round)
+{
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        Player *player = &players[i];
+        if (player->isInJail == 1)
+        {
+            continue;
+        }
+
+        if (player->player_round > game_round)
+        {
+            continue;
+        }
+
+        return 0; // these is atleast one player still in the current game round
+    }
+
+    return 1; // all players (expect in Jail) has passed go
+}
+
 void start_game()
 {
     Square board[MAX_SQUARES] = {0};
@@ -207,9 +228,10 @@ void start_game()
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
             play_turn(players, playerOrder[i].player->playerId, board);
-            if (players[i].has_passed_go == 1)
+
+            if (check_game_round(players, game_round) == 1)
             {
-                num_players_passed_go++;
+                game_round++;
             }
         }
     }
