@@ -96,6 +96,19 @@ void tie_breaker(PlayerOrder *playerOrder)
 
 void determine_playerOrder(PlayerOrder *playerOrder)
 {
+
+// TODO: remove before releasing
+#ifdef DEBUG
+    // Debug Mode: Bypass dice roll sorting and set Player 1 as starting player
+    playerOrder[0].player = playerOrder[0].player;
+    playerOrder[0].rolled_value = 12;
+    playerOrder[0].isOrderCorrect = 1;
+
+    print_heading("DEBUG MODE ACTIVE");
+    printf("%s will begin the game (Debug Single-Player Mode).\n\n", playerOrder[0].player->player_name);
+#else
+    // Normal Mode: Original random turn order setup
+    printf("\n--- Determining turn order ---\n");
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         playerOrder[i].rolled_value = roll_dice();
@@ -107,15 +120,16 @@ void determine_playerOrder(PlayerOrder *playerOrder)
 
     tie_breaker(playerOrder);
 
-    printf("\n%s will begin the game.\n\n", playerOrder[0].player->player_name);
+    printf("\n%s will begin the game.\n", playerOrder[0].player->player_name);
 
-    printf("Turn order:\n");
+    printf("\nTurn order:\n");
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         printf("%s\n", playerOrder[i].player->player_name);
     }
 
     printf("\n");
+#endif
 }
 
 void initial_msg(Player *players)
@@ -128,57 +142,117 @@ void initial_msg(Player *players)
     printf("\nEach player begins with LKR %d.\n", INITIAL_CASH);
 }
 
+void player_in_jail(Player *player, int dice_1, int dice_2)
+{
+    player->inJail_turns++;
+
+    if (player->inJail_turns < MAX_TURNS_INJAIL)
+    {
+        if (dice_1 == dice_2)
+        {
+            printf("\n\t%s rolls doubles gets out of jail.\n", player->player_name);
+            player->isInJail = 0;
+            player->inJail_turns = 0;
+        }
+        else
+        {
+            printf("\n\t%s remains in jail for %d more rounds.\n", player->player_name, MAX_TURNS_INJAIL - player->inJail_turns);
+        }
+    }
+    else
+    {
+        printf("\n\t%s gets out of jail after %d turns.\n", player->player_name, MAX_TURNS_INJAIL);
+        player->isInJail = 0;
+        player->inJail_turns = 0;
+    }
+}
+
 void play_turn(Player *players, PlayerId player_id, Square *board)
 {
     Player *player = &players[player_id];
+    printf("\n---- %s's turn ----\n", player->player_name);
 
     for (int group = 0; group < MAX_PROPERTY_GRPS; group++)
     {
         if (player_has_monopoly(board, player->playerId, group))
         {
             print_heading("Monopoly");
-            printf("%s as a monopoly.\n\n", player->player_name);
+            printf("%s has a monopoly.\n\n", player->player_name);
         }
     }
 
-    int dice_1 = roll_dice();
-    int dice_2 = roll_dice();
+    int dice_1 = 0;
+    int dice_2 = 0;
 
-    // player->rolled_value = 10;
+    // TODO: remove before releasing
+
+#ifdef DEBUG
+    // Debug Mode Menu: Interactive movement and state manipulation
+    print_heading("DEBUG TURN MENU");
+    printf("Active Player: %s | Position: Square %d (%s) | Cash: LKR %d\n",
+           player->player_name, player->current_position, board[player->current_position].square_name, player->cash);
+    printf("1. Roll Manual Dice Values\n");
+    printf("2. Teleport directly to a Square (0-39)\n");
+    printf("3. Add/Subtract Cash\n");
+    printf("4. Roll Standard Random Dice\n");
+    printf("Select Choice: ");
+
+    int choice = 1;
+    scanf("%d", &choice);
+
+    if (choice == 1)
+    {
+        printf("Enter Dice 1 and Dice 2 (e.g., 3 4): ");
+        scanf("%d %d", &dice_1, &dice_2);
+    }
+    else if (choice == 2)
+    {
+        int target_square;
+        printf("Enter target Square Index (0 to 39): ");
+        scanf("%d", &target_square);
+
+        if (target_square >= 0 && target_square < MAX_SQUARES)
+        {
+            player->current_position = target_square;
+            printf("%s teleported directly to Square %d (%s).\n",
+                   player->player_name, target_square, board[target_square].square_name);
+        }
+        dice_1 = 0;
+        dice_2 = 0;
+    }
+    else if (choice == 3)
+    {
+        int cash_change;
+        printf("Enter Cash adjustment (+/- LKR): ");
+        scanf("%d", &cash_change);
+        player->cash += cash_change;
+        printf("New Balance: LKR %d.\n", player->cash);
+
+        dice_1 = roll_dice();
+        dice_2 = roll_dice();
+    }
+    else
+    {
+        dice_1 = roll_dice();
+        dice_2 = roll_dice();
+    }
+#else
+    // Normal Mode: Automatic random dice rolling
+    dice_1 = roll_dice();
+    dice_2 = roll_dice();
+#endif
+
     player->rolled_value = dice_1 + dice_2;
 
-    print_heading("Dice Roll");
-    printf("%s rolled %d and %d with a total %d.\n", player->player_name, dice_1, dice_2, player->rolled_value);
+    printf("\t%s rolled %d and %d (total %d).\n", player->player_name, dice_1, dice_2, player->rolled_value);
 
     if (player->isInJail == 1)
     {
-        player->inJail_turns++;
-
-        print_heading("In Jail");
-        if (player->inJail_turns < 3)
-        {
-            if (dice_1 == dice_2)
-            {
-                printf("%s rolls doubles gets out of jail.\n", player->player_name);
-                player->isInJail = 0;
-                player->inJail_turns = 0;
-            }
-            else
-            {
-                printf("%s remains in jail for %d more rounds.\n", player->player_name, MAX_TURNS_INJAIL - player->inJail_turns);
-            }
-        }
-        else
-        {
-            printf("%s gets out of jail after %d turns.\n", player->player_name, MAX_TURNS_INJAIL);
-            player->isInJail = 0;
-            player->inJail_turns = 0;
-        }
+        player_in_jail(player, dice_1, dice_2);
     }
 
-    if (player->isInJail != 1)
+    if (player->isInJail != 1 && player->rolled_value > 0)
     {
-        print_heading("Player Movement");
         move_player(player, player->rolled_value, board);
     }
 
@@ -200,10 +274,10 @@ int check_game_round(Player *players, int game_round)
             continue;
         }
 
-        return 0; // these is atleast one player still in the current game round
+        return 0; // there is at least one player still in the current game round
     }
 
-    return 1; // all players (expect in Jail) has passed go
+    return 1; // all players (except in Jail) have passed go
 }
 
 void start_game()
@@ -221,19 +295,45 @@ void start_game()
 
     determine_playerOrder(playerOrder);
 
-    printf("board[0].square_name: %s\n", board[0].square_name);
+    printf("\n========================================\n");
+    printf("  Round 1\n");
+    printf("========================================\n\n");
+
     while (game_round <= MAX_ROUNDS)
     {
-        printf("============ Round %d =================", game_round);
-        int num_players_passed_go = 0;
+
+        // TODO: remove before releasing
+
+#ifdef DEBUG
+        // Debug Mode: Loop executes only for index 0 (your active player)
+        for (int i = 0; i < 1; i++)
+        {
+            play_turn(players, playerOrder[i].player->playerId, board);
+
+            printf("%d------ DEBUG\n", players[i].player_round);
+            if (check_game_round(players, game_round) == 1)
+            {
+                game_round++;
+                printf("\n========================================\n");
+                printf("  Round %d\n", game_round);
+                printf("========================================\n\n");
+            }
+        }
+#else
+        // Normal Mode: Loop executes across all players
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
             play_turn(players, playerOrder[i].player->playerId, board);
 
+            printf("%d------ DEBUG\n", players[i].player_round);
             if (check_game_round(players, game_round) == 1)
             {
                 game_round++;
+                printf("\n========================================\n");
+                printf("  Round %d\n", game_round);
+                printf("========================================\n\n");
             }
         }
+#endif
     }
 }
