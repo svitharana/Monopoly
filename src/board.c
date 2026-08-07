@@ -216,11 +216,21 @@ void move_player(Player *player, int move_by, Square *board)
 
 void initialize_board(Square *board)
 {
+
+    for (int i = 0; i < MAX_SQUARES; i++)
+    {
+        board[i].property_index = i;
+        board[i].ownership = UNOWNED;
+        board[i].purchase_price = 0;
+        board[i].base_rent = 0;
+        board[i].house_count = 0;
+        board[i].hasHotel = 0;
+
+        board[i].builing_condition = 100;
+    }
+
     board[0].square_name = "GO";
     board[0].square_type = SPECIAL;
-    board[0].property_group = NONE;
-    board[0].purchase_price = 0;
-    board[0].base_rent = 0;
 
     board[1].square_name = "Pettah";
     board[1].square_type = PROPERTY;
@@ -230,9 +240,6 @@ void initialize_board(Square *board)
 
     board[2].square_name = "Community Development Fund";
     board[2].square_type = EVENT;
-    board[2].property_group = NONE;
-    board[2].purchase_price = 0;
-    board[2].base_rent = 0;
 
     board[3].square_name = "Maradana";
     board[3].square_type = PROPERTY;
@@ -242,15 +249,9 @@ void initialize_board(Square *board)
 
     board[4].square_name = "Income Tax";
     board[4].square_type = TAX;
-    board[4].property_group = NONE;
-    board[4].purchase_price = 0;
-    board[4].base_rent = 0;
 
     board[5].square_name = "Colombo Fort Railway Station";
     board[5].square_type = RAILWAY;
-    board[5].property_group = NONE;
-    board[5].purchase_price = 200;
-    board[5].base_rent = 250;
 
     board[6].square_name = "Bambalapitiya";
     board[6].square_type = PROPERTY;
@@ -260,9 +261,6 @@ void initialize_board(Square *board)
 
     board[7].square_name = "National Event Card";
     board[7].square_type = EVENT;
-    board[7].property_group = NONE;
-    board[7].purchase_price = 0;
-    board[7].base_rent = 0;
 
     board[8].square_name = "Wellawatte";
     board[8].square_type = PROPERTY;
@@ -278,9 +276,6 @@ void initialize_board(Square *board)
 
     board[10].square_name = "Jail / Just Visiting";
     board[10].square_type = JAIL;
-    board[10].property_group = NONE;
-    board[10].purchase_price = 0;
-    board[10].base_rent = 0;
 
     board[11].square_name = "Nugegoda";
     board[11].square_type = PROPERTY;
@@ -290,9 +285,6 @@ void initialize_board(Square *board)
 
     board[12].square_name = "Ceylon Electricity Board";
     board[12].square_type = UTILITY;
-    board[12].property_group = NONE;
-    board[12].purchase_price = 0;
-    board[12].base_rent = 0;
 
     board[13].square_name = "Maharagama";
     board[13].square_type = PROPERTY;
@@ -308,9 +300,6 @@ void initialize_board(Square *board)
 
     board[15].square_name = "Kandy Railway Station";
     board[15].square_type = RAILWAY;
-    board[15].property_group = NONE;
-    board[15].purchase_price = 200;
-    board[15].base_rent = 250;
 
     board[16].square_name = "Negombo";
     board[16].square_type = PROPERTY;
@@ -320,9 +309,6 @@ void initialize_board(Square *board)
 
     board[17].square_name = "Sri Lanka Insurance";
     board[17].square_type = INSURANCE;
-    board[17].property_group = NONE;
-    board[17].purchase_price = 0;
-    board[17].base_rent = 0;
 
     board[18].square_name = "Katunayake";
     board[18].square_type = PROPERTY;
@@ -338,9 +324,6 @@ void initialize_board(Square *board)
 
     board[20].square_name = "Free Parking";
     board[20].square_type = SPECIAL;
-    board[20].property_group = NONE;
-    board[20].purchase_price = 0;
-    board[20].base_rent = 0;
 
     board[21].square_name = "Kandy City";
     board[21].square_type = PROPERTY;
@@ -350,9 +333,6 @@ void initialize_board(Square *board)
 
     board[22].square_name = "National Event Card";
     board[22].square_type = EVENT;
-    board[22].property_group = NONE;
-    board[22].purchase_price = 0;
-    board[22].base_rent = 0;
 
     board[23].square_name = "Peradeniya";
     board[23].square_type = PROPERTY;
@@ -368,9 +348,6 @@ void initialize_board(Square *board)
 
     board[25].square_name = "Galle Railway Station";
     board[25].square_type = RAILWAY;
-    board[25].property_group = NONE;
-    board[25].purchase_price = 200;
-    board[25].base_rent = 250;
 
     board[26].square_name = "Galle Fort";
     board[26].square_type = PROPERTY;
@@ -386,9 +363,6 @@ void initialize_board(Square *board)
 
     board[28].square_name = "National Water Supply and Drainage Board";
     board[28].square_type = UTILITY;
-    board[28].property_group = NONE;
-    board[28].purchase_price = 0;
-    board[28].base_rent = 0;
 
     board[29].square_name = "Hikkaduwa";
     board[29].square_type = PROPERTY;
@@ -398,9 +372,6 @@ void initialize_board(Square *board)
 
     board[30].square_name = "Go To Jail";
     board[30].square_type = JAIL;
-    board[30].property_group = NONE;
-    board[30].purchase_price = 0;
-    board[30].base_rent = 0;
 
     board[31].square_name = "Jaffna Town";
     board[31].square_type = PROPERTY;
@@ -416,9 +387,6 @@ void initialize_board(Square *board)
 
     board[33].square_name = "Ceylinco Insurance";
     board[33].square_type = INSURANCE;
-    board[33].property_group = NONE;
-    board[33].purchase_price = 0;
-    board[33].base_rent = 0;
 
     board[34].square_name = "Trincomalee";
     board[34].square_type = PROPERTY;
@@ -428,15 +396,9 @@ void initialize_board(Square *board)
 
     board[35].square_name = "Jaffna Railway Station";
     board[35].square_type = RAILWAY;
-    board[35].property_group = NONE;
-    board[35].purchase_price = 200;
-    board[35].base_rent = 250;
 
     board[36].square_name = "National Event Card";
     board[36].square_type = EVENT;
-    board[36].property_group = NONE;
-    board[36].purchase_price = 0;
-    board[36].base_rent = 0;
 
     board[37].square_name = "Nuwara Eliya";
     board[37].square_type = PROPERTY;
@@ -446,9 +408,6 @@ void initialize_board(Square *board)
 
     board[38].square_name = "Bank of Ceylon";
     board[38].square_type = BANK;
-    board[38].property_group = NONE;
-    board[38].purchase_price = 0;
-    board[38].base_rent = 0;
 
     board[39].square_name = "Galle Face";
     board[39].square_type = PROPERTY;
@@ -458,12 +417,51 @@ void initialize_board(Square *board)
 
     for (int i = 0; i < MAX_SQUARES; i++)
     {
-        board[i].property_index = i;
-        board[i].ownership = UNOWNED;
-        board[i].house_count = 0;
-        board[i].hasHotel = 0;
-        board[i].isMonopoly = 0;
 
-        board[i].builing_condition = 100;
+        if (board[i].square_type == RAILWAY)
+        {
+            board[i].purchase_price = 1500;
+            board[i].base_rent = 250;
+        }
+
+        if (board[i].square_type == PROPERTY)
+        {
+            switch (board[i].property_group)
+            {
+            case BROWN:
+                board[i].house_constructionCost = 500;
+                board[i].hotel_constructionCost = 2000;
+                break;
+            case LIGHT_BLUE:
+                board[i].house_constructionCost = 750;
+                board[i].hotel_constructionCost = 3000;
+                break;
+            case PINK:
+                board[i].house_constructionCost = 1000;
+                board[i].hotel_constructionCost = 4000;
+                break;
+            case ORANGE:
+                board[i].house_constructionCost = 1250;
+                board[i].hotel_constructionCost = 5000;
+                break;
+            case RED:
+                board[i].house_constructionCost = 1500;
+                board[i].hotel_constructionCost = 6000;
+                break;
+            case YELLOW:
+                board[i].house_constructionCost = 2000;
+                board[i].hotel_constructionCost = 8000;
+                break;
+            case GREEN:
+                board[i].house_constructionCost = 2500;
+                board[i].hotel_constructionCost = 10000;
+                break;
+            case DARK_BLUE:
+                board[i].house_constructionCost = 3000;
+                board[i].hotel_constructionCost = 12000;
+                break;
+            }
+        }
+        board[i].mortgage_value = board[i].purchase_price / 2;
     }
 }
