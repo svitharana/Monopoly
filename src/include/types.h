@@ -8,6 +8,7 @@
 #define MAX_ROUNDS 500
 
 #define MAX_PROPERTY_GRPS 8
+#define MAX_PROPERTIES_IN_GRPS 3
 
 #define INITIAL_CASH 30000
 #define GO_PASSED_AMOUNT 2000
@@ -49,7 +50,7 @@ typedef struct Player
 
     int isBankrupt;
 
-    int has_passed_go;
+    int player_round;
 
 } Player;
 
@@ -89,23 +90,10 @@ typedef enum
     NONE
 } PropertyGroup;
 
-typedef struct House
-{
-    int hasBuild;
-    float condition;
-
-} House;
-
-typedef struct Hotel
-{
-    int hasBuild;
-    float condition;
-} Hotel;
-
 typedef struct Square
 {
-    int property_index;
     char *square_name;
+    int property_index;
     SquareType square_type;
     PlayerId ownership;
 
@@ -116,12 +104,13 @@ typedef struct Square
     int mortgage_value;
     int house_constructionCost;
     int hotel_constructionCost;
+    int house_count;
+    int hasHotel;
+    int builing_condition;
+    int isMonopoly;
+
     int isMortgage;
     int isInsured;
-
-    int house_count;
-    int hotel_count;
-    int builing_condition;
 
 } Square;
 

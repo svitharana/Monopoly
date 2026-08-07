@@ -2,7 +2,23 @@
 
 int decide_purchase(Square *square, Player *player)
 {
-    return player->cash >= square->purchase_price;
+    // TODO: Remove
+    if (player->strategy == AGGRESSIVE_INVESTOR)
+    {
+        return player->cash >= square->purchase_price;
+    }
+    return 0;
+}
+
+int decide_construction(Square property, Player player)
+{
+
+    if (property.house_count == MAX_HOUSES)
+    {
+        return player.cash >= property.hotel_constructionCost;
+    }
+
+    return player.cash >= property.house_constructionCost;
 }
 
 void initialize_players(Player *players, PlayerOrder *playerOrder)
@@ -25,7 +41,7 @@ void initialize_players(Player *players, PlayerOrder *playerOrder)
     // Opportunistic Trader
     players[PLAYER_4].playerId = PLAYER_4;
     players[PLAYER_4].player_name = "Opportunistic Trader";
-    players[PLAYER_4].strategy = AGGRESSIVE_INVESTOR;
+    players[PLAYER_4].strategy = OPPORTUNISTIC_TRADER;
 
     for (int i = 0; i < MAX_PLAYERS; i++)
     {

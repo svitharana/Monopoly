@@ -20,7 +20,7 @@ static void resolve_property(Square *square, Player *players, Player *player)
         int rent_multiplier[] = {0, 2, 3, 5, 7};
         Player *property_owner = &players[square->ownership];
 
-        if (square->hotel_count == 1)
+        if (square->hasHotel == 1)
         {
             rent *= 10;
         }
@@ -113,6 +113,7 @@ static void resolve_jail(Square *square, Player *player)
 {
     if (player->current_position == GOTO_JAIL_SQUARE)
     {
+        printf("\n\t%s went to Jail.\n", player->player_name);
         player->current_position = JAIL_SQUARE; // player moved to jail
         player->isInJail = 1;                   // player in jail
     }
@@ -143,7 +144,37 @@ void resolve_landingSquare(Square *board, Player *players, Player *player)
     }
 }
 
-int player_has_monopoly(Square board[], PlayerId playerId, PropertyGroup group)
+int get_property_index_toBuild(Square *board, PropertyGroup group)
+{
+    int property_index = -1;
+    int lowest_house_count = MAX_HOUSES + 1; // offset this to make hotel construction possible
+    for (int p = 0; p < MAX_SQUARES; p++)
+    {
+        if (board[p].square_type != PROPERTY)
+        {
+            continue;
+        }
+
+        if (board[p].property_group != group)
+        {
+            continue;
+        }
+
+        if (board[p].hasHotel == 1)
+        {
+            continue;
+        }
+        if (board[p].house_count < lowest_house_count)
+        {
+            lowest_house_count = board[p].house_count;
+            property_index = p; // property to build
+        }
+    }
+
+    return property_index;
+}
+
+int player_has_monopoly(Square *board, PlayerId playerId, PropertyGroup group)
 {
     for (int i = 0; i < MAX_SQUARES; i++)
     {
@@ -170,15 +201,16 @@ void move_player(Player *player, int move_by, Square *board)
     int previous_position = player->current_position;
     player->current_position = (previous_position + move_by) % MAX_SQUARES;
 
-    printf("%s moves from Square %d (%s) to Square %d (%s).\n\n", player->player_name, previous_position, board[previous_position].square_name, player->current_position, board[player->current_position].square_name);
+    printf("\t%s moved from Square %d (%s) to Square %d (%s).\n", player->player_name, previous_position, board[previous_position].square_name, player->current_position, board[player->current_position].square_name);
 
     if (previous_position + move_by >= 40)
     {
-        printf("%s passed GO.\n", player->player_name);
-        printf("Collected LKR %d.\n", GO_PASSED_AMOUNT);
+        printf("\n\t%s passed GO.\n", player->player_name);
+        printf("\tCollected LKR %d.\n", GO_PASSED_AMOUNT);
         player->cash += GO_PASSED_AMOUNT;
 
-        printf("Current Balance : %d.\n\n", player->cash);
+        printf("\tCurrent Balance : %d.\n", player->cash);
+        player->player_round++;
     }
 }
 
@@ -429,7 +461,8 @@ void initialize_board(Square *board)
         board[i].property_index = i;
         board[i].ownership = UNOWNED;
         board[i].house_count = 0;
-        board[i].hotel_count = 0;
+        board[i].hasHotel = 0;
+        board[i].isMonopoly = 0;
 
         board[i].builing_condition = 100;
     }

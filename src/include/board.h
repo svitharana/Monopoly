@@ -6,6 +6,7 @@
 void initialize_board(Square *board);
 void move_player(Player *player, int move_by, Square *board);
 void resolve_landingSquare(Square *board, Player *players, Player *player);
-int player_has_monopoly(Square board[], PlayerId playerId, PropertyGroup group);
+int player_has_monopoly(Square *board, PlayerId playerId, PropertyGroup group);
+int get_property_index_toBuild(Square *board, PropertyGroup group);
 
 #endif

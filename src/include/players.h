@@ -6,5 +6,6 @@
 void initialize_players(Player *players, PlayerOrder *playerOrder);
 
 int decide_purchase(Square *square, Player *player);
+int decide_construction(Square property, Player player);
 
 #endif

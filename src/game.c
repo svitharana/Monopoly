@@ -2,6 +2,7 @@
 #include "include/game.h"
 #include "include/players.h"
 #include "include/board.h"
+#include "include/finance.h"
 #include "include/utils.h"
 
 int roll_dice()
@@ -176,8 +177,21 @@ void play_turn(Player *players, PlayerId player_id, Square *board)
     {
         if (player_has_monopoly(board, player->playerId, group))
         {
-            print_heading("Monopoly");
-            printf("%s has a monopoly.\n\n", player->player_name);
+            printf("\n%s has a monopoly %d.\n", player->player_name, group);
+            while (1)
+            {
+                int property_index = get_property_index_toBuild(board, group);
+                if (property_index == -1)
+                {
+                    break;
+                }
+
+                if (decide_construction == 0)
+                {
+                    break;
+                }
+                execute_construction(&board[property_index], player);
+            }
         }
     }
 
@@ -280,6 +294,23 @@ int check_game_round(Player *players, int game_round)
     return 1; // all players (except in Jail) have passed go
 }
 
+void print_summary(Player *players, Square *board)
+{
+    print_heading("Summary");
+    for (int p = 0; p < MAX_PLAYERS; p++)
+    {
+        printf("---- %s has:\n", players[p].player_name);
+
+        for (int pro = 0; pro < MAX_SQUARES; pro++)
+        {
+            if (board[pro].ownership == players[p].playerId)
+            {
+                printf("\tName: %s group: %d\n", board[pro].square_name, board[pro].property_group);
+                printf("\tHouses: %d\n", board[pro].house_count);
+            }
+        }
+    }
+}
 void start_game()
 {
     Square board[MAX_SQUARES] = {0};
@@ -299,7 +330,7 @@ void start_game()
     printf("  Round 1\n");
     printf("========================================\n\n");
 
-    while (game_round <= MAX_ROUNDS)
+    do
     {
 
         // TODO: remove before releasing
@@ -310,7 +341,6 @@ void start_game()
         {
             play_turn(players, playerOrder[i].player->playerId, board);
 
-            printf("%d------ DEBUG\n", players[i].player_round);
             if (check_game_round(players, game_round) == 1)
             {
                 game_round++;
@@ -325,15 +355,15 @@ void start_game()
         {
             play_turn(players, playerOrder[i].player->playerId, board);
 
-            printf("%d------ DEBUG\n", players[i].player_round);
             if (check_game_round(players, game_round) == 1)
             {
                 game_round++;
                 printf("\n========================================\n");
                 printf("  Round %d\n", game_round);
                 printf("========================================\n\n");
+                print_summary(players, board);
             }
         }
 #endif
-    }
+    } while (game_round <= MAX_ROUNDS);
 }

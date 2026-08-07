@@ -5,5 +5,6 @@
 
 void execute_purchase(Square *square, Player *player);
 void pay_rent(Square *square, Player *player, Player *owner, int rent);
+void execute_construction(Square *property, Player *player);
 
 #endif
