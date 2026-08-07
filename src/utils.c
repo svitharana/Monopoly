@@ -16,7 +16,7 @@ void print_heading(char *heading)
         printf("=");
     }
 
-    printf("\n\n%s\n\n", heading);
+    printf("\n\t%s\n", heading);
 
     for (int x = 0; x < decoration_len; x++)
     {
