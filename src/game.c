@@ -283,6 +283,11 @@ int check_game_round(Player *players, int game_round)
             continue;
         }
 
+        if (player->isBankrupt == 1)
+        {
+            continue;
+        }
+
         if (player->player_round > game_round)
         {
             continue;
@@ -353,6 +358,10 @@ void start_game()
         // Normal Mode: Loop executes across all players
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
+            if (players[i].isBankrupt == 1)
+            {
+                continue;
+            }
             play_turn(players, playerOrder[i].player->playerId, board);
 
             if (check_game_round(players, game_round) == 1)
