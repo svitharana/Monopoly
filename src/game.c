@@ -186,7 +186,7 @@ void play_turn(Player *players, PlayerId player_id, Square *board)
                     break;
                 }
 
-                if (decide_construction == 0)
+                if (decide_construction(board[property_index], *player) == 0)
                 {
                     break;
                 }
