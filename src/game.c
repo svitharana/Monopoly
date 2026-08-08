@@ -168,10 +168,8 @@ void player_in_jail(Player *player, int dice_1, int dice_2)
     }
 }
 
-void play_turn(Player *players, PlayerId player_id, Square *board)
+void check_for_monopoly(Square *board, Player *player)
 {
-    Player *player = &players[player_id];
-    printf("\n---- %s's turn ----\n", player->player_name);
 
     for (int group = 0; group < MAX_PROPERTY_GRPS; group++)
     {
@@ -194,6 +192,12 @@ void play_turn(Player *players, PlayerId player_id, Square *board)
             }
         }
     }
+}
+
+void play_turn(Player *players, PlayerId player_id, Square *board)
+{
+    Player *player = &players[player_id];
+    printf("\n---- %s's turn ----\n", player->player_name);
 
     int dice_1 = 0;
     int dice_2 = 0;
@@ -271,6 +275,8 @@ void play_turn(Player *players, PlayerId player_id, Square *board)
     }
 
     resolve_landingSquare(board, players, player);
+
+    check_for_monopoly(board, player);
 }
 
 int check_game_round(Player *players, int game_round)
