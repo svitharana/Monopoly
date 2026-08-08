@@ -40,3 +40,71 @@ void execute_construction(Square *property, Player *player)
         }
     }
 }
+
+void run_auction(Square *square, Player *players, PlayerId starting_playerId)
+{
+    int bidding_price = square->purchase_price / 2;
+
+    printf("\n---- Auction Started: %s (Starting Bid: LKR %d)\n", square->square_name, bidding_price);
+
+    int player_has_withdrawn[MAX_PLAYERS] = {0, 0, 0, 0}; // for each player, 0 - active in the auction
+    int active_bidders = 0;
+
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        if (players[i].isBankrupt == 1)
+        {
+            player_has_withdrawn[i] = 1;
+            continue;
+        }
+        active_bidders++;
+    }
+
+    int highest_bid = bidding_price;
+    int highest_bidder = -1;
+
+    printf("\n\tActive bidders:\n");
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        if (player_has_withdrawn[i] == 0)
+        {
+            printf("\t\t- %s\n", players[i].player_name);
+        }
+    }
+
+    while (active_bidders > 1)
+    {
+        for (int i = 0; i < MAX_PLAYERS && active_bidders > 1; i++)
+        {
+            PlayerId current_bidding_player = (starting_playerId + i) % MAX_PLAYERS; // to make sure, the player who declined start the bidding
+
+            if (player_has_withdrawn[current_bidding_player] == 1)
+            {
+                continue;
+            }
+
+            Player *player = &players[current_bidding_player];
+            if (decide_makeBid(*square, *player, bidding_price) == 0)
+            {
+                printf("\n\t%s withdrew from the bid at LKR %d.\n", player->player_name, bidding_price - BID_INCREMENT);
+                player_has_withdrawn[current_bidding_player] = 1;
+                active_bidders--;
+            }
+            else
+            {
+                highest_bid = bidding_price;
+                highest_bidder = current_bidding_player;
+                bidding_price += BID_INCREMENT;
+            }
+        }
+    }
+
+    if (highest_bidder != -1)
+    {
+        execute_purchase(square, &players[highest_bidder], highest_bid);
+    }
+    else
+    {
+        printf("\n\tNo bids were we placed, %s remaind unowned.\n", square->square_name);
+    }
+}
