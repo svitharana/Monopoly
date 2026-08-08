@@ -18,7 +18,7 @@ int resolve_property(Square *square, Player *players, Player *player)
     else if (square->ownership != player->playerId)
     {
         int rent = square->base_rent;
-        int rent_multiplier[] = {0, 2, 3, 5, 7};
+        int rent_multiplier[] = {1, 2, 3, 5, 7};
         Player *property_owner = &players[square->ownership];
 
         if (square->hasHotel == 1)
