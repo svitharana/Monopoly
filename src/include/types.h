@@ -17,6 +17,8 @@
 #define GOTO_JAIL_SQUARE 30
 #define JAIL_SQUARE 10
 
+#define BID_INCREMENT 250
+
 // PLAYERS
 typedef enum PlayerId
 {

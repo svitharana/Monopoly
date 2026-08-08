@@ -11,7 +11,7 @@ int resolve_property(Square *square, Player *players, Player *player)
         if (decide_purchase(square, player) == 0)
         {
             printf("\n\t%s declined %s for LKR %d.\n", player->player_name, square->square_name, square->purchase_price);
-            return 0; // auction
+            return 1; // auction
         }
         execute_purchase(square, player, square->purchase_price);
     }
@@ -32,7 +32,7 @@ int resolve_property(Square *square, Player *players, Player *player)
         pay_rent(square, player, property_owner, rent);
     }
 
-    return 1; // property resolved
+    return 0; // property resolved
 }
 
 // RAILWAY STATION
@@ -43,7 +43,7 @@ int resolve_railwayStation(Square *board, Square *square, Player *players, Playe
         if (decide_purchase(square, player) == 0)
         {
             printf("\n\t%s declined %s for LKR %d.\n", player->player_name, square->square_name, square->purchase_price);
-            return 0; // auction
+            return 1; // auction
         }
         execute_purchase(square, player, square->purchase_price);
     }
@@ -70,7 +70,7 @@ int resolve_railwayStation(Square *board, Square *square, Player *players, Playe
         pay_rent(square, player, railwayStation_owner, rent);
     }
 
-    return 1; // railway resolved
+    return 0; // railway resolved
 }
 
 // UTILITY COMPANIES
@@ -81,7 +81,7 @@ int resolve_utilityCompany(Square *board, Square *square, Player *players, Playe
         if (decide_purchase(square, player) == 0)
         {
             printf("\n\t%s declined %s for LKR %d.\n", player->player_name, square->square_name, square->purchase_price);
-            return 0; // auction
+            return 1; // auction
         }
         execute_purchase(square, player, square->purchase_price);
     }
@@ -114,7 +114,7 @@ int resolve_utilityCompany(Square *board, Square *square, Player *players, Playe
         pay_rent(square, player, utilityCompany_owner, rent);
     }
 
-    return 1; // utility resolved
+    return 0; // utility resolved
 }
 
 // JAIL
@@ -132,10 +132,9 @@ void resolve_jail(Square *square, Player *player)
 
 void run_auction(Square *square, Player *players, PlayerId starting_playerId)
 {
-    printf("\n---- Auction for %s ----\n", square->square_name);
-
     int bidding_price = square->purchase_price / 2;
-    printf("\tStarting price: LKR %d.\n", bidding_price);
+
+    printf("\n---- Auction Started: %s (Starting Bid: LKR %d)\n", square->square_name, bidding_price);
 
     int player_has_withdrawn[MAX_PLAYERS] = {0, 0, 0, 0}; // for each player, 0 - active in the auction
     int active_bidders = 0;
@@ -153,17 +152,17 @@ void run_auction(Square *square, Player *players, PlayerId starting_playerId)
     int highest_bid = bidding_price;
     int highest_bidder = -1;
 
+    printf("\n\tActive bidders:\n");
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        if (player_has_withdrawn[i] == 0)
+        {
+            printf("\t\t- %s\n", players[i].player_name);
+        }
+    }
+
     while (active_bidders > 1)
     {
-        printf("\n\tActive bidders:\n");
-        for (int j = 0; j < MAX_PLAYERS; j++)
-        {
-            if (player_has_withdrawn[j] == 0)
-            {
-                printf("\t\t- %s\n", players[j].player_name);
-            }
-        }
-
         for (int i = 0; i < MAX_PLAYERS && active_bidders > 1; i++)
         {
             PlayerId current_bidding_player = (starting_playerId + i) % MAX_PLAYERS; // to make sure, the player who declined start the bidding
@@ -174,9 +173,9 @@ void run_auction(Square *square, Player *players, PlayerId starting_playerId)
             }
 
             Player *player = &players[current_bidding_player];
-            if (decide_makeBid(square, player, bidding_price) == 0)
+            if (decide_makeBid(*square, *player, bidding_price) == 0)
             {
-                printf("\n\t%s withdrew from the bid.\n", player->player_name);
+                printf("\n\t%s withdrew from the bid at LKR %d.\n", player->player_name, bidding_price - BID_INCREMENT);
                 player_has_withdrawn[current_bidding_player] = 1;
                 active_bidders--;
             }
@@ -184,7 +183,7 @@ void run_auction(Square *square, Player *players, PlayerId starting_playerId)
             {
                 highest_bid = bidding_price;
                 highest_bidder = current_bidding_player;
-                bidding_price += 250;
+                bidding_price += BID_INCREMENT;
             }
         }
     }
@@ -222,9 +221,12 @@ void resolve_landingSquare(Square *board, Player *players, Player *player)
     default:
         break;
     }
-    if (shouldRunAuction == 0)
+    if (square->square_type == PROPERTY || square->square_type == UTILITY || square->square_type == RAILWAY)
     {
-        run_auction(square, players, player->playerId);
+        if (shouldRunAuction == 1)
+        {
+            run_auction(square, players, player->playerId);
+        }
     }
 }
 
@@ -506,6 +508,11 @@ void initialize_board(Square *board)
         {
             board[i].purchase_price = 1500;
             board[i].base_rent = 250;
+        }
+
+        if (board[i].square_type == UTILITY)
+        {
+            board[i].purchase_price = 1500;
         }
 
         if (board[i].square_type == PROPERTY)
