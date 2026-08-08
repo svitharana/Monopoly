@@ -5,7 +5,7 @@
 #define MAX_PLAYERS 4
 #define MAX_SQUARES 40
 #define MAX_HOUSES 4
-#define MAX_ROUNDS 500
+#define MAX_ROUNDS 10
 
 #define MAX_PROPERTY_GRPS 8
 #define MAX_PROPERTIES_IN_GRPS 3
@@ -108,9 +108,6 @@ typedef struct Square
     int hasHotel;
     int builing_condition;
     int isMonopoly;
-
-    int isMortgage;
-    int isInsured;
 
 } Square;
 

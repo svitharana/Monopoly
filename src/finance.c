@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include "include/finance.h"
 
-void execute_purchase(Square *square, Player *player)
+void execute_purchase(Square *square, Player *player, int purchase_price)
 {
-    player->cash -= square->purchase_price;
+    player->cash -= purchase_price;
     square->ownership = player->playerId;
 
-    printf("\n\t%s purchased %s for LKR %d.\n", player->player_name, square->square_name, square->purchase_price);
+    printf("\n\t%s purchased %s for LKR %d.\n", player->player_name, square->square_name, purchase_price);
     printf("\tRemaining Balance : LKR %d.\n", player->cash);
 }
 
