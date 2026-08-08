@@ -170,7 +170,6 @@ void player_in_jail(Player *player, int dice_1, int dice_2)
 
 void check_for_monopoly(Square *board, Player *player)
 {
-
     for (int group = 0; group < MAX_PROPERTY_GRPS; group++)
     {
         if (player_has_monopoly(board, player->playerId, group))
