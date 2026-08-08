@@ -21,6 +21,11 @@ int decide_construction(Square property, Player player)
     return player.cash >= property.house_constructionCost;
 }
 
+int decide_makeBid(Square square, Player player, int bidding_price)
+{
+    return player.cash >= bidding_price;
+}
+
 void initialize_players(Player *players, PlayerOrder *playerOrder)
 {
     // Aggressive Investor
