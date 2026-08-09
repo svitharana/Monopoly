@@ -87,7 +87,8 @@ int resolve_utilityCompany(Square *board, Square *square, Player *players, Playe
     }
     else if (square->ownership != player->playerId)
     {
-        int rent = square->base_rent;
+
+        int rent = player->rolled_value;
 
         Player *utilityCompany_owner = &players[square->ownership];
         int utilityCompany_count = 0;
