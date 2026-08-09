@@ -70,7 +70,7 @@ void run_auction(Square *square, Player *players, PlayerId starting_playerId)
     {
         if (player_has_withdrawn[i] == 0)
         {
-            printf("\t\t- %s\n", players[i].player_name);
+            printf("\t\t- %-20s : LKR %d\n", players[i].player_name, players[i].cash);
         }
     }
 
@@ -88,12 +88,13 @@ void run_auction(Square *square, Player *players, PlayerId starting_playerId)
             Player *player = &players[current_bidding_player];
             if (decide_bid(*square, *player, bidding_price) == 0)
             {
-                printf("\n\t%s withdrew from the bid at LKR %d.\n", player->player_name, bidding_price - BID_INCREMENT); // FIXME: issue when displaying the value
+                printf("\n\t%s withdrew from the bid at LKR %d.\n", player->player_name, highest_bid); // FIXME: issue when displaying the value
                 player_has_withdrawn[current_bidding_player] = 1;
                 active_bidders--;
             }
             else
             {
+                printf("\n\t%s placed a bid for LKR %d.", player->player_name, bidding_price);
                 highest_bid = bidding_price;
                 highest_bidder = current_bidding_player;
                 bidding_price += BID_INCREMENT;
