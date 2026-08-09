@@ -7,6 +7,7 @@ void initialize_players(Player *players, PlayerOrder *playerOrder);
 
 int decide_purchase(Square *square, Player *player);
 int decide_construction(Square property, Player player);
-int decide_makeBid(Square square, Player player, int bidding_price);
+int decide_bid(Square square, Player player, int bidding_price);
+int decide_loan_repayment(Player player, int *amount);
 
 #endif

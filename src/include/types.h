@@ -5,7 +5,7 @@
 #define MAX_PLAYERS 4
 #define MAX_SQUARES 40
 #define MAX_HOUSES 4
-#define MAX_ROUNDS 10
+#define MAX_ROUNDS 500
 
 #define MAX_PROPERTY_GRPS 8
 #define MAX_PROPERTIES_IN_GRPS 3
@@ -18,6 +18,8 @@
 #define JAIL_SQUARE 10
 
 #define BID_INCREMENT 250
+
+#define MAX_LOAN_ROUNDS 20
 
 // PLAYERS
 typedef enum PlayerId
@@ -47,12 +49,17 @@ typedef struct Player
     int current_position;
     int rolled_value;
 
-    int isInJail;
-    int inJail_turns;
+    int is_in_jail;
+    int in_jail_turns;
 
-    int isBankrupt;
+    int is_bankrupt;
 
     int player_round;
+
+    int has_active_loan;
+    int loan_amount;
+    int loan_interest_rate;
+    int loan_rounds_remaining;
 
 } Player;
 
@@ -107,9 +114,11 @@ typedef struct Square
     int house_constructionCost;
     int hotel_constructionCost;
     int house_count;
-    int hasHotel;
+    int has_hotel;
     int builing_condition;
-    int isMonopoly;
+
+    int is_loan_locked;
+    int is_mortgage;
 
 } Square;
 

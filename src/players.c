@@ -1,4 +1,8 @@
 #include "include/players.h"
+#include "include/finance.h"
+#include "include/utils.h"
+
+#include <stdio.h>
 
 int decide_purchase(Square *square, Player *player)
 {
@@ -21,9 +25,23 @@ int decide_construction(Square property, Player player)
     return player.cash >= property.house_constructionCost;
 }
 
-int decide_makeBid(Square square, Player player, int bidding_price)
+int decide_bid(Square square, Player player, int bidding_price)
 {
     return player.cash >= bidding_price;
+}
+
+int decide_loan_repayment(Player player, int *amount)
+{
+    int loan_amount_with_interest = calculate_loan_payable(player);
+
+    if (player.cash >= loan_amount_with_interest * 2)
+    {
+        *amount = loan_amount_with_interest;
+
+        return 1; // repay loan
+    }
+
+    return 0; // decline repayment
 }
 
 void initialize_players(Player *players, PlayerOrder *playerOrder)

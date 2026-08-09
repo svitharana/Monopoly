@@ -26,6 +26,11 @@ void print_heading(char *heading)
     printf("\n\n");
 }
 
+int apply_percentage(int base, int percentage)
+{
+    return (base * percentage) / 100;
+}
+
 void format_amount(int amount) // formats 30000 -> 30,000
 {
     int arr[5];

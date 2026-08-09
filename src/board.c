@@ -21,7 +21,7 @@ int resolve_property(Square *square, Player *players, Player *player)
         int rent_multiplier[] = {1, 2, 3, 5, 7};
         Player *property_owner = &players[square->ownership];
 
-        if (square->hasHotel == 1)
+        if (square->has_hotel == 1)
         {
             rent *= 10;
         }
@@ -117,6 +117,64 @@ int resolve_utilityCompany(Square *board, Square *square, Player *players, Playe
     return 0; // utility resolved
 }
 
+int get_eligible_collateral(Square *board, Player *player, int *eligible_properties)
+{
+    int property_count = 0;
+    for (int i = 0; i < MAX_SQUARES; i++)
+    {
+
+        if (board[i].ownership != player->playerId)
+        {
+            continue;
+        }
+
+        if (board[i].is_loan_locked == 1 || board[i].is_mortgage == 1)
+        {
+            continue;
+        }
+        eligible_properties[property_count] = board[i].property_index;
+        property_count++;
+    }
+
+    return property_count;
+}
+
+// BANK
+void resolve_bank(Square *board, Player *player)
+{
+    printf("\n---- BANK ----\n");
+    if (player->has_active_loan == 1)
+    {
+
+        int payment_amount = 0;
+        if (decide_loan_repayment(*player, &payment_amount) == 1)
+        {
+            repay_loan(board, player, payment_amount);
+        }
+        else
+        {
+            printf("\n\t%s has an outstanding loan of LKR %d.\n", player->player_name, player->loan_amount);
+            printf("\tCurrent balance: LKR %d.", player->cash);
+        }
+    }
+    else
+    {
+        int eligible_properties[MAX_SQUARES];
+        int eligible_property_count = get_eligible_collateral(board, player, eligible_properties); // TODO: create this function
+        if (eligible_property_count != 0)
+        {
+            //  TODO: decide_loan_collateral(board, player, eligible_properties, eligible_property_count)
+            int loan_amount = calculate_loan_amount(board, eligible_properties, eligible_property_count); // TODO: create this function
+
+            issue_loan(board, player, eligible_properties, eligible_property_count, loan_amount); // TODO: create this function
+        }
+        else
+        {
+            printf("\n\t%s has no properties to put as collateral.\n", player->player_name);
+        }
+    }
+}
+
 // JAIL
 void resolve_jail(Square *square, Player *player)
 {
@@ -124,7 +182,7 @@ void resolve_jail(Square *square, Player *player)
     {
         printf("\n\t%s went to Jail.\n", player->player_name);
         player->current_position = JAIL_SQUARE; // player moved to jail
-        player->isInJail = 1;                   // player in jail
+        player->is_in_jail = 1;                 // player in jail
     }
 }
 
@@ -144,7 +202,7 @@ int get_property_index_toBuild(Square *board, PropertyGroup group)
             continue;
         }
 
-        if (board[p].hasHotel == 1)
+        if (board[p].has_hotel == 1)
         {
             continue;
         }
@@ -196,6 +254,9 @@ void resolve_landingSquare(Square *board, Player *players, Player *player)
     case UTILITY:
         shouldRunAuction = resolve_utilityCompany(board, square, players, player);
         break;
+    case BANK:
+        resolve_bank(board, player);
+        break;
     case JAIL:
         resolve_jail(square, player);
         break;
@@ -240,7 +301,7 @@ void initialize_board(Square *board)
         board[i].purchase_price = 0;
         board[i].base_rent = 0;
         board[i].house_count = 0;
-        board[i].hasHotel = 0;
+        board[i].has_hotel = 0;
 
         board[i].builing_condition = 100;
     }
