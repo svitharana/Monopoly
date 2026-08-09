@@ -27,7 +27,11 @@ int decide_construction(Square property, Player player)
 
 int decide_bid(Square square, Player player, int bidding_price)
 {
-    return player.cash >= bidding_price;
+    if (bidding_price <= (square.purchase_price + apply_percentage(square.purchase_price, 20)))
+    {
+        return player.cash >= bidding_price;
+    }
+    return 0; // withdrawn
 }
 
 int decide_loan_repayment(Player player, int *amount)
