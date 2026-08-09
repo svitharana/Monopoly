@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include "include/finance.h"
+#include "include/players.h"
+#include "include/utils.h"
 
 void execute_purchase(Square *square, Player *player, int purchase_price)
 {
@@ -21,11 +23,11 @@ void pay_rent(Square *square, Player *player, Player *owner, int rent)
 
 void execute_construction(Square *property, Player *player)
 {
-    if (property->hasHotel == 0)
+    if (property->has_hotel == 0)
     {
         if (property->house_count == MAX_HOUSES)
         {
-            property->hasHotel = 1;
+            property->has_hotel = 1;
             player->cash -= property->hotel_constructionCost;
 
             printf("%s upgraded %s to a Hotel for LKR %d.\n", player->player_name, property->square_name, property->hotel_constructionCost);
@@ -52,7 +54,7 @@ void run_auction(Square *square, Player *players, PlayerId starting_playerId)
 
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        if (players[i].isBankrupt == 1)
+        if (players[i].is_bankrupt == 1)
         {
             player_has_withdrawn[i] = 1;
             continue;
@@ -84,9 +86,9 @@ void run_auction(Square *square, Player *players, PlayerId starting_playerId)
             }
 
             Player *player = &players[current_bidding_player];
-            if (decide_makeBid(*square, *player, bidding_price) == 0)
+            if (decide_bid(*square, *player, bidding_price) == 0)
             {
-                printf("\n\t%s withdrew from the bid at LKR %d.\n", player->player_name, bidding_price - BID_INCREMENT);
+                printf("\n\t%s withdrew from the bid at LKR %d.\n", player->player_name, bidding_price - BID_INCREMENT); // FIXME: issue when displaying the value
                 player_has_withdrawn[current_bidding_player] = 1;
                 active_bidders--;
             }
@@ -107,4 +109,83 @@ void run_auction(Square *square, Player *players, PlayerId starting_playerId)
     {
         printf("\n\tNo bids were we placed, %s remaind unowned.\n", square->square_name);
     }
+}
+
+int calculate_loan_payable(Player player)
+{
+    int amount = player.loan_amount;
+    for (int i = 0; i < MAX_LOAN_ROUNDS - player.loan_rounds_remaining; i++)
+    {
+        amount += apply_percentage(amount, player.loan_interest_rate);
+    }
+
+    return amount;
+}
+
+void repay_loan(Square *board, Player *player, int payment_amount)
+{
+    player->cash -= payment_amount;
+    player->loan_amount -= payment_amount;
+
+    if (player->loan_amount == 0)
+    {
+        player->loan_interest_rate = 0;
+        player->loan_rounds_remaining = 0;
+        player->has_active_loan = 0;
+
+        for (int i = 0; i < MAX_SQUARES; i++)
+        {
+            if (board[i].ownership != player->playerId)
+            {
+                continue;
+            }
+            board[i].is_loan_locked = 0;
+        }
+        printf("\t%s fully settled the loan.\n", player->player_name);
+    }
+    else
+    {
+        printf("\t%s repaid LKR %d.\n", player->player_name, payment_amount);
+        printf("\tOutstanding: LKR %d.\n", player->loan_amount);
+    }
+}
+
+int calculate_loan_amount(Square *board, int *eligible_properties, int eligible_property_count)
+{
+
+    int total_mortage_value = 0;
+    for (int i = 0; i < eligible_property_count; i++)
+    {
+        total_mortage_value += board[eligible_properties[i]].mortgage_value;
+    }
+
+    int loan_amount = apply_percentage(total_mortage_value, 75);
+
+    return loan_amount;
+}
+
+void issue_loan(Square *board, Player *player, int *eligible_properties, int eligible_property_count, int loan_amount)
+{
+    int interest_rate = 8;
+
+    player->cash += loan_amount;
+    player->has_active_loan = 1;
+    player->loan_amount = loan_amount;
+    player->loan_interest_rate = interest_rate;
+    player->loan_rounds_remaining = MAX_LOAN_ROUNDS;
+
+    for (int i = 0; i < eligible_property_count; i++)
+    {
+        board[eligible_properties[i]].is_loan_locked = 1;
+    }
+
+    printf("\n\t%s has obtained a secured loan\n", player->player_name);
+    printf("\t\tLoan amount: LKR %d.\n", loan_amount);
+    printf("\t\tCollateral:\n");
+    for (int i = 0; i < eligible_property_count; i++)
+    {
+        printf("\t\t\t%s\n", board[eligible_properties[i]].square_name);
+    }
+    printf("\n\tInterest rate: %d%\n", interest_rate);
+    printf("\tDuration: %d rounds\n", MAX_LOAN_ROUNDS);
 }
