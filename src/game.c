@@ -145,26 +145,26 @@ void initial_msg(Player *players)
 
 void player_in_jail(Player *player, int dice_1, int dice_2)
 {
-    player->inJail_turns++;
+    player->in_jail_turns++;
 
-    if (player->inJail_turns < MAX_TURNS_INJAIL)
+    if (player->in_jail_turns < MAX_TURNS_INJAIL)
     {
         if (dice_1 == dice_2)
         {
             printf("\n\t%s rolls doubles gets out of jail.\n", player->player_name);
-            player->isInJail = 0;
-            player->inJail_turns = 0;
+            player->is_in_jail = 0;
+            player->in_jail_turns = 0;
         }
         else
         {
-            printf("\n\t%s remains in jail for %d more rounds.\n", player->player_name, MAX_TURNS_INJAIL - player->inJail_turns);
+            printf("\n\t%s remains in jail for %d more rounds.\n", player->player_name, MAX_TURNS_INJAIL - player->in_jail_turns);
         }
     }
     else
     {
         printf("\n\t%s gets out of jail after %d turns.\n", player->player_name, MAX_TURNS_INJAIL);
-        player->isInJail = 0;
-        player->inJail_turns = 0;
+        player->is_in_jail = 0;
+        player->in_jail_turns = 0;
     }
 }
 
@@ -263,12 +263,12 @@ void play_turn(Player *players, PlayerId player_id, Square *board)
 
     printf("\t%s rolled %d and %d (total %d).\n", player->player_name, dice_1, dice_2, player->rolled_value);
 
-    if (player->isInJail == 1)
+    if (player->is_in_jail == 1)
     {
         player_in_jail(player, dice_1, dice_2);
     }
 
-    if (player->isInJail != 1 && player->rolled_value > 0)
+    if (player->is_in_jail != 1 && player->rolled_value > 0)
     {
         move_player(player, player->rolled_value, board);
     }
@@ -283,12 +283,12 @@ int check_game_round(Player *players, int game_round)
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         Player *player = &players[i];
-        if (player->isInJail == 1)
+        if (player->is_in_jail == 1)
         {
             continue;
         }
 
-        if (player->isBankrupt == 1)
+        if (player->is_bankrupt == 1)
         {
             continue;
         }
@@ -363,7 +363,7 @@ void start_game()
         // Normal Mode: Loop executes across all players
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
-            if (players[i].isBankrupt == 1)
+            if (players[i].is_bankrupt == 1)
             {
                 continue;
             }
