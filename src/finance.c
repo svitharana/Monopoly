@@ -112,6 +112,38 @@ void run_auction(Square *square, Player *players, PlayerId starting_playerId)
     }
 }
 
+void process_loan_default(Square *board, Player *player)
+{
+    printf("\n\t%s has defaulted.", player->player_name);
+    printf("\n\tFollowing collateral has been foreclosed:");
+    for (int i = 0; i < MAX_SQUARES; i++)
+    {
+
+        if (board[i].ownership != player->playerId)
+        {
+            continue;
+        }
+
+        if (board[i].is_loan_locked == 0)
+        {
+            continue;
+        }
+
+        printf("\n\t\t - %s", board[i].square_name);
+        board[i].ownership == UNOWNED;
+        board[i].is_loan_locked == 0;
+        board[i].has_hotel = 0;
+        board[i].house_count = 0;
+        board[i].builing_condition = 100;
+        board[i].is_mortgage = 0;
+
+        player->loan_amount = 0;
+        player->loan_interest_rate = 0;
+        player->loan_rounds_remaining = 0;
+        player->has_active_loan = 0;
+    }
+}
+
 int check_player_loan(Square *board, Player *player)
 {
     if (player->loan_rounds_remaining > 0)
@@ -123,30 +155,7 @@ int check_player_loan(Square *board, Player *player)
     }
     else
     {
-        // TODO: Loan default
-        printf("\n\t%s has defaulted.", player->player_name);
-        printf("\n\tFollowing collateral has been foreclosed:");
-        for (int i = 0; i < MAX_SQUARES; i++)
-        {
-            if (board[i].ownership != player->playerId)
-            {
-                continue;
-            }
-
-            if (board[i].is_loan_locked == 0)
-            {
-                continue;
-            }
-
-            printf("\n\t\t - %s", board[i].square_name);
-            board[i].ownership == UNOWNED;
-            board[i].is_loan_locked == 0;
-
-            player->loan_amount = 0;
-            player->loan_interest_rate = 0;
-            player->loan_rounds_remaining = 0;
-            player->has_active_loan = 0;
-        }
+        process_loan_default(board, player);
     }
 }
 
@@ -236,4 +245,45 @@ void issue_loan(Square *board, Player *player, int *eligible_properties, int eli
 
     printf("\n\tInterest rate: %d%\n", player->loan_interest_rate);
     printf("\tDuration: %d rounds\n", player->loan_rounds_remaining);
+}
+
+void liquidate_player_assets(Square *board, Player *player)
+{
+    if (player->has_active_loan == 1)
+    {
+        process_loan_default(board, player);
+    }
+
+    printf("\n\tFollowing properties are transfered to Bank:\n");
+    for (int i = 0; i < MAX_SQUARES; i++)
+    {
+        if (board[i].ownership != player->playerId)
+        {
+            continue;
+        }
+
+        // TODO: Need to add insurance policy
+        printf("\n\t\t - %s", board[i].square_name);
+
+        board[i].ownership = UNOWNED;
+        board[i].is_loan_locked == 0;
+        board[i].has_hotel = 0;
+        board[i].house_count = 0;
+        board[i].builing_condition = 100;
+        board[i].is_mortgage = 0;
+    }
+}
+
+int check_player_bankrupt(Square *board, Player *player, int debt_amount)
+{
+    if (player->cash >= debt_amount)
+    {
+        return 0;
+    }
+
+    player->is_bankrupt == 1;
+    printf("\n\t%s declares bankrupt.\n");
+    liquidate_player_assets(board, player);
+
+    return 1;
 }
