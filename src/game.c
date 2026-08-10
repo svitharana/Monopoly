@@ -19,6 +19,7 @@ void display_players(PlayerOrder *playerOrder)
     printf("\n");
 }
 
+// TODO: try a insertion sort
 void bubble_sort(PlayerOrder *playerOrder)
 {
     while (1)
@@ -301,6 +302,13 @@ int check_game_round(Player *players, int game_round)
         return 0; // there is at least one player still in the current game round
     }
 
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        if (players[i].is_in_jail == 1)
+        {
+            players[i].player_round++;
+        }
+    }
     return 1; // all players (except in Jail) have passed go
 }
 
@@ -321,6 +329,24 @@ void print_summary(Player *players, Square *board)
         }
     }
 }
+
+void update_game_data(Square *board, Player *players, int game_round)
+{
+    printf("\n========================================\n");
+    printf("  Round %d Summary\n", game_round);
+    printf("========================================\n\n");
+    // LOANs
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        printf("\n----%s's Summary----\n", players[i].player_name);
+        if (players[i].has_active_loan == 0)
+        {
+            continue;
+        }
+        check_player_loan(board, &players[i]);
+    }
+}
+
 void start_game()
 {
     Square board[MAX_SQUARES] = {0};
@@ -371,11 +397,13 @@ void start_game()
 
             if (check_game_round(players, game_round) == 1)
             {
+                update_game_data(board, players, game_round);
+
                 game_round++;
                 printf("\n========================================\n");
                 printf("  Round %d\n", game_round);
                 printf("========================================\n\n");
-                print_summary(players, board);
+                // print_summary(players, board);
             }
         }
 #endif
