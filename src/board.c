@@ -140,6 +140,19 @@ int get_eligible_collateral(Square *board, Player *player, int *eligible_propert
     return property_count;
 }
 
+void handle_loan(Square *board, Player *player)
+{
+    int eligible_properties[MAX_SQUARES];
+    int eligible_property_count = get_eligible_collateral(board, player, eligible_properties);
+    if (eligible_property_count != 0)
+    {
+        //  TODO: decide_loan_collateral(board, player, eligible_properties, eligible_property_count)
+        int loan_amount = calculate_loan_amount(board, eligible_properties, eligible_property_count);
+
+        issue_loan(board, player, eligible_properties, eligible_property_count, loan_amount);
+    }
+}
+
 // BANK
 void resolve_bank(Square *board, Player *player)
 {
@@ -152,6 +165,14 @@ void resolve_bank(Square *board, Player *player)
         {
             repay_loan(board, player, payment_amount);
         }
+        else if (decide_loan_extention(*player) == 1)
+        {
+            loan_period_extention(player);
+        }
+        else if (decide_loan_refiance(board, *player) == 1)
+        {
+            handle_loan(board, player);
+        }
         else
         {
             printf("\n\t%s has an outstanding loan of LKR %d.\n", player->player_name, player->loan_amount);
@@ -160,18 +181,9 @@ void resolve_bank(Square *board, Player *player)
     }
     else
     {
-        int eligible_properties[MAX_SQUARES];
-        int eligible_property_count = get_eligible_collateral(board, player, eligible_properties); // TODO: create this function
-        if (eligible_property_count != 0)
+        if (decide_loan(board, *player) == 1)
         {
-            //  TODO: decide_loan_collateral(board, player, eligible_properties, eligible_property_count)
-            int loan_amount = calculate_loan_amount(board, eligible_properties, eligible_property_count); // TODO: create this function
-
-            issue_loan(board, player, eligible_properties, eligible_property_count, loan_amount); // TODO: create this function
-        }
-        else
-        {
-            printf("\n\t%s has no properties to put as collateral.\n", player->player_name);
+            handle_loan(board, player);
         }
     }
 }

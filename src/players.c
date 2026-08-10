@@ -34,6 +34,41 @@ int decide_bid(Square square, Player player, int bidding_price)
     return 0; // withdrawn
 }
 
+// LOANs
+
+int decide_loan(Square *board, Player player)
+{
+    for (int i = 0; i < MAX_SQUARES; i++)
+    {
+        if (board[i].ownership != player.playerId)
+        {
+            continue;
+        }
+
+        return 1; // if there is atleast property
+    }
+
+    return 0;
+}
+
+int decide_loan_extention(Player player)
+{
+    return player.loan_rounds_remaining < 5;
+}
+
+int decide_loan_refiance(Square *board, Player player)
+{
+    for (int i = 0; i < MAX_SQUARES; i++)
+    {
+        if (board[i].ownership != player.playerId)
+        {
+            continue;
+        }
+
+        return board[i].is_loan_locked == 0; // if there is atleast one property that is not used as collateral
+    }
+}
+
 int decide_loan_repayment(Player player, int *amount)
 {
     // int loan_amount_with_interest = calculate_loan_payable(player);

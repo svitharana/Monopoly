@@ -150,16 +150,10 @@ int check_player_loan(Square *board, Player *player)
     }
 }
 
-// TODO: Remove this function
-int calculate_loan_payable(Player player)
+void loan_period_extention(Player *player)
 {
-    int amount = player.loan_amount;
-    for (int i = 0; i < MAX_LOAN_ROUNDS - player.loan_rounds_remaining; i++)
-    {
-        amount += apply_percentage(amount, player.loan_interest_rate);
-    }
-
-    return amount;
+    player->loan_rounds_remaining += MAX_LOAN_ROUNDS;
+    printf("\n\t%s's loan extended by %d Rounds.", player->player_name, MAX_LOAN_ROUNDS);
 }
 
 void repay_loan(Square *board, Player *player, int payment_amount)
@@ -207,25 +201,39 @@ int calculate_loan_amount(Square *board, int *eligible_properties, int eligible_
 void issue_loan(Square *board, Player *player, int *eligible_properties, int eligible_property_count, int loan_amount)
 {
     int interest_rate = 8;
-
     player->cash += loan_amount;
-    player->has_active_loan = 1;
-    player->loan_amount = loan_amount;
-    player->loan_interest_rate = interest_rate;
-    player->loan_rounds_remaining = MAX_LOAN_ROUNDS;
+    player->loan_amount += loan_amount;
+
+    if (player->has_active_loan == 0)
+    {
+        player->has_active_loan = 1;
+        player->loan_interest_rate = interest_rate;
+        player->loan_rounds_remaining = MAX_LOAN_ROUNDS;
+
+        printf("\n\t%s has obtained a secured loan\n", player->player_name);
+        printf("\t\tLoan amount: LKR %d.\n", loan_amount);
+
+        printf("\t\tCollateral:\n");
+        for (int i = 0; i < eligible_property_count; i++)
+        {
+            printf("\t\t\t%s\n", board[eligible_properties[i]].square_name);
+        }
+    }
+    else
+    {
+        printf("\n\t%s has increased the loan amount by LKR %d.\n", player->player_name, loan_amount);
+        printf("\t\tAdditional Collateral:\n");
+        for (int i = 0; i < eligible_property_count; i++)
+        {
+            printf("\t\t\t%s\n", board[eligible_properties[i]].square_name);
+        }
+    }
 
     for (int i = 0; i < eligible_property_count; i++)
     {
         board[eligible_properties[i]].is_loan_locked = 1;
     }
 
-    printf("\n\t%s has obtained a secured loan\n", player->player_name);
-    printf("\t\tLoan amount: LKR %d.\n", loan_amount);
-    printf("\t\tCollateral:\n");
-    for (int i = 0; i < eligible_property_count; i++)
-    {
-        printf("\t\t\t%s\n", board[eligible_properties[i]].square_name);
-    }
-    printf("\n\tInterest rate: %d%\n", interest_rate);
-    printf("\tDuration: %d rounds\n", MAX_LOAN_ROUNDS);
+    printf("\n\tInterest rate: %d%\n", player->loan_interest_rate);
+    printf("\tDuration: %d rounds\n", player->loan_rounds_remaining);
 }
