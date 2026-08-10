@@ -88,7 +88,7 @@ void run_auction(Square *square, Player *players, PlayerId starting_playerId)
             Player *player = &players[current_bidding_player];
             if (decide_bid(*square, *player, bidding_price) == 0)
             {
-                printf("\n\t%s withdrew from the bid at LKR %d.\n", player->player_name, highest_bid); // FIXME: issue when displaying the value
+                printf("\n\t%s withdrew from the bid at LKR %d.\n", player->player_name, highest_bid);
                 player_has_withdrawn[current_bidding_player] = 1;
                 active_bidders--;
             }
@@ -112,6 +112,7 @@ void run_auction(Square *square, Player *players, PlayerId starting_playerId)
     }
 }
 
+// TODO: Remove this function
 int calculate_loan_payable(Player player)
 {
     int amount = player.loan_amount;

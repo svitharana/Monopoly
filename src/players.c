@@ -36,11 +36,11 @@ int decide_bid(Square square, Player player, int bidding_price)
 
 int decide_loan_repayment(Player player, int *amount)
 {
-    int loan_amount_with_interest = calculate_loan_payable(player);
+    // int loan_amount_with_interest = calculate_loan_payable(player);
 
-    if (player.cash >= loan_amount_with_interest * 2)
+    if (player.cash >= player.loan_amount * 2)
     {
-        *amount = loan_amount_with_interest;
+        *amount = player.loan_amount;
 
         return 1; // repay loan
     }
