@@ -121,6 +121,33 @@ int check_player_loan(Square *board, Player *player)
         printf("\n\t%s has an outstanding loan of LKR %d.\n", player->player_name, player->loan_amount);
         printf("\tLoan due in %d Rounds.", player->loan_rounds_remaining);
     }
+    else
+    {
+        // TODO: Loan default
+        printf("\n\t%s has defaulted.", player->player_name);
+        printf("\n\tFollowing collateral has been foreclosed:");
+        for (int i = 0; i < MAX_SQUARES; i++)
+        {
+            if (board[i].ownership != player->playerId)
+            {
+                continue;
+            }
+
+            if (board[i].is_loan_locked == 0)
+            {
+                continue;
+            }
+
+            printf("\n\t\t - %s", board[i].square_name);
+            board[i].ownership == UNOWNED;
+            board[i].is_loan_locked == 0;
+
+            player->loan_amount = 0;
+            player->loan_interest_rate = 0;
+            player->loan_rounds_remaining = 0;
+            player->has_active_loan = 0;
+        }
+    }
 }
 
 // TODO: Remove this function
