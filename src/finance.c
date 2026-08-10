@@ -112,6 +112,17 @@ void run_auction(Square *square, Player *players, PlayerId starting_playerId)
     }
 }
 
+int check_player_loan(Square *board, Player *player)
+{
+    if (player->loan_rounds_remaining > 0)
+    {
+        player->loan_amount += apply_percentage(player->loan_amount, player->loan_interest_rate);
+        player->loan_rounds_remaining--;
+        printf("\n\t%s has an outstanding loan of LKR %d.\n", player->player_name, player->loan_amount);
+        printf("\tLoan due in %d Rounds.", player->loan_rounds_remaining);
+    }
+}
+
 // TODO: Remove this function
 int calculate_loan_payable(Player player)
 {
