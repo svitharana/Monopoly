@@ -335,16 +335,56 @@ void update_game_data(Square *board, Player *players, int game_round)
     printf("\n========================================\n");
     printf("  Round %d Summary\n", game_round);
     printf("========================================\n\n");
-    // LOANs
+
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        printf("\n----%s's Summary----\n", players[i].player_name);
-        if (players[i].has_active_loan == 0)
+        printf("\n---- %s's Summary ----\n", players[i].player_name);
+
+        printf("\n\tCash : LKR %d.", players[i].cash);
+        int property_count = 0;
+        int hotel_count = 0;
+        for (int j = 0; j < MAX_SQUARES; j++)
+        {
+            if (board[i].ownership != players[i].playerId)
+            {
+                continue;
+            }
+            property_count++;
+
+            if (board[i].has_hotel == 1)
+            {
+                hotel_count++;
+            }
+        }
+        printf("\n\tProperties : %d.", property_count);
+        printf("\n\tHotels : %d.", hotel_count);
+
+        if (players[i].has_active_loan == 1)
+        {
+            check_player_loan(board, &players[i]);
+        }
+    }
+}
+
+void check_winner(Player *players)
+{
+    Player winner = players[0];
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        if (players[i].is_bankrupt == 1)
         {
             continue;
         }
-        check_player_loan(board, &players[i]);
+
+        printf("\n\t\t -%s worth: %d, bankrupt: %d\n", players[i].player_name, players[i].cash, players[i].is_bankrupt);
+
+        if (players[i].cash > winner.cash)
+        {
+            winner = players[i];
+        }
     }
+
+    printf("\n\t%s has won the game with maximum assets.\n", winner.player_name);
 }
 
 void start_game()
@@ -354,7 +394,7 @@ void start_game()
     PlayerOrder playerOrder[MAX_PLAYERS] = {0};
 
     int game_round = 1;
-    int turn = 1;
+    int active_players = MAX_PLAYERS;
 
     initialize_board(board);
     initialize_players(players, playerOrder);
@@ -363,14 +403,13 @@ void start_game()
     determine_playerOrder(playerOrder);
 
     printf("\n========================================\n");
-    printf("  Round 1\n");
+    printf("  Round %d\n", game_round);
     printf("========================================\n\n");
 
-    do
+    int game_over = 0;
+    while (game_over == 0)
     {
-
         // TODO: remove before releasing
-
 #ifdef DEBUG
         // Debug Mode: Loop executes only for index 0 (your active player)
         for (int i = 0; i < 1; i++)
@@ -387,18 +426,41 @@ void start_game()
         }
 #else
         // Normal Mode: Loop executes across all players
+        Player *current_player;
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
-            if (players[i].is_bankrupt == 1)
+            current_player = playerOrder[i].player;
+
+            printf("----DEBUG%s - bankrupt: %d", current_player->player_name, current_player->is_bankrupt);
+            if (current_player->is_bankrupt == 1)
             {
                 continue;
             }
-            play_turn(players, playerOrder[i].player->playerId, board);
+
+            if (active_players == 1)
+            {
+                printf("\n\t%s has won the game avoiding bankrupty.\n", current_player->player_name);
+                game_over = 1;
+                break;
+            }
+
+            play_turn(players, current_player->playerId, board);
+
+            if (current_player->is_bankrupt == 1)
+            {
+                active_players--;
+            }
 
             if (check_game_round(players, game_round) == 1)
             {
+                // TODO: bankrupt and win conditions
                 update_game_data(board, players, game_round);
-
+                if (game_round == MAX_ROUNDS)
+                {
+                    check_winner(players);
+                    game_over = 1;
+                    break;
+                }
                 game_round++;
                 printf("\n========================================\n");
                 printf("  Round %d\n", game_round);
@@ -406,6 +468,7 @@ void start_game()
                 // print_summary(players, board);
             }
         }
+
 #endif
-    } while (game_round <= MAX_ROUNDS);
+    }
 }
