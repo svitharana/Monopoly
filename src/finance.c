@@ -108,7 +108,7 @@ void run_auction(Square *square, Player *players, PlayerId starting_playerId)
     }
     else
     {
-        printf("\n\tNo bids were we placed, %s remaind unowned.\n", square->square_name);
+        printf("\n\tNo bids were placed, %s remaind unowned.\n", square->square_name);
     }
 }
 
@@ -254,10 +254,15 @@ void liquidate_player_assets(Square *board, Player *player)
         process_loan_default(board, player);
     }
 
-    printf("\n\tFollowing properties are transfered to Bank:\n");
+    printf("\n\tFollowing properties are transferred to Bank:\n");
     for (int i = 0; i < MAX_SQUARES; i++)
     {
         if (board[i].ownership != player->playerId)
+        {
+            continue;
+        }
+
+        if (board[i].is_loan_locked == 1)
         {
             continue;
         }
