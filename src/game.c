@@ -312,24 +312,6 @@ int check_game_round(Player *players, int game_round)
     return 1; // all players (except in Jail) have passed go
 }
 
-void print_summary(Player *players, Square *board)
-{
-    print_heading("Summary");
-    for (int p = 0; p < MAX_PLAYERS; p++)
-    {
-        printf("---- %s has:\n", players[p].player_name);
-
-        for (int pro = 0; pro < MAX_SQUARES; pro++)
-        {
-            if (board[pro].ownership == players[p].playerId)
-            {
-                printf("\tName: %s group: %d\n", board[pro].square_name, board[pro].property_group);
-                printf("\tHouses: %d\n", board[pro].house_count);
-            }
-        }
-    }
-}
-
 void update_game_data(Square *board, Player *players, int game_round)
 {
     printf("\n========================================\n");
@@ -345,13 +327,13 @@ void update_game_data(Square *board, Player *players, int game_round)
         int hotel_count = 0;
         for (int j = 0; j < MAX_SQUARES; j++)
         {
-            if (board[i].ownership != players[i].playerId)
+            if (board[j].ownership != players[j].playerId)
             {
                 continue;
             }
             property_count++;
 
-            if (board[i].has_hotel == 1)
+            if (board[j].has_hotel == 1)
             {
                 hotel_count++;
             }
