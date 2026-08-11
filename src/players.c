@@ -4,12 +4,82 @@
 
 #include <stdio.h>
 
+// --------------- PURCHASE ------------------------
+int aggressive_decide_purchase(Square *square, Player *player)
+{
+    int offset = 1;
+    int rent = 0;
+    while (1)
+    {
+        Square *next_property = (square + offset);
+
+        rent = next_property->base_rent;
+
+        offset++;
+        if (offset == 40)
+        {
+            offset = 0;
+        }
+
+        if (next_property->ownership == UNOWNED || next_property->ownership == player->playerId)
+        {
+            continue;
+        }
+
+        if (next_property->square_type == PROPERTY)
+        {
+            int rent_multiplier[] = {1, 2, 3, 5, 7};
+
+            if (square->has_hotel == 1)
+            {
+                rent *= 10;
+            }
+            else
+            {
+                rent *= rent_multiplier[next_property->house_count];
+            }
+
+            break;
+        } // TODO: see if i can add railway as well
+    }
+
+    return player->cash >= rent;
+}
+
+int conservative_decide_purchase(Square *square, Player *player)
+{
+    return player->cash / 2 > square->purchase_price;
+}
+
+int risk_decide_purchase(Square *square, Player *player)
+{
+    return player->cash >= square->purchase_price;
+}
+
+int opportunistic_decide_purchase(Square *square, Player *player)
+{
+    // TODO: opportunistic purchase strategy
+    return 1;
+}
+
 int decide_purchase(Square *square, Player *player)
 {
-    // TODO: Remove
-    if (player->strategy == AGGRESSIVE_INVESTOR)
+    switch (player->strategy)
     {
-        return player->cash >= square->purchase_price;
+    case AGGRESSIVE_INVESTOR:
+        return aggressive_decide_purchase(square, player);
+        break;
+    case CONSERVATIVE_BANKER:
+        return conservative_deicde_purchase(square, player);
+        break;
+    case RISK_TAKER:
+        return risk_decide_purchase(square, player);
+        break;
+    case OPPORTUNISTIC_TRADER:
+        return opportunistic_decide_purchase(square, player);
+        break;
+    default:
+        break;
     }
     return 0;
 }
