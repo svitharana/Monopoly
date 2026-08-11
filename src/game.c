@@ -366,6 +366,8 @@ void start_game()
     printf("  Round 1\n");
     printf("========================================\n\n");
 
+    Player *current_player;
+
     do
     {
 
@@ -389,11 +391,14 @@ void start_game()
         // Normal Mode: Loop executes across all players
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
-            if (players[i].is_bankrupt == 1)
+            // current_player = &players[playerOrder[i].player->playerId];
+            current_player = playerOrder[i].player;
+
+            if (current_player->is_bankrupt == 1)
             {
                 continue;
             }
-            play_turn(players, playerOrder[i].player->playerId, board);
+            play_turn(players, current_player->playerId, board);
 
             if (check_game_round(players, game_round) == 1)
             {
