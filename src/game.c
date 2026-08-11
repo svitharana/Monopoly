@@ -335,15 +335,46 @@ void update_game_data(Square *board, Player *players, int game_round)
     printf("\n========================================\n");
     printf("  Round %d Summary\n", game_round);
     printf("========================================\n\n");
-    // LOANs
+
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        printf("\n----%s's Summary----\n", players[i].player_name);
-        if (players[i].has_active_loan == 0)
+        printf("\n---- %s's Summary ----\n", players[i].player_name);
+
+        printf("\n\tCash : LKR %d.", players[i].cash);
+        int property_count = 0;
+        int hotel_count = 0;
+        for (int j = 0; j < MAX_SQUARES; j++)
         {
-            continue;
+            if (board[i].ownership != players[i].playerId)
+            {
+                continue;
+            }
+            property_count++;
+
+            if (board[i].has_hotel == 1)
+            {
+                hotel_count++;
+            }
         }
-        check_player_loan(board, &players[i]);
+        printf("\n\tProperties : %d.", property_count);
+        printf("\n\tHotels : %d.", hotel_count);
+
+        // LOANs
+        if (players[i].has_active_loan == 1)
+        {
+            check_player_loan(board, &players[i]);
+        }
+    }
+}
+
+void show_winner(Player *players)
+{
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        if (players[i].is_bankrupt == 0)
+        {
+            printf("\n================= %s won the game by avoding bankruptcy =================\n", players[i].player_name);
+        }
     }
 }
 
@@ -420,17 +451,18 @@ void start_game()
                 continue;
             }
 
-            if (active_players == 1)
-            {
-                printf("\n================= %s won the game by avoding bankruptcy =================\n", current_player->player_name);
-                game_over = 1;
-                break;
-            }
             play_turn(players, current_player->playerId, board);
 
             if (current_player->is_bankrupt == 1)
             {
                 active_players--;
+            }
+
+            if (active_players == 1)
+            {
+                show_winner(players);
+                game_over = 1;
+                break;
             }
 
             if (check_game_round(players, game_round) == 1)
