@@ -332,7 +332,7 @@ void update_game_data(Square *board, Player *players, int game_round)
         int hotel_count = 0;
         for (int j = 0; j < MAX_SQUARES; j++)
         {
-            if (board[j].ownership != players[j].playerId)
+            if (board[j].ownership != players[i].playerId)
             {
                 continue;
             }
