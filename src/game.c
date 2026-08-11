@@ -347,6 +347,26 @@ void update_game_data(Square *board, Player *players, int game_round)
     }
 }
 
+void check_winner(Player *players)
+{
+    Player winner = players[0];
+
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        if (players[i].is_bankrupt == 1)
+        {
+            continue;
+        }
+
+        if (players[i].cash > winner.cash)
+        {
+            winner = players[i];
+        }
+    }
+
+    printf("\n================= %s won the game by maximum assets =================\n", winner.player_name);
+}
+
 void start_game()
 {
     Square board[MAX_SQUARES] = {0};
@@ -354,7 +374,7 @@ void start_game()
     PlayerOrder playerOrder[MAX_PLAYERS] = {0};
 
     int game_round = 1;
-    int turn = 1;
+    int active_players = MAX_PLAYERS;
 
     initialize_board(board);
     initialize_players(players, playerOrder);
@@ -366,9 +386,10 @@ void start_game()
     printf("  Round 1\n");
     printf("========================================\n\n");
 
-    Player *current_player;
+    Player *current_player = &players[0];
+    int game_over = 0;
 
-    do
+    while (game_over == 0)
     {
 
         // TODO: remove before releasing
@@ -398,12 +419,30 @@ void start_game()
             {
                 continue;
             }
+
+            if (active_players == 1)
+            {
+                printf("\n================= %s won the game by avoding bankruptcy =================\n", current_player->player_name);
+                game_over = 1;
+                break;
+            }
             play_turn(players, current_player->playerId, board);
+
+            if (current_player->is_bankrupt == 1)
+            {
+                active_players--;
+            }
 
             if (check_game_round(players, game_round) == 1)
             {
                 update_game_data(board, players, game_round);
 
+                if (game_round == MAX_ROUNDS)
+                {
+                    game_over = 1;
+                    check_winner(players);
+                    break;
+                }
                 game_round++;
                 printf("\n========================================\n");
                 printf("  Round %d\n", game_round);
@@ -412,5 +451,5 @@ void start_game()
             }
         }
 #endif
-    } while (game_round <= MAX_ROUNDS);
+    }
 }
