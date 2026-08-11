@@ -282,8 +282,8 @@ int check_player_bankrupt(Square *board, Player *player, int debt_amount)
     }
 
     player->is_bankrupt == 1;
-    printf("\n\t%s declares bankrupt.\n");
+    printf("\n\t%s declares bankrupt.\n", player->player_name);
     liquidate_player_assets(board, player);
 
-    return 1;
+    return 1; // bankrupt
 }

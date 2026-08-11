@@ -4,7 +4,7 @@
 #include "include/players.h"
 
 // PROPERTY
-int resolve_property(Square *square, Player *players, Player *player)
+int resolve_property(Square *board, Square *square, Player *players, Player *player)
 {
     if (square->ownership == UNOWNED)
     {
@@ -29,6 +29,13 @@ int resolve_property(Square *square, Player *players, Player *player)
         {
             rent *= rent_multiplier[square->house_count];
         }
+
+        if (check_player_bankrupt(board, player, rent) == 1)
+        {
+            printf("----DEBUG : rent: %d, name: %s, balance: %d\n", rent, player->player_name, player->cash);
+            return -1; // player bankrupted
+        }
+
         pay_rent(square, player, property_owner, rent);
     }
 
@@ -66,6 +73,11 @@ int resolve_railwayStation(Square *board, Square *square, Player *players, Playe
         int multiplier = 1 << (railwayStation_count - 1);
 
         rent *= multiplier;
+
+        if (check_player_bankrupt(board, player, rent) == 1)
+        {
+            return -1; // player bankrupted
+        }
 
         pay_rent(square, player, railwayStation_owner, rent);
     }
@@ -112,6 +124,12 @@ int resolve_utilityCompany(Square *board, Square *square, Player *players, Playe
         default:
             break;
         }
+
+        if (check_player_bankrupt(board, player, rent) == 1)
+        {
+            return -1; // player bankrupted
+        }
+
         pay_rent(square, player, utilityCompany_owner, rent);
     }
 
@@ -259,7 +277,7 @@ void resolve_landingSquare(Square *board, Player *players, Player *player)
     switch (square->square_type)
     {
     case PROPERTY:
-        shouldRunAuction = resolve_property(square, players, player);
+        shouldRunAuction = resolve_property(board, square, players, player);
         break;
     case RAILWAY:
         shouldRunAuction = resolve_railwayStation(board, square, players, player);
