@@ -32,7 +32,6 @@ int resolve_property(Square *board, Square *square, Player *players, Player *pla
 
         if (check_player_bankrupt(board, player, rent) == 1)
         {
-            printf("----DEBUG : rent: %d, name: %s, balance: %d\n", rent, player->player_name, player->cash);
             return -1; // player bankrupted
         }
 
@@ -104,6 +103,7 @@ int resolve_utilityCompany(Square *board, Square *square, Player *players, Playe
 
         Player *utilityCompany_owner = &players[square->ownership];
         int utilityCompany_count = 0;
+        int rent_multiplier[] = {0, 4, 10};
 
         for (int i = 0; i < MAX_SQUARES; i++)
         {
@@ -113,17 +113,7 @@ int resolve_utilityCompany(Square *board, Square *square, Player *players, Playe
             }
         }
 
-        switch (utilityCompany_count)
-        {
-        case 1:
-            rent *= 2;
-            break;
-        case 2:
-            rent *= 7;
-            break;
-        default:
-            break;
-        }
+        rent *= rent_multiplier[utilityCompany_count];
 
         if (check_player_bankrupt(board, player, rent) == 1)
         {
