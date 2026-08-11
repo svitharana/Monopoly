@@ -175,7 +175,7 @@ void check_for_monopoly(Square *board, Player *player)
     {
         if (player_has_monopoly(board, player->playerId, group))
         {
-            printf("\n%s has a monopoly %d.\n", player->player_name, group);
+            int announced = 0;
             while (1)
             {
                 int property_index = get_property_index_toBuild(board, group);
@@ -187,6 +187,11 @@ void check_for_monopoly(Square *board, Player *player)
                 if (decide_construction(board[property_index], *player) == 0)
                 {
                     break;
+                }
+
+                if (announced == 0)
+                {
+                    printf("\n%s has monopoly.\n", player->player_name);
                 }
                 execute_construction(&board[property_index], player);
             }
