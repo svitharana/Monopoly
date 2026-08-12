@@ -130,8 +130,8 @@ void process_loan_default(Square *board, Player *player)
         }
 
         printf("\n\t\t - %s", board[i].square_name);
-        board[i].ownership == UNOWNED;
-        board[i].is_loan_locked == 0;
+        board[i].ownership = UNOWNED;
+        board[i].is_loan_locked = 0;
         board[i].has_hotel = 0;
         board[i].house_count = 0;
         board[i].builing_condition = 100;
@@ -144,7 +144,7 @@ void process_loan_default(Square *board, Player *player)
     }
 }
 
-int check_player_loan(Square *board, Player *player)
+void check_player_loan(Square *board, Player *player)
 {
     if (player->loan_rounds_remaining > 0)
     {
@@ -243,7 +243,7 @@ void issue_loan(Square *board, Player *player, int *eligible_properties, int eli
         board[eligible_properties[i]].is_loan_locked = 1;
     }
 
-    printf("\n\tInterest rate: %d%\n", player->loan_interest_rate);
+    printf("\n\tInterest rate: %d%% \n", player->loan_interest_rate);
     printf("\tDuration: %d rounds\n", player->loan_rounds_remaining);
 }
 
@@ -271,7 +271,7 @@ void liquidate_player_assets(Square *board, Player *player)
         printf("\n\t\t - %s", board[i].square_name);
 
         board[i].ownership = UNOWNED;
-        board[i].is_loan_locked == 0;
+        board[i].is_loan_locked = 0;
         board[i].has_hotel = 0;
         board[i].house_count = 0;
         board[i].builing_condition = 100;
