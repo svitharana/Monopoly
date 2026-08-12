@@ -58,7 +58,7 @@ int risk_decide_purchase(Square *square, Player *player)
 
 int opportunistic_decide_purchase(Square *square, Player *player)
 {
-    // TODO: opportunistic purchase strategy
+    // TODO: add opportunistic purchase strategy
     return 1;
 }
 
@@ -70,7 +70,7 @@ int decide_purchase(Square *square, Player *player)
         return aggressive_decide_purchase(square, player);
         break;
     case CONSERVATIVE_BANKER:
-        return conservative_deicde_purchase(square, player);
+        return conservative_decide_purchase(square, player);
         break;
     case RISK_TAKER:
         return risk_decide_purchase(square, player);
@@ -78,79 +78,346 @@ int decide_purchase(Square *square, Player *player)
     case OPPORTUNISTIC_TRADER:
         return opportunistic_decide_purchase(square, player);
         break;
+    }
+}
+
+// ---------------- LOANS ----------------------
+
+int risk_decide_loan(Square *board, Player player)
+{
+    for (int i = 0; i < MAX_SQUARES; i++)
+    {
+        if (board[i].ownership != player.playerId)
+        {
+            continue;
+        }
+
+        return 1; // if there is atleast one property
+    }
+}
+
+int aggressive_decide_loan(Square *board, Player player)
+{
+    for (int i = 0; i < MAX_SQUARES; i++)
+    {
+        if (board[i].ownership != player.playerId)
+        {
+            continue;
+        }
+
+        if (board[i].square_type == RAILWAY || board[i].square_type == UTILITY)
+        {
+            continue;
+        }
+
+        if (board[i].has_hotel == 1)
+        {
+            continue;
+        }
+
+        if (board[i].house_count < 4 && board[i].house_constructionCost > player.cash)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+int conservative_decide_loan(Square *board, Player player)
+{
+    // TODO: Add conservative loan decision
+    return 1;
+}
+
+int opportunistic_decide_loan(Square *board, Player player)
+{
+    // TODO: Add opportunistic loan decision
+    return 1;
+}
+
+int decide_loan(Square *board, Player player)
+{
+    switch (player.strategy)
+    {
+    case AGGRESSIVE_INVESTOR:
+        return aggressive_decide_loan(board, player);
+        break;
+    case CONSERVATIVE_BANKER:
+        return conservative_decide_loan(board, player);
+        break;
+    case RISK_TAKER:
+        return risk_decide_loan(board, player);
+        break;
+    case OPPORTUNISTIC_TRADER:
+        return opportunistic_decide_loan(board, player);
+        break;
     default:
         break;
+    }
+}
+
+// --------------- LOAN - REPAYMENT ---------------
+
+int aggressive_decide_loan_repayment(Player player, int *amount)
+{
+    if (player.cash > player.loan_amount * 2)
+    {
+        *amount = player.loan_amount;
+
+        return 1; // repay loan
+    }
+}
+
+int conservative_decide_loan_repayment(Player player, int *amount)
+{
+    if (player.cash >= player.loan_amount)
+    {
+        *amount = player.loan_amount;
+
+        return 1; // repay loan
+    }
+}
+
+int risk_decide_loan_repayment(Player player, int *amount)
+{
+    return 0; // never repay loan
+}
+
+int opportunistic_decide_loan_repayment(Player player, int *amount)
+{
+    // TODO: Add opportunistic loan repayment
+    return 1;
+}
+
+int decide_loan_repayment(Player player, int *amount)
+{
+    switch (player.strategy)
+    {
+    case AGGRESSIVE_INVESTOR:
+        return aggressive_decide_loan_repayment(player, amount);
+        break;
+    case CONSERVATIVE_BANKER:
+        return conservative_decide_loan_repayment(player, amount);
+        break;
+    case RISK_TAKER:
+        return risk_decide_loan_repayment(player, amount);
+        break;
+    case OPPORTUNISTIC_TRADER:
+        return opportunistic_decide_loan_repayment(player, amount);
+        break;
+    default:
+        break;
+    }
+}
+
+// --------------- LOAN - EXTENTION ---------------
+
+int aggressive_decide_loan_extention(Player player)
+{
+    return 0; // TODO: check aggressive loan extention strategy
+}
+
+int conservative_decide_loan_extention(Player player)
+{
+    return 0; // never extend loan
+}
+
+int risk_decide_loan_extention(Player player)
+{
+    // TODO: check risk loan extention strategy
+    return 1; // always extend loan
+}
+
+int opportunistic_decide_loan_extention(Player player)
+{
+    // TODO: Add opportunistic loan extention strategy
+    return 0; // never extend loan
+}
+
+int decide_loan_extention(Player player)
+{
+    switch (player.strategy)
+    {
+    case AGGRESSIVE_INVESTOR:
+        return aggressive_decide_loan_extention(player); // always extend loan
+        break;
+    case CONSERVATIVE_BANKER:
+        return conservative_decide_loan_extention(player); // never extend loan
+        break;
+    case RISK_TAKER:
+        return risk_decide_loan_extention(player); // always extend loan
+        break;
+    case OPPORTUNISTIC_TRADER:
+        return opportunistic_decide_loan_extention(player); // always extend loan
+        break;
+    default:
+        break;
+    }
+}
+
+// --------------- LOAN - REFINANCE ---------------
+
+int aggressive_decide_loan_refinance(Square *board, Player player)
+{
+    return 0; // TODO: check aggressive loan refinance strategy
+}
+
+int conservative_decide_loan_refinance(Square *board, Player player)
+{
+    return 0; // TODO: check conservative loan refinance strategy
+}
+
+int risk_decide_loan_refinance(Square *board, Player player)
+{
+    for (int i = 0; i < MAX_SQUARES; i++)
+    {
+        if (board[i].ownership != player.playerId)
+        {
+            continue;
+        }
+
+        if (board[i].is_loan_locked == 0 && board[i].is_mortgage == 0) // if there is atleast one property that is not used as collateral or mortgage
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+int opportunistic_decide_loan_refinance(Square *board, Player player)
+{
+    return 0; // TODO: check opportunistic loan refinance strategy
+}
+
+int decide_loan_refiance(Square *board, Player player)
+{
+    switch (player.strategy)
+    {
+    case AGGRESSIVE_INVESTOR:
+        return aggressive_decide_loan_refinance(board, player); // always refinance loan
+        break;
+    case CONSERVATIVE_BANKER:
+        return conservative_decide_loan_refinance(board, player); // never refinance loan
+    case RISK_TAKER:
+        return risk_decide_loan_refinance(board, player); // always refinance loan
+        break;
+    case OPPORTUNISTIC_TRADER:
+        return opportunistic_decide_loan_refinance(board, player); // always refinance loan
+        break;
+    default:
+        break;
+    }
+}
+
+// --------------- CONSTRUCTION ------------------------
+
+int aggressive_decide_construction(Square property, Player player)
+{
+    if (property.house_count < 4)
+    {
+        return player.cash >= property.house_constructionCost;
+    }
+    else if (property.has_hotel == 0)
+    {
+        return player.cash >= property.hotel_constructionCost;
+    }
+    return 0;
+}
+
+int conservative_decide_construction(Square property, Player player)
+{
+    if (property.house_count < 4)
+    {
+        return player.cash >= property.house_constructionCost * 2;
+    }
+    else if (property.has_hotel == 0 && player.has_active_loan == 0)
+    {
+        return player.cash >= property.hotel_constructionCost * 2;
+    }
+
+    return 0;
+}
+
+int risk_decide_construction(Square property, Player player)
+{
+    if (property.house_count < 4)
+    {
+        return player.cash >= property.house_constructionCost;
+    }
+    else if (property.has_hotel == 0)
+    {
+        return player.cash >= property.hotel_constructionCost;
     }
     return 0;
 }
 
 int decide_construction(Square property, Player player)
 {
-
-    if (property.house_count == MAX_HOUSES)
+    switch (player.strategy)
     {
-        return player.cash >= property.hotel_constructionCost;
+    case AGGRESSIVE_INVESTOR:
+        return aggressive_decide_construction(property, player);
+        break;
+    case CONSERVATIVE_BANKER:
+        return conservative_decide_construction(property, player);
+        break;
+    case RISK_TAKER:
+        return risk_decide_construction(property, player);
+        break;
+    case OPPORTUNISTIC_TRADER:
+        return opportunistic_decide_construction(property, player);
+        break;
     }
+}
 
-    return player.cash >= property.house_constructionCost;
+int opportunistic_decide_construction(Square property, Player player)
+{
+    return 1; // TODO: check opportunistic construction strategy
+}
+
+// --------------- AUCTION ------------------------
+
+int aggressive_decide_bid(Square square, Player player, int bidding_price)
+{
+    return player.cash >= bidding_price && bidding_price <= apply_percentage(square.current_market_value, 120);
+}
+
+int conservative_decide_bid(Square square, Player player, int bidding_price)
+{
+    return player.cash >= bidding_price && bidding_price <= square.current_market_value;
+}
+
+int risk_decide_bid(Square square, Player player, int bidding_price)
+{
+    return player.cash >= bidding_price;
+}
+
+int opportunistic_decide_bid(Square square, Player player, int bidding_price)
+{
+    return player.cash >= bidding_price;
 }
 
 int decide_bid(Square square, Player player, int bidding_price)
 {
-    if (bidding_price <= (square.purchase_price + apply_percentage(square.purchase_price, 20)))
+    switch (player.strategy)
     {
-        return player.cash >= bidding_price;
+    case AGGRESSIVE_INVESTOR:
+        return aggressive_decide_bid(square, player, bidding_price);
+        break;
+    case CONSERVATIVE_BANKER:
+        return conservative_decide_bid(square, player, bidding_price);
+        break;
+    case RISK_TAKER:
+        return risk_decide_bid(square, player, bidding_price);
+        break;
+    case OPPORTUNISTIC_TRADER:
+        return opportunistic_decide_bid(square, player, bidding_price);
+        break;
+    default:
+        break;
     }
-    return 0; // withdrawn
-}
-
-// LOANs
-
-int decide_loan(Square *board, Player player)
-{
-    for (int i = 0; i < MAX_SQUARES; i++)
-    {
-        if (board[i].ownership != player.playerId)
-        {
-            continue;
-        }
-
-        return 1; // if there is atleast property
-    }
-
-    return 0;
-}
-
-int decide_loan_extention(Player player)
-{
-    return player.loan_rounds_remaining < 5;
-}
-
-int decide_loan_refiance(Square *board, Player player)
-{
-    for (int i = 0; i < MAX_SQUARES; i++)
-    {
-        if (board[i].ownership != player.playerId)
-        {
-            continue;
-        }
-
-        return board[i].is_loan_locked == 0; // if there is atleast one property that is not used as collateral
-    }
-}
-
-int decide_loan_repayment(Player player, int *amount)
-{
-    // int loan_amount_with_interest = calculate_loan_payable(player);
-
-    if (player.cash >= player.loan_amount * 2)
-    {
-        *amount = player.loan_amount;
-
-        return 1; // repay loan
-    }
-
-    return 0; // decline repayment
 }
 
 void initialize_players(Player *players, PlayerOrder *playerOrder)
