@@ -8,7 +8,7 @@ int resolve_property(Square *board, Square *square, Player *players, Player *pla
 {
     if (square->ownership == UNOWNED)
     {
-        if (decide_purchase(square, player) == 0)
+        if (decide_purchase(board, square, player) == 0)
         {
             printf("\n\t%s declined %s for LKR %d.\n", player->player_name, square->square_name, square->purchase_price);
             return 1; // auction
@@ -46,7 +46,7 @@ int resolve_railwayStation(Square *board, Square *square, Player *players, Playe
 {
     if (square->ownership == UNOWNED)
     {
-        if (decide_purchase(square, player) == 0)
+        if (decide_purchase(board, square, player) == 0)
         {
             printf("\n\t%s declined %s for LKR %d.\n", player->player_name, square->square_name, square->purchase_price);
             return 1; // auction
@@ -89,7 +89,7 @@ int resolve_utilityCompany(Square *board, Square *square, Player *players, Playe
 {
     if (square->ownership == UNOWNED)
     {
-        if (decide_purchase(square, player) == 0)
+        if (decide_purchase(board, square, player) == 0)
         {
             printf("\n\t%s declined %s for LKR %d.\n", player->player_name, square->square_name, square->purchase_price);
             return 1; // auction
@@ -177,7 +177,7 @@ void resolve_bank(Square *board, Player *player)
         {
             loan_period_extention(player);
         }
-        else if (decide_loan_refiance(board, *player) == 1)
+        else if (decide_loan_refinance(board, *player) == 1)
         {
             handle_loan(board, player);
         }
@@ -564,6 +564,8 @@ void initialize_board(Square *board)
             case DARK_BLUE:
                 board[i].house_constructionCost = 3000;
                 board[i].hotel_constructionCost = 12000;
+                break;
+            default:
                 break;
             }
         }
