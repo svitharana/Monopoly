@@ -17,9 +17,8 @@ int decide_pay_bail(Player *player)
         return player->cash > BAIL_AMOUNT;
     case OPPORTUNISTIC_TRADER:
         return 0; // TODO: add opportunistic bail strategy
-
     default:
-        break;
+        return 0;
     }
 }
 
@@ -68,7 +67,7 @@ int risk_decide_purchase(Square *square, Player *player)
 int opportunistic_decide_purchase(Square *square, Player *player)
 {
     // TODO: add opportunistic purchase strategy
-    return 1;
+    return player->cash >= square->purchase_price;
 }
 
 int decide_purchase(Square *board, Square *square, Player *player)
