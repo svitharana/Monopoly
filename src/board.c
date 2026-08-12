@@ -516,6 +516,8 @@ void initialize_board(Square *board)
     for (int i = 0; i < MAX_SQUARES; i++)
     {
 
+        board[i].current_market_value = board[i].purchase_price;
+
         if (board[i].square_type == RAILWAY)
         {
             board[i].purchase_price = 1500;

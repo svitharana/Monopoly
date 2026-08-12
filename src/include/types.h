@@ -107,6 +107,7 @@ typedef struct Square
     PlayerId ownership;
 
     int purchase_price;
+    int current_market_value;
     int base_rent;
 
     PropertyGroup property_group;
