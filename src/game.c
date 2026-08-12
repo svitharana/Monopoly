@@ -201,8 +201,19 @@ void check_for_monopoly(Square *board, Player *player)
 
 void play_turn(Player *players, PlayerId player_id, Square *board)
 {
+
     Player *player = &players[player_id];
     printf("\n---- %s's turn ----\n", player->player_name);
+
+    if (player->is_in_jail == 1)
+    {
+        if (decide_pay_bail(player) == 1)
+        {
+            pay_bail(player);
+            player->is_in_jail = 0;
+            player->in_jail_turns = 0;
+        }
+    }
 
     int dice_1 = 0;
     int dice_2 = 0;

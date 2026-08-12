@@ -3,6 +3,13 @@
 #include "include/players.h"
 #include "include/utils.h"
 
+void pay_bail(Player *player)
+{
+    player->cash -= BAIL_AMOUNT;
+    printf("\n\t%s paid LKR %d for bail.\n", player->player_name, BAIL_AMOUNT);
+    printf("\tRemaining Balance : LKR %d.\n", player->cash);
+}
+
 void execute_purchase(Square *square, Player *player, int purchase_price)
 {
     player->cash -= purchase_price;

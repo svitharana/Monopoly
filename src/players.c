@@ -4,6 +4,25 @@
 
 #include <stdio.h>
 
+// --------------- BAIL ------------------------
+int decide_pay_bail(Player *player)
+{
+    switch (player->strategy)
+    {
+    case AGGRESSIVE_INVESTOR:
+        return player->cash > BAIL_AMOUNT;
+    case CONSERVATIVE_BANKER:
+        return 0;
+    case RISK_TAKER:
+        return player->cash > BAIL_AMOUNT;
+    case OPPORTUNISTIC_TRADER:
+        return 0; // TODO: add opportunistic bail strategy
+
+    default:
+        break;
+    }
+}
+
 // --------------- PURCHASE ------------------------
 int aggressive_decide_purchase(Square *board, Square *square, Player *player)
 {
