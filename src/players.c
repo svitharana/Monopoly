@@ -5,45 +5,35 @@
 #include <stdio.h>
 
 // --------------- PURCHASE ------------------------
-int aggressive_decide_purchase(Square *square, Player *player)
+int aggressive_decide_purchase(Square *board, Square *square, Player *player)
 {
-    int offset = 1;
     int rent = 0;
-    while (1)
+
+    for (int i = 0; i < MAX_SQUARES; i++)
     {
-        Square *next_property = (square + offset);
-
-        rent = next_property->base_rent;
-
-        offset++;
-        if (offset == 40)
-        {
-            offset = 0;
-        }
-
-        if (next_property->ownership == UNOWNED || next_property->ownership == player->playerId)
+        if (board[i].ownership == player->playerId || board[i].ownership == UNOWNED)
         {
             continue;
         }
 
-        if (next_property->square_type == PROPERTY)
+        if (board[i].square_type == PROPERTY)
         {
             int rent_multiplier[] = {1, 2, 3, 5, 7};
+            rent = board[i].base_rent;
 
-            if (square->has_hotel == 1)
+            if (board[i].has_hotel == 1)
             {
                 rent *= 10;
             }
             else
             {
-                rent *= rent_multiplier[next_property->house_count];
+                rent *= rent_multiplier[board[i].house_count];
             }
-
             break;
-        } // TODO: see if i can add railway as well
+        }
     }
 
-    return player->cash >= rent;
+    return player->cash >= square->purchase_price + rent;
 }
 
 int conservative_decide_purchase(Square *square, Player *player)
@@ -62,22 +52,20 @@ int opportunistic_decide_purchase(Square *square, Player *player)
     return 1;
 }
 
-int decide_purchase(Square *square, Player *player)
+int decide_purchase(Square *board, Square *square, Player *player)
 {
     switch (player->strategy)
     {
     case AGGRESSIVE_INVESTOR:
-        return aggressive_decide_purchase(square, player);
-        break;
+        return aggressive_decide_purchase(board, square, player);
     case CONSERVATIVE_BANKER:
         return conservative_decide_purchase(square, player);
-        break;
     case RISK_TAKER:
         return risk_decide_purchase(square, player);
-        break;
     case OPPORTUNISTIC_TRADER:
         return opportunistic_decide_purchase(square, player);
-        break;
+    default:
+        return 0;
     }
 }
 
@@ -94,6 +82,7 @@ int risk_decide_loan(Square *board, Player player)
 
         return 1; // if there is atleast one property
     }
+    return 0;
 }
 
 int aggressive_decide_loan(Square *board, Player player)
@@ -142,18 +131,14 @@ int decide_loan(Square *board, Player player)
     {
     case AGGRESSIVE_INVESTOR:
         return aggressive_decide_loan(board, player);
-        break;
     case CONSERVATIVE_BANKER:
         return conservative_decide_loan(board, player);
-        break;
     case RISK_TAKER:
         return risk_decide_loan(board, player);
-        break;
     case OPPORTUNISTIC_TRADER:
         return opportunistic_decide_loan(board, player);
-        break;
     default:
-        break;
+        return 0;
     }
 }
 
@@ -167,6 +152,8 @@ int aggressive_decide_loan_repayment(Player player, int *amount)
 
         return 1; // repay loan
     }
+
+    return 0;
 }
 
 int conservative_decide_loan_repayment(Player player, int *amount)
@@ -177,6 +164,8 @@ int conservative_decide_loan_repayment(Player player, int *amount)
 
         return 1; // repay loan
     }
+
+    return 0;
 }
 
 int risk_decide_loan_repayment(Player player, int *amount)
@@ -196,18 +185,14 @@ int decide_loan_repayment(Player player, int *amount)
     {
     case AGGRESSIVE_INVESTOR:
         return aggressive_decide_loan_repayment(player, amount);
-        break;
     case CONSERVATIVE_BANKER:
         return conservative_decide_loan_repayment(player, amount);
-        break;
     case RISK_TAKER:
         return risk_decide_loan_repayment(player, amount);
-        break;
     case OPPORTUNISTIC_TRADER:
         return opportunistic_decide_loan_repayment(player, amount);
-        break;
     default:
-        break;
+        return 0;
     }
 }
 
@@ -241,18 +226,14 @@ int decide_loan_extention(Player player)
     {
     case AGGRESSIVE_INVESTOR:
         return aggressive_decide_loan_extention(player); // always extend loan
-        break;
     case CONSERVATIVE_BANKER:
         return conservative_decide_loan_extention(player); // never extend loan
-        break;
     case RISK_TAKER:
         return risk_decide_loan_extention(player); // always extend loan
-        break;
     case OPPORTUNISTIC_TRADER:
         return opportunistic_decide_loan_extention(player); // always extend loan
-        break;
     default:
-        break;
+        return 0;
     }
 }
 
@@ -291,7 +272,7 @@ int opportunistic_decide_loan_refinance(Square *board, Player player)
     return 0; // TODO: check opportunistic loan refinance strategy
 }
 
-int decide_loan_refiance(Square *board, Player player)
+int decide_loan_refinance(Square *board, Player player)
 {
     switch (player.strategy)
     {
@@ -302,12 +283,10 @@ int decide_loan_refiance(Square *board, Player player)
         return conservative_decide_loan_refinance(board, player); // never refinance loan
     case RISK_TAKER:
         return risk_decide_loan_refinance(board, player); // always refinance loan
-        break;
     case OPPORTUNISTIC_TRADER:
         return opportunistic_decide_loan_refinance(board, player); // always refinance loan
-        break;
     default:
-        break;
+        return 0;
     }
 }
 
@@ -353,28 +332,26 @@ int risk_decide_construction(Square property, Player player)
     return 0;
 }
 
+int opportunistic_decide_construction(Square property, Player player)
+{
+    return 1; // TODO: check opportunistic construction strategy
+}
+
 int decide_construction(Square property, Player player)
 {
     switch (player.strategy)
     {
     case AGGRESSIVE_INVESTOR:
         return aggressive_decide_construction(property, player);
-        break;
     case CONSERVATIVE_BANKER:
         return conservative_decide_construction(property, player);
-        break;
     case RISK_TAKER:
         return risk_decide_construction(property, player);
-        break;
     case OPPORTUNISTIC_TRADER:
         return opportunistic_decide_construction(property, player);
-        break;
+    default:
+        return 0;
     }
-}
-
-int opportunistic_decide_construction(Square property, Player player)
-{
-    return 1; // TODO: check opportunistic construction strategy
 }
 
 // --------------- AUCTION ------------------------
@@ -386,7 +363,7 @@ int aggressive_decide_bid(Square square, Player player, int bidding_price)
 
 int conservative_decide_bid(Square square, Player player, int bidding_price)
 {
-    return player.cash >= bidding_price && bidding_price <= square.current_market_value;
+    return player.cash >= bidding_price && bidding_price < square.current_market_value;
 }
 
 int risk_decide_bid(Square square, Player player, int bidding_price)
@@ -405,18 +382,14 @@ int decide_bid(Square square, Player player, int bidding_price)
     {
     case AGGRESSIVE_INVESTOR:
         return aggressive_decide_bid(square, player, bidding_price);
-        break;
     case CONSERVATIVE_BANKER:
         return conservative_decide_bid(square, player, bidding_price);
-        break;
     case RISK_TAKER:
         return risk_decide_bid(square, player, bidding_price);
-        break;
     case OPPORTUNISTIC_TRADER:
         return opportunistic_decide_bid(square, player, bidding_price);
-        break;
     default:
-        break;
+        return 0;
     }
 }
 
