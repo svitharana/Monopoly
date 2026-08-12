@@ -45,7 +45,7 @@ void execute_construction(Square *property, Player *player)
 
 void run_auction(Square *square, Player *players, PlayerId starting_playerId)
 {
-    int bidding_price = square->purchase_price / 2;
+    int bidding_price = square->current_market_value / 2;
 
     printf("\n---- Auction Started: %s (Starting Bid: LKR %d)\n", square->square_name, bidding_price);
 
