@@ -3,6 +3,7 @@
 
 #include "types.h"
 
+void resolve_renovations(Square *board, Player *player);
 void initialize_board(Square *board);
 void move_player(Player *player, int move_by, Square *board);
 void resolve_landingSquare(Square *board, Player *players, Player *player);

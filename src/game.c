@@ -215,6 +215,8 @@ void play_turn(Player *players, PlayerId player_id, Square *board)
         }
     }
 
+    resolve_renovations(board, player);
+
     int dice_1 = 0;
     int dice_2 = 0;
 

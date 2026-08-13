@@ -7,6 +7,7 @@ void execute_purchase(Square *square, Player *player, int purchase_price);
 void pay_rent(Square *square, Player *player, Player *owner, int rent);
 
 void execute_construction(Square *property, Player *player);
+void execute_renovation(Square *square, Player *player, int house_index);
 
 void run_auction(Square *square, Player *players);
 

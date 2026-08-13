@@ -22,6 +22,97 @@ int decide_pay_bail(Player *player)
     }
 }
 
+// --------------- RENOVATION ------------------------
+
+int aggressive_decide_renovation(Square square, Player player, int building_condition)
+{
+    if (building_condition >= 90)
+    {
+        return 0;
+    }
+
+    int renovation_cost = 0;
+
+    if (square.has_hotel == 1)
+    {
+        renovation_cost = apply_percentage(square.hotel_constructionCost, HOTEL_RENOVATION_COST_PERCENTAGE);
+    }
+    else
+    {
+        renovation_cost = apply_percentage(square.house_constructionCost, HOUSE_RENOVATION_COST_PERCENTAGE);
+    }
+
+    if (building_condition < 60)
+    {
+        renovation_cost = apply_percentage(renovation_cost, 150); // Increase cost by 50% if condition is below 60
+    }
+
+    return player.cash > renovation_cost;
+}
+
+int conservative_decide_renovation(Square square, Player player, int building_condition)
+{
+    if (building_condition >= 90)
+    {
+        return 0;
+    }
+
+    int renovation_cost = 0;
+
+    if (square.has_hotel == 1)
+    {
+        renovation_cost = apply_percentage(square.hotel_constructionCost, HOTEL_RENOVATION_COST_PERCENTAGE);
+    }
+    else
+    {
+        renovation_cost = apply_percentage(square.house_constructionCost, HOUSE_RENOVATION_COST_PERCENTAGE);
+    }
+
+    if (building_condition < 60)
+    {
+        renovation_cost = apply_percentage(renovation_cost, 150); // Increase cost by 50% if condition is below 60
+    }
+
+    return player.cash > renovation_cost;
+}
+
+int risk_decide_renovation(Square square, Player player, int building_condition)
+{
+    if (building_condition >= 60)
+    {
+        return 0;
+    }
+
+    int renovation_cost = 0;
+    if (square.has_hotel == 1)
+    {
+        renovation_cost = apply_percentage(square.hotel_constructionCost, HOTEL_RENOVATION_COST_PERCENTAGE);
+    }
+    else
+    {
+        renovation_cost = apply_percentage(square.house_constructionCost, HOUSE_RENOVATION_COST_PERCENTAGE);
+    }
+
+    return player.cash > apply_percentage(renovation_cost, 150);
+}
+
+int decide_renovation(Square square, Player player, int building_condition)
+{
+    switch (player.strategy)
+    {
+    case AGGRESSIVE_INVESTOR:
+        return aggressive_decide_renovation(square, player, building_condition);
+    case CONSERVATIVE_BANKER:
+        return conservative_decide_renovation(square, player, building_condition);
+    case RISK_TAKER:
+        return player.cash > square.house_constructionCost;
+    case OPPORTUNISTIC_TRADER:
+        return 0; // TODO: add opportunistic renovation strategy
+    default:
+        return 0;
+    }
+}
+
 // --------------- PURCHASE ------------------------
 int aggressive_decide_purchase(Square *board, Square *square, Player *player)
 {

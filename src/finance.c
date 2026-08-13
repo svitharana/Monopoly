@@ -27,6 +27,38 @@ int check_building_rent(int condition)
     }
 }
 
+void execute_renovation(Square *property, Player *player, int house_index)
+{
+
+    int renovation_cost = 0;
+    if (property->has_hotel == 1)
+    {
+        renovation_cost = apply_percentage(property->hotel_constructionCost, HOTEL_RENOVATION_COST_PERCENTAGE);
+        if (property->hotel_condition < 60)
+        {
+            renovation_cost = apply_percentage(renovation_cost, 150); // Increase cost by 50% if condition is below 60
+        }
+        property->hotel_condition = 100;
+        player->cash -= renovation_cost;
+
+        printf("\n\t%s renovated %s to 100%% condition for LKR %d.\n", player->player_name, property->square_name, renovation_cost);
+        printf("\tRemaining Balance : LKR %d.\n", player->cash);
+    }
+    else
+    {
+        renovation_cost = apply_percentage(property->house_constructionCost, HOUSE_RENOVATION_COST_PERCENTAGE);
+        if (property->house_conditons[house_index] < 60)
+        {
+            renovation_cost = apply_percentage(renovation_cost, 150); // Increase cost by 50% if condition is below 60
+        }
+        property->house_conditons[house_index] = 100;
+        player->cash -= renovation_cost;
+
+        printf("\n\t%s renovated %s to 100%% condition for LKR %d.\n", player->player_name, property->square_name, renovation_cost);
+        printf("\tRemaining Balance : LKR %d.\n", player->cash);
+    }
+}
+
 void pay_bail(Player *player)
 {
     player->cash -= BAIL_AMOUNT;

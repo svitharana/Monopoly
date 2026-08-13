@@ -4,6 +4,42 @@
 #include "include/players.h"
 #include "include/utils.h"
 
+// renovating building
+void resolve_renovations(Square *board, Player *player)
+{
+    for (int i = 0; i < MAX_SQUARES; i++)
+    {
+        if (board[i].ownership != player->playerId)
+        {
+            continue;
+        }
+
+        if (board[i].has_hotel == 1)
+        {
+            if (board[i].hotel_condition < 100)
+            {
+                if (decide_renovation(board[i], *player, board[i].hotel_condition) == 1)
+                {
+                    execute_renovation(&board[i], player, -1);
+                }
+            }
+        }
+        else if (board[i].house_count > 0)
+        {
+            for (int j = 0; j < board[i].house_count; j++)
+            {
+                if (board[i].house_conditons[j] < 100)
+                {
+                    if (decide_renovation(board[i], *player, board[i].house_conditons[j]) == 1)
+                    {
+                        execute_renovation(&board[i], player, j);
+                    }
+                }
+            }
+        }
+    }
+}
+
 // PROPERTY
 int resolve_property(Square *board, Square *square, Player *players, Player *player)
 {
