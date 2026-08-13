@@ -360,7 +360,7 @@ void update_game_data(Square *board, Player *players, int game_round)
         // LOANs
         if (players[i].has_active_loan == 1)
         {
-            check_player_loan(board, &players[i]);
+            check_player_loan(board, &players[i], players);
         }
     }
 }

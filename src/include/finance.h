@@ -8,12 +8,12 @@ void pay_rent(Square *square, Player *player, Player *owner, int rent);
 
 void execute_construction(Square *property, Player *player);
 
-void run_auction(Square *square, Player *players, PlayerId starting_playerId);
+void run_auction(Square *square, Player *players);
 
-int check_player_bankrupt(Square *board, Player *player, int debt_amount);
+int check_player_bankrupt(Square *board, Player *player, Player *players, int debt_amount);
 
 void pay_bail(Player *player);
-void check_player_loan(Square *board, Player *player);
+void check_player_loan(Square *board, Player *player, Player *players);
 void loan_period_extention(Player *player);
 void repay_loan(Square *board, Player *player, int payment_amount);
 int calculate_loan_amount(Square *board, int *eligible_properties, int eligible_property_count);
