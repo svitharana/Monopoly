@@ -114,10 +114,12 @@ typedef struct Square
     PropertyGroup property_group;
     int mortgage_value;
     int house_constructionCost;
-    int hotel_constructionCost;
+    int house_conditons[MAX_HOUSES];
     int house_count;
+
+    int hotel_constructionCost;
     int has_hotel;
-    int builing_condition;
+    int hotel_condition;
 
     int is_loan_locked;
     int is_mortgage;

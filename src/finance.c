@@ -3,6 +3,30 @@
 #include "include/players.h"
 #include "include/utils.h"
 
+int check_building_rent(int condition)
+{
+    if (condition >= 90 && condition <= 100)
+    {
+        return 100; // full rent
+    }
+    else if (condition >= 75 && condition <= 89)
+    {
+        return 90;
+    }
+    else if (condition >= 50 && condition <= 74)
+    {
+        return 80;
+    }
+    else if (condition >= 25 && condition <= 49)
+    {
+        return 70;
+    }
+    else
+    {
+        return -1;
+    }
+}
+
 void pay_bail(Player *player)
 {
     player->cash -= BAIL_AMOUNT;
@@ -36,12 +60,14 @@ void execute_construction(Square *property, Player *player)
         {
             property->has_hotel = 1;
             player->cash -= property->hotel_constructionCost;
+            property->hotel_condition = 100;
 
             printf("%s upgraded %s to a Hotel for LKR %d.\n", player->player_name, property->square_name, property->hotel_constructionCost);
             printf("Remaining Balance: LKR %d.\n", player->cash);
         }
         else
         {
+            property->house_conditons[property->house_count] = 100;
             property->house_count++;
             player->cash -= property->house_constructionCost;
             printf("%s constructed one house on %s for LKR %d.\n", player->player_name, property->square_name, property->house_constructionCost);
@@ -145,7 +171,7 @@ void process_loan_default(Square *board, Player *player, Player *players)
         board[i].is_loan_locked = 0;
         board[i].has_hotel = 0;
         board[i].house_count = 0;
-        board[i].builing_condition = 100;
+        // board[i].builing_condition = 100;
         board[i].is_mortgage = 0;
 
         forecloased_properties[forecloased_property_count] = board[i].property_index;
@@ -296,7 +322,7 @@ void liquidate_player_assets(Square *board, Player *player, Player *players)
         board[i].is_loan_locked = 0;
         board[i].has_hotel = 0;
         board[i].house_count = 0;
-        board[i].builing_condition = 100;
+        // board[i].builing_condition = 100; // TODO: add conditions
         board[i].is_mortgage = 0;
 
         forecloased_properties[forecloased_property_count] = board[i].property_index;

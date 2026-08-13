@@ -12,6 +12,8 @@ void run_auction(Square *square, Player *players);
 
 int check_player_bankrupt(Square *board, Player *player, Player *players, int debt_amount);
 
+int check_building_rent(int avg_condition);
+
 void pay_bail(Player *player);
 void check_player_loan(Square *board, Player *player, Player *players);
 void loan_period_extention(Player *player);

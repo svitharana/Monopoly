@@ -2,6 +2,7 @@
 #include "include/board.h"
 #include "include/finance.h"
 #include "include/players.h"
+#include "include/utils.h"
 
 // PROPERTY
 int resolve_property(Square *board, Square *square, Player *players, Player *player)
@@ -19,15 +20,32 @@ int resolve_property(Square *board, Square *square, Player *players, Player *pla
     {
         int rent = square->base_rent;
         int rent_multiplier[] = {1, 2, 3, 5, 7};
+
         Player *property_owner = &players[square->ownership];
 
         if (square->has_hotel == 1)
         {
             rent *= 10;
+            rent = apply_percentage(rent, check_building_rent(square->hotel_condition));
         }
-        else
+        else if (square->house_count > 0)
         {
-            rent *= rent_multiplier[square->house_count];
+            int total_condition = 0;
+            int eligible_buildings = 0;
+            for (int i = 0; i < square->house_count; i++)
+            {
+                if (square->house_conditons[i] >= 25)
+                {
+                    total_condition += square->house_conditons[i];
+                    eligible_buildings++;
+                }
+            }
+            rent *= rent_multiplier[eligible_buildings];
+
+            if (eligible_buildings > 0)
+            {
+                rent = apply_percentage(rent, check_building_rent(total_condition / eligible_buildings));
+            }
         }
 
         if (check_player_bankrupt(board, player, players, rent) == 1)
@@ -324,7 +342,7 @@ void initialize_board(Square *board)
         board[i].house_count = 0;
         board[i].has_hotel = 0;
 
-        board[i].builing_condition = 100;
+        // board[i].builing_condition = 100;
     }
 
     board[0].square_name = "GO";

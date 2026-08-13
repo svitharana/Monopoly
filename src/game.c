@@ -334,6 +334,31 @@ void update_game_data(Square *board, Player *players, int game_round)
     printf("  Round %d Summary\n", game_round);
     printf("========================================\n\n");
 
+    for (int i = 0; i < MAX_SQUARES; i++)
+    {
+        Square *square = &board[i];
+
+        if (square->ownership == UNOWNED)
+        {
+            continue;
+        }
+
+        if (square->square_type == PROPERTY)
+        {
+            if (square->has_hotel == 1)
+            {
+                square->hotel_condition -= 2;
+            }
+            else if (square->house_count > 0)
+            {
+                for (int j = 0; j < square->house_count; j++)
+                {
+                    square->house_conditons[j] -= 2;
+                }
+            }
+        }
+    }
+
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         printf("\n---- %s's Summary ----\n", players[i].player_name);
