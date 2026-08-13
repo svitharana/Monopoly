@@ -198,7 +198,7 @@ int risk_decide_loan_repayment(Player player, int *amount)
 int opportunistic_decide_loan_repayment(Player player, int *amount)
 {
     // TODO: Add opportunistic loan repayment
-    return 1;
+    return player.cash >= player.loan_amount; // repay loan if possible
 }
 
 int decide_loan_repayment(Player player, int *amount)
