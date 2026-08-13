@@ -50,7 +50,7 @@ void execute_construction(Square *property, Player *player)
     }
 }
 
-void run_auction(Square *square, Player *players, PlayerId starting_playerId)
+void run_auction(Square *square, Player *players)
 {
     int bidding_price = square->current_market_value / 2;
 
@@ -83,9 +83,9 @@ void run_auction(Square *square, Player *players, PlayerId starting_playerId)
 
     while (active_bidders > 1)
     {
-        for (int i = 0; i < MAX_PLAYERS && active_bidders > 1; i++)
+        for (int i = 0; i < MAX_PLAYERS; i++)
         {
-            PlayerId current_bidding_player = (starting_playerId + i) % MAX_PLAYERS; // to make sure, the player who declined start the bidding
+            PlayerId current_bidding_player = i;
 
             if (player_has_withdrawn[current_bidding_player] == 1)
             {
@@ -119,8 +119,11 @@ void run_auction(Square *square, Player *players, PlayerId starting_playerId)
     }
 }
 
-void process_loan_default(Square *board, Player *player)
+void process_loan_default(Square *board, Player *player, Player *players)
 {
+    int forecloased_properties[MAX_SQUARES] = {0};
+    int forecloased_property_count = 0;
+
     printf("\n\t%s has defaulted.", player->player_name);
     printf("\n\tFollowing collateral has been foreclosed:");
     for (int i = 0; i < MAX_SQUARES; i++)
@@ -136,6 +139,7 @@ void process_loan_default(Square *board, Player *player)
             continue;
         }
 
+        // TODO: running auction
         printf("\n\t\t - %s", board[i].square_name);
         board[i].ownership = UNOWNED;
         board[i].is_loan_locked = 0;
@@ -144,14 +148,22 @@ void process_loan_default(Square *board, Player *player)
         board[i].builing_condition = 100;
         board[i].is_mortgage = 0;
 
+        forecloased_properties[forecloased_property_count] = board[i].property_index;
+        forecloased_property_count++;
+
         player->loan_amount = 0;
         player->loan_interest_rate = 0;
         player->loan_rounds_remaining = 0;
         player->has_active_loan = 0;
     }
+
+    for (int i = 0; i < forecloased_property_count; i++)
+    {
+        run_auction(&board[forecloased_properties[i]], players);
+    }
 }
 
-void check_player_loan(Square *board, Player *player)
+void check_player_loan(Square *board, Player *player, Player *players)
 {
     if (player->loan_rounds_remaining > 0)
     {
@@ -162,7 +174,7 @@ void check_player_loan(Square *board, Player *player)
     }
     else
     {
-        process_loan_default(board, player);
+        process_loan_default(board, player, players);
     }
 }
 
@@ -254,11 +266,14 @@ void issue_loan(Square *board, Player *player, int *eligible_properties, int eli
     printf("\tDuration: %d rounds\n", player->loan_rounds_remaining);
 }
 
-void liquidate_player_assets(Square *board, Player *player)
+void liquidate_player_assets(Square *board, Player *player, Player *players)
 {
+    int forecloased_properties[MAX_SQUARES] = {0};
+    int forecloased_property_count = 0;
+
     if (player->has_active_loan == 1)
     {
-        process_loan_default(board, player);
+        process_loan_default(board, player, players);
     }
 
     printf("\n\tFollowing properties are transferred to Bank:\n");
@@ -283,10 +298,18 @@ void liquidate_player_assets(Square *board, Player *player)
         board[i].house_count = 0;
         board[i].builing_condition = 100;
         board[i].is_mortgage = 0;
+
+        forecloased_properties[forecloased_property_count] = board[i].property_index;
+        forecloased_property_count++;
+    }
+
+    for (int i = 0; i < forecloased_property_count; i++)
+    {
+        run_auction(&board[forecloased_properties[i]], players);
     }
 }
 
-int check_player_bankrupt(Square *board, Player *player, int debt_amount)
+int check_player_bankrupt(Square *board, Player *player, Player *players, int debt_amount)
 {
     if (player->cash >= debt_amount)
     {
@@ -295,7 +318,7 @@ int check_player_bankrupt(Square *board, Player *player, int debt_amount)
 
     player->is_bankrupt = 1;
     printf("\n\t%s declares bankrupt.\n", player->player_name);
-    liquidate_player_assets(board, player);
+    liquidate_player_assets(board, player, players);
 
     return 1; // bankrupt
 }
