@@ -25,9 +25,9 @@ int decide_pay_bail(Player *player)
 // --------------- PURCHASE ------------------------
 int aggressive_decide_purchase(Square *board, Square *square, Player *player)
 {
-    int rent = 0;
+    int max_rent = 0;
 
-    for (int i = 0; i < MAX_SQUARES; i++)
+    for (int i = square->property_index + 1; i < MAX_SQUARES; i++)
     {
         if (board[i].ownership == player->playerId || board[i].ownership == UNOWNED)
         {
@@ -37,7 +37,7 @@ int aggressive_decide_purchase(Square *board, Square *square, Player *player)
         if (board[i].square_type == PROPERTY)
         {
             int rent_multiplier[] = {1, 2, 3, 5, 7};
-            rent = board[i].base_rent;
+            int rent = board[i].base_rent;
 
             if (board[i].has_hotel == 1)
             {
@@ -47,11 +47,15 @@ int aggressive_decide_purchase(Square *board, Square *square, Player *player)
             {
                 rent *= rent_multiplier[board[i].house_count];
             }
-            break;
+
+            if (rent > max_rent)
+            {
+                max_rent = rent;
+            }
         }
     }
 
-    return player->cash >= square->purchase_price + rent;
+    return player->cash >= square->purchase_price + max_rent;
 }
 
 int conservative_decide_purchase(Square *square, Player *player)
