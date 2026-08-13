@@ -30,7 +30,7 @@ int resolve_property(Square *board, Square *square, Player *players, Player *pla
             rent *= rent_multiplier[square->house_count];
         }
 
-        if (check_player_bankrupt(board, player, rent) == 1)
+        if (check_player_bankrupt(board, player, players, rent) == 1)
         {
             return -1; // player bankrupted
         }
@@ -73,7 +73,7 @@ int resolve_railwayStation(Square *board, Square *square, Player *players, Playe
 
         rent *= multiplier;
 
-        if (check_player_bankrupt(board, player, rent) == 1)
+        if (check_player_bankrupt(board, player, players, rent) == 1)
         {
             return -1; // player bankrupted
         }
@@ -115,7 +115,7 @@ int resolve_utilityCompany(Square *board, Square *square, Player *players, Playe
 
         rent *= rent_multiplier[utilityCompany_count];
 
-        if (check_player_bankrupt(board, player, rent) == 1)
+        if (check_player_bankrupt(board, player, players, rent) == 1)
         {
             return -1; // player bankrupted
         }
@@ -289,7 +289,7 @@ void resolve_landingSquare(Square *board, Player *players, Player *player)
     {
         if (shouldRunAuction == 1)
         {
-            run_auction(square, players, player->playerId);
+            run_auction(square, players);
         }
     }
 }
@@ -516,8 +516,6 @@ void initialize_board(Square *board)
     for (int i = 0; i < MAX_SQUARES; i++)
     {
 
-        board[i].current_market_value = board[i].purchase_price;
-
         if (board[i].square_type == RAILWAY)
         {
             board[i].purchase_price = 1500;
@@ -570,5 +568,7 @@ void initialize_board(Square *board)
             }
         }
         board[i].mortgage_value = board[i].purchase_price / 2;
+
+        board[i].current_market_value = board[i].purchase_price;
     }
 }
