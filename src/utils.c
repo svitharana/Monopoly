@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include "include/utils.h"
 
-int random_generator(int max)
+int random_generator(int min, int max)
 {
-    int value = rand() % max + 1;
+    int value = min + (rand() % (max - min + 1));
     return value;
 }
 

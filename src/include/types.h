@@ -113,7 +113,7 @@ typedef struct Economy
 
     int income_tax_rate;
     int community_fund_rate;
-    
+
     PropertyGroup boom_group;
     int boom_rounds_remaining;
     PropertyGroup decline_group;
