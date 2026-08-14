@@ -274,6 +274,8 @@ int resolve_income_tax(Square *board, Economy economy, Player *player, Player *p
 
     printf("\n\t%s paid LKR %d as income tax (%d%%).\n", player->player_name, tax_amount, economy.income_tax_rate);
     execute_tax_collection(player, tax_amount);
+
+    return 0;
 }
 
 // EVENTS
@@ -300,6 +302,8 @@ int resolve_event_square(Square *board, Square *square, Player *player, Economy 
         printf("\n\t%s paid LKR %d as community development fund payment.\n", player->player_name, tax_amount);
         execute_tax_collection(player, tax_amount);
     }
+
+    return 0;
 }
 
 int get_property_index_toBuild(Square *board, PropertyGroup group)
