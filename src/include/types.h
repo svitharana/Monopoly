@@ -27,6 +27,9 @@
 
 #define HOUSE_RENOVATION_COST_PERCENTAGE 5
 #define HOTEL_RENOVATION_COST_PERCENTAGE 8
+#define DAMAGED_BUILDING_REPAIR_PERCENTAGE 25
+
+#define MAX_DISASTERS 5
 
 // PLAYERS
 typedef enum PlayerId
@@ -78,6 +81,16 @@ typedef struct PlayerOrder
 
 } PlayerOrder;
 
+// DISASTERS
+
+typedef enum Disasters {
+    FIRE,
+    FLOOD,
+    RIOT,
+    BUILDING_COLLAPSE,
+    ELECTRICAL_FAILURE
+} Disasters;
+
 // SQUARES
 
 typedef enum SquareType
@@ -93,7 +106,7 @@ typedef enum SquareType
     SPECIAL
 } SquareType;
 
-typedef enum
+typedef enum PropertyGroup
 {
     BROWN,
     LIGHT_BLUE,
@@ -146,6 +159,8 @@ typedef struct Square
     int is_loan_locked;
     int is_mortgage;
 
+    int is_damaged;
+    Disasters damaged_by;
 } Square;
 
 #endif

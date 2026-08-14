@@ -1,7 +1,8 @@
 #include "include/events.h"
-#include "_mingw_mac.h"
 #include "include/types.h"
 #include "include/utils.h"
+
+#include <stdio.h>
 
 void update_inflation(Economy *economy)
 {
@@ -33,36 +34,38 @@ void update_board_data(Economy *economy, Square *board)
     }
 }
 
-void update_dynamic_property_market(Square *board, Economy *economy) 
+void update_dynamic_property_market(Square *board, Economy *economy)
 {
     int boom_grp;
     int decline_grp;
-    do {
-         boom_grp = random_generator(0, MAX_PROPERTY_GRPS - 1);
-    
+    do
+    {
+        boom_grp = random_generator(0, MAX_PROPERTY_GRPS - 1);
+
     } while (economy->boom_decline_grp_cooldown[boom_grp] > 0);
 
     economy->boom_decline_grp_cooldown[boom_grp] = 30;
     economy->boom_group = boom_grp;
     economy->boom_rounds_remaining = 10;
 
-    do {
+    do
+    {
         decline_grp = random_generator(0, MAX_PROPERTY_GRPS - 1);
 
-    } while(economy->boom_decline_grp_cooldown[decline_grp] > 0);   
+    } while (economy->boom_decline_grp_cooldown[decline_grp] > 0);
 
     economy->boom_decline_grp_cooldown[decline_grp] = 30;
     economy->decline_group = decline_grp;
     economy->decline_rounds_remaining = 10;
 
-    for (int i = 0; i < MAX_SQUARES; i++) 
+    for (int i = 0; i < MAX_SQUARES; i++)
     {
-        Square *property = &board[i];   
+        Square *property = &board[i];
         if (property->square_type != PROPERTY)
         {
             continue;
         }
-        
+
         if (property->property_group == economy->boom_group)
         {
             property->purchase_price = apply_percentage(property->purchase_price, 100 + 15);
@@ -71,7 +74,8 @@ void update_dynamic_property_market(Square *board, Economy *economy)
             property->house_constructionCost = apply_percentage(property->house_constructionCost, 100 + 10);
             property->hotel_constructionCost = apply_percentage(property->hotel_constructionCost, 100 + 10);
             property->current_market_value = apply_percentage(property->current_market_value, 100 + 20);
-        } else if (property->property_group == economy->decline_group)
+        }
+        else if (property->property_group == economy->decline_group)
         {
             // TODO: add auction starting price decrease by 25%
             property->mortgage_value = apply_percentage(property->mortgage_value, 100 - 10);
@@ -79,5 +83,37 @@ void update_dynamic_property_market(Square *board, Economy *economy)
             property->current_market_value = apply_percentage(property->current_market_value, 100 - 15);
         }
     }
+}
 
+int create_disaster(Square *board) {
+
+    Disasters disaster = random_generator(0, MAX_DISASTERS - 1);
+
+    Square *property;
+
+    int developed_properties_exists = 0;
+    for (int i = 0; i < MAX_SQUARES; i++) {
+        if (board[i].house_count > 0 || board[i].has_hotel == 1)
+        {
+            developed_properties_exists = 1;
+        }
+    }
+
+    if (developed_properties_exists == 1) {
+        do {
+
+            int random_property_index = random_generator(0, MAX_SQUARES - 1);
+            property = &board[random_property_index];
+
+        } while (property->square_type != PROPERTY || (property->has_hotel == 0 && property->house_count == 0));
+
+    property->is_damaged = 1;
+    property->damaged_by = disaster;
+
+    return property->property_index;
+    } else {
+        return -1;
+    }
+    
+    
 }

@@ -4,6 +4,7 @@
 #include "include/board.h"
 #include "include/finance.h"
 #include "include/events.h"
+#include "include/types.h"
 #include "include/utils.h"
 
 int roll_dice()
@@ -201,7 +202,13 @@ void check_for_monopoly(Square *board, Player *player)
 }
 
 void play_turn(Player *players, PlayerId player_id, Square *board, Economy economy)
-{
+{ 
+    for (int i = 0; i < MAX_SQUARES; i++) {
+        if (board[i].is_damaged == 1) {
+            printf("\tRepairing Damamged Buildings (%s)\n", board[i].square_name);
+            repair_damaged_property(&board[i], &players[board[i].ownership]);
+        }
+    }
 
     Player *player = &players[player_id];
     printf("\n---- %s's turn ----\n", player->player_name);
@@ -343,17 +350,78 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
         update_board_data(economy, board);
 
         update_dynamic_property_market(board, economy);
+
+        int damaged_property_index = create_disaster(board);
+        if (damaged_property_index != -1) { 
+            
+        Square damaged_property = board[damaged_property_index];
+
+        char disasters[][30] = {
+            [FLOOD] = "Flood",
+            [FIRE] = "Fire",
+            [RIOT] = "Riot",
+            [BUILDING_COLLAPSE] = "Building Collapse",
+            [ELECTRICAL_FAILURE] = "Electrical Failure"
+        };
+
+        printf("\tDisaster (%s)\n", disasters[damaged_property.damaged_by]);
+        printf("\t----------------\n");
+        printf("\tAffected Property: %s\n", damaged_property.square_name);
+        printf("\tOwner: %s\n", players[damaged_property.ownership].player_name);
+        }
+
     }
 
     // boom or decline grp update
-    for (int i = 0; i < MAX_PROPERTY_GRPS; i++) {
-        if (economy->boom_decline_grp_cooldown[i] > 0) {
+    for (int i = 0; i < MAX_PROPERTY_GRPS; i++)
+    {
+        if (economy->boom_decline_grp_cooldown[i] > 0)
+        {
             economy->boom_decline_grp_cooldown[i]--;
         }
     }
 
     // TODO: add output market conditions
-    
+    char property_grps[][30] = {
+        [BROWN] = "Brown",
+        [LIGHT_BLUE] = "Light Blue",
+        [PINK] = "Pink",
+        [ORANGE] = "Orange",
+        [RED] = "Red",
+        [YELLOW] = "Yellow",
+        [GREEN] = "Green",
+        [DARK_BLUE] = "Dark Blue"};
+
+    printf("\n========================================\n");
+    printf("  Current Maret Conditions\n");
+    printf("========================================\n\n");
+
+    printf("\tMarket Boom\n");
+    printf("\t----------------\n");
+    printf("\t%s (+%d%%)\n", property_grps[economy->boom_group], 20);
+    printf("\tRounds remaining : %d\n", economy->boom_rounds_remaining);
+
+    printf("\n");
+
+    printf("\tMarket Decline\n");
+    printf("\t----------------\n");
+    printf("\t%s (-%d%%)\n", property_grps[economy->decline_group], 15);
+    printf("\tRounds remaining : %d\n", economy->decline_rounds_remaining);
+
+    printf("\n");
+
+    printf("\tInflation\n");
+    printf("\t----------------\n");
+    printf("\t%d%%", economy->inflation);
+
+    printf("\n");
+
+    printf("\tCurrent Loan Interest\n");
+    printf("\t------------------------\n");
+    printf("\t%d%%", economy->loan_interest_rate);
+
+    printf("\n");
+
     for (int i = 0; i < MAX_SQUARES; i++)
     {
         Square *square = &board[i];

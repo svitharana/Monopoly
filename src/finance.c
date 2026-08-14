@@ -1,7 +1,35 @@
 #include <stdio.h>
 #include "include/finance.h"
 #include "include/players.h"
+#include "include/types.h"
 #include "include/utils.h"
+
+void repair_damaged_property(Square *property, Player *player) {
+    int repair_cost;
+    
+    if (property->has_hotel == 1) {
+        repair_cost = apply_percentage(property->hotel_constructionCost, DAMAGED_BUILDING_REPAIR_PERCENTAGE);
+    } else {
+        repair_cost = apply_percentage(property->house_constructionCost, DAMAGED_BUILDING_REPAIR_PERCENTAGE) * property->house_count;
+    }
+
+    if (player->cash >= repair_cost) {
+        printf("\t%s spend %d on repairing %s due to a disaster.\n", player->player_name, repair_cost, property->square_name);
+        player->cash -= repair_cost; 
+        printf("\tRemaining Balance: LKR %d\n", player->cash);
+        property->damaged_by = -1;
+        
+        property->hotel_condition = 100;
+        for (int i = 0; i < property->house_count; i++) {
+            property->house_conditons[i] = 100;
+        }
+        property->is_damaged = 0;
+    } else {
+        printf("\t%s does not have enough cash to repair the property\n", player->player_name);
+    }
+
+}
+
 
 int calculate_net_worth(Square *board, Player player) 
 {

@@ -3,6 +3,8 @@
 
 #include "types.h"
 
+void repair_damaged_property(Square *property, Player *player);
+
 void execute_purchase(Square *square, Player *player, int purchase_price);
 void pay_rent(Square *square, Player *player, Player *owner, int rent);
 
