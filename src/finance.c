@@ -3,6 +3,44 @@
 #include "include/players.h"
 #include "include/utils.h"
 
+int calculate_net_worth(Square *board, Player player) 
+{
+    int net_worth = 0;
+
+    net_worth += player.cash; 
+    
+    if (player.has_active_loan == 1) {
+        net_worth -= player.loan_amount;
+    }
+
+    for (int i = 0; i < MAX_SQUARES; i++) {
+        Square square = board[i];
+
+        if (square.ownership != player.playerId) {
+            continue;
+        }
+
+        net_worth += square.current_market_value;
+
+        if (square.is_mortgage == 1) {
+            net_worth -= square.mortgage_value;
+        }
+
+        if (square.has_hotel == 1) {
+            net_worth += square.hotel_constructionCost;
+        } else if (square.house_count > 0) {
+            net_worth += square.house_constructionCost * square.house_count;
+        }
+    }   
+    return net_worth;
+}
+
+void execute_tax_collection(Player *player, int tax_amount) 
+{
+    player->cash -= tax_amount;
+    printf("\tRemaining Balance : LKR %d.\n", player->cash);
+}
+
 int check_building_rent(int condition)
 {
     if (condition >= 90 && condition <= 100)
@@ -108,6 +146,7 @@ void execute_construction(Square *property, Player *player)
     }
 }
 
+// TODO: don't run auction if only one player remains
 void run_auction(Square *square, Player *players)
 {
     int bidding_price = square->current_market_value / 2;
@@ -284,16 +323,15 @@ int calculate_loan_amount(Square *board, int *eligible_properties, int eligible_
     return loan_amount;
 }
 
-void issue_loan(Square *board, Player *player, int *eligible_properties, int eligible_property_count, int loan_amount)
+void issue_loan(Square *board, Player *player, Economy economy, int *eligible_properties, int eligible_property_count, int loan_amount)
 {
-    int interest_rate = 8;
     player->cash += loan_amount;
     player->loan_amount += loan_amount;
 
     if (player->has_active_loan == 0)
     {
         player->has_active_loan = 1;
-        player->loan_interest_rate = interest_rate;
+        player->loan_interest_rate = economy.loan_interest_rate;
         player->loan_rounds_remaining = MAX_LOAN_ROUNDS;
 
         printf("\n\t%s has obtained a secured loan\n", player->player_name);

@@ -202,7 +202,7 @@ int get_eligible_collateral(Square *board, Player *player, int *eligible_propert
     return property_count;
 }
 
-void handle_loan(Square *board, Player *player)
+void handle_loan(Square *board, Player *player, Economy economy)
 {
     int eligible_properties[MAX_SQUARES];
     int eligible_property_count = get_eligible_collateral(board, player, eligible_properties);
@@ -211,12 +211,12 @@ void handle_loan(Square *board, Player *player)
         //  TODO: decide_loan_collateral(board, player, eligible_properties, eligible_property_count)
         int loan_amount = calculate_loan_amount(board, eligible_properties, eligible_property_count);
 
-        issue_loan(board, player, eligible_properties, eligible_property_count, loan_amount);
+        issue_loan(board, player, economy, eligible_properties, eligible_property_count, loan_amount);
     }
 }
 
 // BANK
-void resolve_bank(Square *board, Player *player)
+void resolve_bank(Square *board, Player *player, Economy economy)
 {
     printf("\n---- BANK ----\n");
     if (player->has_active_loan == 1)
@@ -233,7 +233,7 @@ void resolve_bank(Square *board, Player *player)
         }
         else if (decide_loan_refinance(board, *player) == 1)
         {
-            handle_loan(board, player);
+            handle_loan(board, player, economy);
         }
         else
         {
@@ -245,7 +245,7 @@ void resolve_bank(Square *board, Player *player)
     {
         if (decide_loan(board, *player) == 1)
         {
-            handle_loan(board, player);
+            handle_loan(board, player, economy);
         }
     }
 }
@@ -258,6 +258,47 @@ void resolve_jail(Square *square, Player *player)
         printf("\n\t%s went to Jail.\n", player->player_name);
         player->current_position = JAIL_SQUARE; // player moved to jail
         player->is_in_jail = 1;                 // player in jail
+    }
+}
+
+// INCOME TAX
+int resolve_income_tax(Square *board, Economy economy, Player *player, Player *players)
+{
+    // TODO: on what does income tax applied on
+    int player_net_worth = calculate_net_worth(board, *player);
+    int tax_amount = apply_percentage(player_net_worth, economy.income_tax_rate);
+    if (check_player_bankrupt(board, player, players, tax_amount) == 1)
+    {
+        return -1; // bankrupt
+    }
+
+    printf("\n\t%s paid LKR %d as income tax (%d%%).\n", player->player_name, tax_amount, economy.income_tax_rate);
+    execute_tax_collection(player, tax_amount);
+}
+
+// EVENTS
+int resolve_event_square(Square *board, Square *square, Player *player, Economy economy, Player *players)
+{
+    if (square->property_index == COMMUNITY_DEVELOPMENT_FUND_SQUARE)
+    {
+        int property_assets = 0;
+        for (int i = 0; i < MAX_SQUARES; i++) {
+            if (board[i].ownership != player->playerId){
+                continue;
+            }
+            
+            if (board[i].square_type == PROPERTY || board[i].square_type == RAILWAY || board[i].square_type == UTILITY) {
+                property_assets += board[i].current_market_value;
+            }
+        }
+
+        int tax_amount = apply_percentage(property_assets, economy.community_fund_rate);
+        if (check_player_bankrupt(board, player, players, tax_amount) == 1) {
+            return -1;
+        }
+
+        printf("\n\t%s paid LKR %d as community development fund payment.\n", player->player_name, tax_amount);
+        execute_tax_collection(player, tax_amount);
     }
 }
 
@@ -313,7 +354,7 @@ int player_has_monopoly(Square *board, PlayerId playerId, PropertyGroup group)
     return 1;
 }
 
-void resolve_landingSquare(Square *board, Player *players, Player *player)
+void resolve_landingSquare(Square *board, Player *players, Player *player, Economy economy)
 {
     Square *square = &board[player->current_position];
 
@@ -330,10 +371,16 @@ void resolve_landingSquare(Square *board, Player *players, Player *player)
         shouldRunAuction = resolve_utilityCompany(board, square, players, player);
         break;
     case BANK:
-        resolve_bank(board, player);
+        resolve_bank(board, player, economy);
         break;
     case JAIL:
         resolve_jail(square, player);
+        break;
+    case TAX:
+        resolve_income_tax(board, economy, player, players);
+        break;
+    case EVENT:
+        resolve_event_square(board, square, player, economy, players);
         break;
 
     default:

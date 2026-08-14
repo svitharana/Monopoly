@@ -3,11 +3,12 @@
 #include "include/players.h"
 #include "include/board.h"
 #include "include/finance.h"
+#include "include/events.h"
 #include "include/utils.h"
 
 int roll_dice()
 {
-    return random_generator(6);
+    return random_generator(1, 6);
 }
 
 void display_players(PlayerOrder *playerOrder)
@@ -199,7 +200,7 @@ void check_for_monopoly(Square *board, Player *player)
     }
 }
 
-void play_turn(Player *players, PlayerId player_id, Square *board)
+void play_turn(Player *players, PlayerId player_id, Square *board, Economy economy)
 {
 
     Player *player = &players[player_id];
@@ -292,7 +293,7 @@ void play_turn(Player *players, PlayerId player_id, Square *board)
         move_player(player, player->rolled_value, board);
     }
 
-    resolve_landingSquare(board, players, player);
+    resolve_landingSquare(board, players, player, economy);
 
     check_for_monopoly(board, player);
 }
@@ -330,12 +331,29 @@ int check_game_round(Player *players, int game_round)
     return 1; // all players (except in Jail) have passed go
 }
 
-void update_game_data(Square *board, Player *players, int game_round)
+void update_game_data(Square *board, Player *players, int game_round, Economy *economy)
 {
     printf("\n========================================\n");
     printf("  Round %d Summary\n", game_round);
     printf("========================================\n\n");
 
+    if (game_round % 10 == 0)
+    {
+        update_inflation(economy);
+        update_board_data(economy, board);
+
+        update_dynamic_property_market(board, economy);
+    }
+
+    // boom or decline grp update
+    for (int i = 0; i < MAX_PROPERTY_GRPS; i++) {
+        if (economy->boom_decline_grp_cooldown[i] > 0) {
+            economy->boom_decline_grp_cooldown[i]--;
+        }
+    }
+
+    // TODO: add output market conditions
+    
     for (int i = 0; i < MAX_SQUARES; i++)
     {
         Square *square = &board[i];
@@ -429,6 +447,13 @@ void start_game()
     Player players[MAX_PLAYERS] = {0};
     PlayerOrder playerOrder[MAX_PLAYERS] = {0};
 
+    Economy economy;
+
+    economy.inflation = 0;
+    economy.loan_interest_rate = INITIAL_LOAN_INTEREST_RATE;
+    economy.income_tax_rate = 15;
+    economy.community_fund_rate = 10;
+
     int game_round = 1;
     int active_players = MAX_PLAYERS;
 
@@ -454,7 +479,7 @@ void start_game()
         // Debug Mode: Loop executes only for index 0 (your active player)
         for (int i = 0; i < 1; i++)
         {
-            play_turn(players, playerOrder[i].player->playerId, board);
+            play_turn(players, playerOrder[i].player->playerId, board, economy);
 
             if (check_game_round(players, game_round) == 1)
             {
@@ -476,7 +501,7 @@ void start_game()
                 continue;
             }
 
-            play_turn(players, current_player->playerId, board);
+            play_turn(players, current_player->playerId, board, economy);
 
             if (current_player->is_bankrupt == 1)
             {
@@ -492,7 +517,7 @@ void start_game()
 
             if (check_game_round(players, game_round) == 1)
             {
-                update_game_data(board, players, game_round);
+                update_game_data(board, players, game_round, &economy);
 
                 if (game_round == MAX_ROUNDS)
                 {

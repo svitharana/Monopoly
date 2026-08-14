@@ -18,9 +18,12 @@
 #define GOTO_JAIL_SQUARE 30
 #define JAIL_SQUARE 10
 
+#define COMMUNITY_DEVELOPMENT_FUND_SQUARE 2
+
 #define BID_INCREMENT 250
 
 #define MAX_LOAN_ROUNDS 20
+#define INITIAL_LOAN_INTEREST_RATE 8
 
 #define HOUSE_RENOVATION_COST_PERCENTAGE 5
 #define HOTEL_RENOVATION_COST_PERCENTAGE 8
@@ -102,6 +105,22 @@ typedef enum
     DARK_BLUE,
     NONE
 } PropertyGroup;
+
+typedef struct Economy
+{
+    int inflation;
+    int loan_interest_rate;
+
+    int income_tax_rate;
+    int community_fund_rate;
+    
+    PropertyGroup boom_group;
+    int boom_rounds_remaining;
+    PropertyGroup decline_group;
+    int decline_rounds_remaining;
+
+    int boom_decline_grp_cooldown[MAX_PROPERTY_GRPS];
+} Economy;
 
 typedef struct Square
 {
