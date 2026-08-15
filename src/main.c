@@ -5,6 +5,7 @@
 
 int main()
 {
+    // srand(100);
     srand(time(NULL));
     start_game();
 }

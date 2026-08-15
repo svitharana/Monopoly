@@ -2,6 +2,7 @@
 #include "include/board.h"
 #include "include/finance.h"
 #include "include/players.h"
+#include "include/types.h"
 #include "include/utils.h"
 
 // renovating building
@@ -54,6 +55,10 @@ int resolve_property(Square *board, Square *square, Player *players, Player *pla
     }
     else if (square->ownership != player->playerId)
     {
+        if (square->is_mortgage == 1) {
+            printf("\n\t%s is mortgaged. No rent collected.\n", square->square_name);
+            return 0;
+        }
         int rent = square->base_rent;
         int rent_multiplier[] = {1, 2, 3, 5, 7};
 
@@ -109,6 +114,10 @@ int resolve_railwayStation(Square *board, Square *square, Player *players, Playe
     }
     else if (square->ownership != player->playerId)
     {
+        if (square->is_mortgage == 1) {
+            printf("\n\t%s is mortgaged. No rent collected.\n", square->square_name);
+            return 0;
+        }
         int rent = square->base_rent;
 
         Player *railwayStation_owner = &players[square->ownership];
@@ -152,6 +161,10 @@ int resolve_utilityCompany(Square *board, Square *square, Player *players, Playe
     }
     else if (square->ownership != player->playerId)
     {
+        if (square->is_mortgage == 1) {
+            printf("\n\t%s is mortgaged. No rent collected.\n", square->square_name);
+            return 0;
+        }
 
         int rent = player->rolled_value;
 
@@ -306,6 +319,28 @@ int resolve_event_square(Square *board, Square *square, Player *player, Economy 
     return 0;
 }
 
+// INSURANCE
+int resolve_insurance_square(Square *board, Square *square, Player *player, Economy economy, Player *players) {
+    for (int i = 0; i < MAX_SQUARES; i++) {
+        Square *property = &board[i];
+
+        if (property->ownership != player->playerId || property->square_type != PROPERTY) {
+            continue;
+        }
+
+        InsuranceType insurance_type = decide_insurance(*property, economy, *player);
+        if (insurance_type == NO_INSURANCE) {
+            continue;
+        }
+
+        if (property->insurance_type != insurance_type || property->insurance_rounds_remaining <= 3)
+        {
+            execute_insurance_transaction(property, player, insurance_type, economy);
+        }
+    }
+    return 0;
+}
+
 int get_property_index_toBuild(Square *board, PropertyGroup group)
 {
     int property_index = -1;
@@ -379,6 +414,9 @@ void resolve_landingSquare(Square *board, Player *players, Player *player, Econo
         break;
     case JAIL:
         resolve_jail(square, player);
+        break;
+    case INSURANCE:
+        resolve_insurance_square(board, square, player, economy, players);
         break;
     case TAX:
         resolve_income_tax(board, economy, player, players);

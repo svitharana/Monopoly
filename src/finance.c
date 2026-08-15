@@ -4,22 +4,26 @@
 #include "include/types.h"
 #include "include/utils.h"
 
+int get_repair_cost(Square property)
+{
+    if (property.has_hotel == 1)
+    {
+        return apply_percentage(property.hotel_constructionCost, DAMAGED_BUILDING_REPAIR_PERCENTAGE);
+    }
+    else if (property.house_count > 0)
+    {
+        return apply_percentage(property.house_constructionCost, DAMAGED_BUILDING_REPAIR_PERCENTAGE) * property.house_count;
+    }
+    return 0;
+}
+
 void repair_damaged_property(Square *property, Player *player)
 {
-    int repair_cost;
-
-    if (property->has_hotel == 1)
-    {
-        repair_cost = apply_percentage(property->hotel_constructionCost, DAMAGED_BUILDING_REPAIR_PERCENTAGE);
-    }
-    else
-    {
-        repair_cost = apply_percentage(property->house_constructionCost, DAMAGED_BUILDING_REPAIR_PERCENTAGE) * property->house_count;
-    }
+    int repair_cost = get_repair_cost(*property);
 
     if (player->cash >= repair_cost)
     {
-        printf("\t%s spend %d on repairing %s due to a disaster.\n", player->player_name, repair_cost, property->square_name);
+        printf("\t%s spend LKR %d on repairing %s due to a disaster.\n", player->player_name, repair_cost, property->square_name);
         player->cash -= repair_cost;
         printf("\tRemaining Balance: LKR %d\n", player->cash);
         property->damaged_by = -1;
@@ -36,6 +40,92 @@ void repair_damaged_property(Square *property, Player *player)
         printf("\t%s does not have enough cash to repair the property\n", player->player_name);
     }
 }
+
+void check_insurance_compensation(Square property, Player *player)
+{
+    int repair_cost = get_repair_cost(property);
+    int compensation = 0;
+    switch (property.insurance_type)
+    {
+    case BASIC_PROPERTY:
+        // Basic covers fire and flood 80
+        if (property.damaged_by == FIRE || property.damaged_by == FLOOD)
+        {
+            compensation = apply_percentage(repair_cost, 80);
+        }
+        break;
+    case COMPREHENSIVE:
+        // Comprehensive all 
+        compensation = repair_cost;
+        break;
+    case BUSINESS_INTERRUPTION:
+        // Covers 100 + 5 rounds of hotel rent
+        compensation = repair_cost + (property.base_rent * 10 * 5);
+        break;
+    default:
+        break;
+    }
+    player->cash += compensation;
+    printf("\n\tInsurance Claim Approved\n");
+    printf("\tCompensation Paid : LKR %d.\n", compensation);
+    printf("\tRemaining Balance : LKR %d.\n", player->cash);
+}
+
+int calculate_insurance_premium(Square property, InsuranceType insurance_type, Economy economy, Player player) {
+    int rate = 0;
+
+    switch (insurance_type) {
+        case BASIC_PROPERTY:
+            rate = 5;
+            break;
+        case COMPREHENSIVE:
+            rate  = 10;
+            break;
+        case BUSINESS_INTERRUPTION:
+            rate = 15;
+            break;
+        default:
+            return 0;
+    }
+
+    int premium = apply_percentage(property.current_market_value, rate);
+    
+    // TODO: modifiers for regulations/cards will plug in here!
+    return premium;
+}
+
+void execute_insurance_transaction(Square *property, Player *player, InsuranceType insurance_type, Economy economy) {
+
+    char insurance_types[][30] = {
+        [NO_INSURANCE] = "",
+        [BASIC_PROPERTY] = "Basic Property",
+        [COMPREHENSIVE] = "Comprehensive",
+        [BUSINESS_INTERRUPTION] = "Business Interruption"
+    };
+
+    int premium = calculate_insurance_premium(*property, insurance_type, economy, *player);
+
+    player->cash -= premium;
+
+    if (property->insurance_type == insurance_type) // renewing a insurance
+    {
+        printf("\n\t* Renewed Insurance\n");
+    }
+    else
+    {
+        // new purchase or update insurance 
+        property->insurance_type = insurance_type;
+        property->is_insured = 1;
+        printf("\n\t* Purchasing Insurance\n");
+    }
+
+    property->insurance_rounds_remaining = MAX_INSURANCE_ROUNDS;
+
+    printf("\t%s Insurance active on %s.\n", insurance_types[insurance_type], property->square_name);
+    printf("\tPremium : LKR %d.\n", premium);
+    printf("\tRemaining Balance : LKR %d.\n", player->cash);
+}
+
 
 int calculate_net_worth(Square *board, Player player)
 {
@@ -294,12 +384,12 @@ void process_loan_default(Square *board, Player *player, Player *players)
 
         forecloased_properties[forecloased_property_count] = board[i].property_index;
         forecloased_property_count++;
-
-        player->loan_amount = 0;
-        player->loan_interest_rate = 0;
-        player->loan_rounds_remaining = 0;
-        player->has_active_loan = 0;
     }
+
+    player->loan_amount = 0;
+    player->loan_interest_rate = 0;
+    player->loan_rounds_remaining = 0;
+    player->has_active_loan = 0;
 
     for (int i = 0; i < forecloased_property_count; i++)
     {
@@ -453,6 +543,23 @@ void liquidate_player_assets(Square *board, Player *player, Player *players)
     }
 }
 
+void execute_mortgage(Square *square, Player *player) {
+    square->is_mortgage = 1;
+    player->cash += square->mortgage_value;
+
+    printf("\t%s mortgaged %s for LKR %d.\n",player->player_name, square->square_name, square->mortgage_value);
+    printf("\tRemaining cash: LKR %d.\n", player->cash);
+}
+
+void execute_unmortgage(Square *square, Player *player) {
+    player->cash -= square->mortgage_value;
+    square->is_mortgage = 0;
+
+    printf("\n\t%s unmortgaged %s for LKR %d.\n",
+    player->player_name, square->square_name, square->mortgage_value);
+    printf("\t  Remaining Balance : LKR %d.\n", player->cash);
+}
+
 int check_player_bankrupt(Square *board, Player *player, Player *players, int debt_amount)
 {
     if (player->cash >= debt_amount)
@@ -460,6 +567,32 @@ int check_player_bankrupt(Square *board, Player *player, Player *players, int de
         return 0;
     }
 
+    printf("\n\t%s has insufficient cash (LKR %d) to pay LKR %d. Mortgaging properties...\n",player->player_name, player->cash, debt_amount);
+
+    for (int i = 0; i < MAX_SQUARES; i++)
+    {
+        if (board[i].ownership != player->playerId)
+        {
+            continue;
+        }
+
+        if (board[i].is_mortgage == 1) {
+            continue;
+        }
+
+        if (board[i].is_loan_locked == 1) {
+            continue;
+        }
+
+        // TODO: what if the property is developed
+        
+        execute_mortgage(&board[i], player);
+
+        if (player->cash >= debt_amount) {
+            return 0;
+        }
+    }
+    
     player->is_bankrupt = 1;
     printf("\n\t%s declares bankrupt.\n", player->player_name);
 

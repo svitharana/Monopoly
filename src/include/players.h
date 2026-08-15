@@ -5,6 +5,8 @@
 
 void initialize_players(Player *players, PlayerOrder *playerOrder);
 
+InsuranceType decide_insurance(Square property, Economy economy, Player player);
+
 int decide_purchase(Square *board, Square *square, Player *player);
 int decide_construction(Square property, Player player);
 int decide_bid(Square square, Player player, int bidding_price);

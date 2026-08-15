@@ -36,14 +36,14 @@ void update_board_data(Economy *economy, Square *board)
 
 void update_dynamic_property_market(Square *board, Economy *economy)
 {
-    int boom_grp;
-    int decline_grp;
+    PropertyGroup boom_grp = -1;
+    PropertyGroup decline_grp = -1;
 
     do
     {
         boom_grp = random_generator(0, MAX_PROPERTY_GRPS - 1);
 
-    } while (economy->boom_decline_grp_cooldown[boom_grp] > 0);
+    } while (economy->boom_decline_grp_cooldown[boom_grp] != 0);
 
     economy->boom_decline_grp_cooldown[boom_grp] = 30;
     economy->boom_group = boom_grp;
@@ -51,9 +51,9 @@ void update_dynamic_property_market(Square *board, Economy *economy)
 
     do
     {
-    decline_grp = random_generator(0, MAX_PROPERTY_GRPS - 1);
+        decline_grp = random_generator(0, MAX_PROPERTY_GRPS - 1);
 
-    } while (economy->boom_decline_grp_cooldown[decline_grp] > 0);
+    } while (economy->boom_decline_grp_cooldown[decline_grp] != 0);
 
     economy->boom_decline_grp_cooldown[decline_grp] = 30;
     economy->decline_group = decline_grp;

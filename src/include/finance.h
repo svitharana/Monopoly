@@ -3,7 +3,15 @@
 
 #include "types.h"
 
+void execute_mortgage(Square *square, Player *player);
+void execute_unmortgage(Square *square, Player *player);
+
 void repair_damaged_property(Square *property, Player *player);
+int get_repair_cost(Square property);
+void check_insurance_compensation(Square property, Player *player);
+
+int calculate_insurance_premium(Square property, InsuranceType insurance_type, Economy economy, Player player);
+void execute_insurance_transaction(Square *property, Player *player, InsuranceType insurance_type, Economy economy);
 
 void execute_purchase(Square *square, Player *player, int purchase_price);
 void pay_rent(Square *square, Player *player, Player *owner, int rent);

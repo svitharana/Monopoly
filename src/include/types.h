@@ -5,8 +5,8 @@
 #define MAX_PLAYERS 4
 #define MAX_SQUARES 40
 #define MAX_HOUSES 4
-#define MAX_ROUNDS 500
-
+#define MAX_ROUNDS 50
+#define MAX_INSURANCE_ROUNDS 20
 #define MAX_PROPERTY_GRPS 8
 #define MAX_PROPERTIES_IN_GRPS 3
 
@@ -71,6 +71,8 @@ typedef struct Player
     int loan_interest_rate;
     int loan_rounds_remaining;
 
+    int incured_loss;
+
 } Player;
 
 typedef struct PlayerOrder
@@ -83,7 +85,8 @@ typedef struct PlayerOrder
 
 // DISASTERS
 
-typedef enum Disasters {
+typedef enum Disasters
+{
     FIRE,
     FLOOD,
     RIOT,
@@ -135,6 +138,20 @@ typedef struct Economy
     int boom_decline_grp_cooldown[MAX_PROPERTY_GRPS];
 } Economy;
 
+typedef enum InsurancetType
+{
+    NO_INSURANCE,
+    BASIC_PROPERTY,
+    COMPREHENSIVE,
+    BUSINESS_INTERRUPTION
+} InsuranceType;
+
+// typedef struct Insurance{
+//     InsuranceType insurance_type;
+//     int remaining_rounds;
+//     int premium_perecentage;
+// }Insurance;
+
 typedef struct Square
 {
     char *square_name;
@@ -161,6 +178,11 @@ typedef struct Square
 
     int is_damaged;
     Disasters damaged_by;
+
+    int is_insured;
+    InsuranceType insurance_type;
+    int insurance_rounds_remaining;
+
 } Square;
 
 #endif

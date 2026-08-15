@@ -1,5 +1,6 @@
 #include "include/players.h"
 #include "include/finance.h"
+#include "include/types.h"
 #include "include/utils.h"
 
 #include <stdio.h>
@@ -116,7 +117,7 @@ int decide_renovation(Square square, Player player, int building_condition)
 // --------------- PURCHASE ------------------------
 int aggressive_decide_purchase(Square *board, Square *square, Player *player)
 {
-    int max_rent = 0;
+    int max_rent = 0; // gets the current highest rent
 
     for (int i = square->property_index + 1; i < MAX_SQUARES; i++)
     {
@@ -229,7 +230,7 @@ int aggressive_decide_loan(Square *board, Player player)
 int conservative_decide_loan(Square *board, Player player)
 {
     // TODO: Add conservative loan decision
-    return 1;
+    return 0;
 }
 
 int opportunistic_decide_loan(Square *board, Player player)
@@ -474,6 +475,77 @@ int decide_construction(Square property, Player player)
         return 0;
     }
 }
+
+// --------------- INSURANCE ---------------------- 
+
+InsuranceType aggressive_decide_insurance(Square property, Economy economy, Player player) {
+    if (property.has_hotel == 1) {
+        return COMPREHENSIVE;
+    } else if (property.house_count > 0) {
+        return BASIC_PROPERTY;
+    }
+    return NO_INSURANCE;
+}
+
+InsuranceType conservative_decide_insurance(Square property, Economy economy, Player player) {
+    if (property.has_hotel == 1 || property.house_count > 0) {
+        return COMPREHENSIVE;
+    }
+    return NO_INSURANCE;
+}
+
+InsuranceType risk_decide_insurance(Square property, Economy economy, Player player) {
+    if (player.incured_loss == 1) {
+        if (property.has_hotel == 1 || property.house_count > 0)
+        {
+            return BASIC_PROPERTY;
+        }           
+    }
+    return NO_INSURANCE;
+}
+
+InsuranceType opportunistic_decide_insurance(Square property, Economy economy, Player player)
+{
+    // TODO: Need to implement opportunistic insurance strategy
+    if (property.has_hotel == 1 || property.house_count > 0) {
+        return COMPREHENSIVE;
+    }
+    return NO_INSURANCE;
+}
+
+InsuranceType decide_insurance(Square property, Economy economy, Player player) {
+
+    InsuranceType insurance_type;
+
+    switch (player.strategy) {
+        case AGGRESSIVE_INVESTOR:
+            insurance_type =  aggressive_decide_insurance(property, economy, player); 
+            break;
+        case CONSERVATIVE_BANKER:
+            insurance_type =  conservative_decide_insurance(property, economy, player);
+            break;
+        case RISK_TAKER:
+            insurance_type =  risk_decide_insurance(property, economy, player);
+            break;
+        case OPPORTUNISTIC_TRADER:
+            insurance_type =  opportunistic_decide_insurance(property, economy, player);
+            break;
+        default:
+            insurance_type = NO_INSURANCE;
+            break;
+    }
+    if (insurance_type == NO_INSURANCE) {
+        return insurance_type;
+    }
+
+    int premium = calculate_insurance_premium(property, insurance_type, economy, player);
+
+    if (player.cash >= premium) {
+        return insurance_type;
+    }
+
+    return NO_INSURANCE;
+} 
 
 // --------------- AUCTION ------------------------
 

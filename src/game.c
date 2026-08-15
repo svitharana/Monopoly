@@ -225,6 +225,7 @@ void play_turn(Player *players, PlayerId player_id, Square *board, Economy econo
         }
     }
 
+    // TODO: implement unmortgage
     resolve_renovations(board, player);
 
     int dice_1 = 0;
@@ -370,6 +371,16 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
             printf("\t----------------\n");
             printf("\tAffected Property: %s\n", damaged_property.square_name);
             printf("\tOwner: %s\n", players[damaged_property.ownership].player_name);
+            players[damaged_property.ownership].incured_loss = 1;
+
+            if (damaged_property.is_insured == 1)
+            {
+                check_insurance_compensation(damaged_property, &players[damaged_property.ownership]);
+            }
+            else
+            {
+                printf("\tNo insurance. %s bears repair costs.\n", players[damaged_property.ownership].player_name);
+            }
         }
     }
 
@@ -382,10 +393,12 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
         }
     }
 
-    if (economy->boom_rounds_remaining > 0) {
+    if (economy->boom_rounds_remaining > 0)
+    {
         economy->boom_rounds_remaining--;
     }
-    if (economy->decline_rounds_remaining > 0) {
+    if (economy->decline_rounds_remaining > 0)
+    {
         economy->decline_rounds_remaining--;
     }
 
@@ -454,12 +467,31 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
                     square->house_conditons[j] -= 2;
                 }
             }
+
+            if (square->insurance_rounds_remaining > 0)
+            {
+                square->insurance_rounds_remaining--;
+
+                if (square->insurance_rounds_remaining <= 3)
+                {
+                    printf("\t%s has %d rounds remaining for the insurance of %s property.\n", players[square->ownership].player_name, square->insurance_rounds_remaining, square->square_name);
+                }
+
+                if (square->insurance_rounds_remaining == 0)
+                {
+                    square->insurance_type = NO_INSURANCE;
+                    square->is_insured = 0;
+                    printf("\tInsurance for %s property has expired.\n", square->square_name);
+                    printf("\tOwner: %s\n", players[square->ownership].player_name);
+                }
+            }
         }
     }
 
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        if (players[i].is_bankrupt == 1) {
+        if (players[i].is_bankrupt == 1)
+        {
             continue;
         }
         printf("\n---- %s's Summary ----\n", players[i].player_name);
@@ -492,8 +524,10 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
 
     printf("\n\tBankrupt Players.\n");
     printf("\t---------------------\n");
-    for (int i = 0; i < MAX_PLAYERS; i++){
-        if (players[i].is_bankrupt == 1)  {
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        if (players[i].is_bankrupt == 1)
+        {
             printf("\t%d. %s\n", i, players[i].player_name);
         }
     }
@@ -579,6 +613,7 @@ void start_game()
             }
         }
 #else
+
         // Normal Mode: Loop executes across all players
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
@@ -597,14 +632,14 @@ void start_game()
                 active_players--;
             }
 
-            #ifndef NO_EARLY_WIN
-                if (active_players == 1)
-                {
-                    show_winner(players);
-                    game_over = 1;
-                    break;
-                }
-            #endif
+#ifndef NO_EARLY_WIN
+            if (active_players == 1)
+            {
+                show_winner(players);
+                game_over = 1;
+                break;
+            }
+#endif
 
             if (check_game_round(players, game_round) == 1)
             {
