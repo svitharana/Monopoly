@@ -207,10 +207,10 @@ void execute_renovation(Square *property, Player *player, int house_index)
         {
             renovation_cost = apply_percentage(renovation_cost, 150); // Increase cost by 50% if condition is below 60
         }
-        property->hotel_condition = 100;
         player->cash -= renovation_cost;
 
-        printf("\n\t%s renovated %s to 100%% condition for LKR %d.\n", player->player_name, property->square_name, renovation_cost);
+        printf("\n\t%s renovated a hotel in %s from %d%% to 100%% condition for LKR %d.\n", player->player_name, property->square_name, property->hotel_condition, renovation_cost);
+        property->hotel_condition = 100;
         printf("\tRemaining Balance : LKR %d.\n", player->cash);
     }
     else
@@ -220,10 +220,10 @@ void execute_renovation(Square *property, Player *player, int house_index)
         {
             renovation_cost = apply_percentage(renovation_cost, 150); // Increase cost by 50% if condition is below 60
         }
-        property->house_conditons[house_index] = 100;
         player->cash -= renovation_cost;
 
-        printf("\n\t%s renovated %s to 100%% condition for LKR %d.\n", player->player_name, property->square_name, renovation_cost);
+        printf("\n\t%s renovated a house %s from %d%% to 100%% condition for LKR %d.\n", player->player_name, property->square_name, property->house_conditons[house_index], renovation_cost);
+        property->house_conditons[house_index] = 100;
         printf("\tRemaining Balance : LKR %d.\n", player->cash);
     }
 }
@@ -604,16 +604,10 @@ int check_player_bankrupt(Square *board, Player *player, Player *players, int de
             active_player_count++;
         }
     }
-
-    #ifndef NO_EARLY_WIN
-
-    #else
     if (active_player_count == 1)
         {
             return 1;
-        }  
-    #endif
-    
+        }    
     
     liquidate_player_assets(board, player, players);
 
