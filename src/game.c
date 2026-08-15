@@ -311,6 +311,10 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
         run_economic_event(board, economy);
     }
 
+    if (game_round% 20 == 0) {
+        run_government_regulations(board, economy, players);
+    }
+
     if (game_round % 10 == 0)
     {
         update_inflation(economy);
@@ -447,6 +451,24 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
         printf("\t----------------\n");
         printf("\tActive Event: %s\n\n", event_names[economy->active_economic_event]);
     }
+
+    char regulation_names[][100] = {
+    [INCREASE_PROPERTY_TAX] = "Income Tax increases by 50%",
+    [REDUCE_LOAN_INTEREST] = "Interest decreases by 2%",
+    [HOUSING_SUBSIDY] = "House construction costs reduce by 30%",
+    [LUXURY_PROPERTY_TAX] = "Hotels incur annual maintenance tax of 25% of property value",
+    [RAILWAY_MODERNIZATION] = "Railway rents increase by 25%",
+    [ELECTRICAL_TARIFF_REVISION] = "Utility rent increases by 20%",
+    [INSURANCE_REGULATION] = "Insurance premiums decrease by 15%",
+    [ANTI_SPECULATION_ACT] = "Anti-Speculation Act (Max 3 undeveloped properties)"
+};
+
+
+    if (economy->active_government_regulation != -1) {
+        printf("\tGovernment Regulation\n");
+        printf("\t-----------------------\n");
+        printf("\tActive Regulation: %s\n\n", regulation_names[economy->active_government_regulation]);
+    }
     
     for (int i = 0; i < MAX_SQUARES; i++)
     {
@@ -582,6 +604,7 @@ void start_game()
     
     economy.active_regional_card = -1;
     economy.active_economic_event = -1;
+    economy.active_government_regulation = -1;
 
     int game_round = 1;
     int active_players = MAX_PLAYERS;

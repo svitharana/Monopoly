@@ -166,10 +166,6 @@ int resolve_utilityCompany(Square *board, Square *square, Player *players, Playe
             return 0;
         }
 
-        int rent = square->base_rent;
-
-        rent *= player->rolled_value;
-
         Player *utilityCompany_owner = &players[square->ownership];
         int utilityCompany_count = 0;
         int rent_multiplier[] = {0, 4, 10};
@@ -182,7 +178,8 @@ int resolve_utilityCompany(Square *board, Square *square, Player *players, Playe
             }
         }
 
-        rent *= rent_multiplier[utilityCompany_count];
+        int standard_rent = player->rolled_value * rent_multiplier[utilityCompany_count];
+        int rent = apply_percentage(standard_rent, square->base_rent);
 
         if (check_player_bankrupt(board, player, players, rent) == 1)
         {
@@ -679,7 +676,7 @@ void initialize_board(Square *board)
         if (board[i].square_type == UTILITY)
         {
             board[i].purchase_price = 1500;
-            board[i].base_rent = 1;
+            board[i].base_rent = 100;
         }
 
         if (board[i].square_type == PROPERTY)

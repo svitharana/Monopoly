@@ -1,4 +1,5 @@
 #include "include/events.h"
+#include "include/finance.h"
 #include "include/types.h"
 #include "include/utils.h"
 
@@ -359,5 +360,57 @@ void run_economic_event(Square *board, Economy *economy) {
         default:
             break;
     }
+    }
+}
+
+void run_government_regulations(Square *board, Economy *economy, Player *players) {
+    GovernmentRegulations regulation = random_generator(0, MAX_GOVERNMENT_REGULATIONS - 1);
+
+    economy->active_government_regulation = regulation;
+
+    switch(regulation){
+        case INCREASE_PROPERTY_TAX:
+            economy->income_tax_rate = apply_percentage(economy->income_tax_rate, 100 + 50);
+            break;
+        case REDUCE_LOAN_INTEREST:
+            economy->loan_interest_rate -= 2; 
+            break;
+        default:
+            break;
+    }
+
+    for (int i = 0; i < MAX_SQUARES; i++){
+        Square *square = &board[i];
+        switch (regulation) {
+            case HOUSING_SUBSIDY:
+            if (square->square_type == PROPERTY) {
+                square->house_constructionCost = apply_percentage(square->house_constructionCost, 100 - 30);
+            }
+                break;
+            case RAILWAY_MODERNIZATION:
+                if (square->square_type == RAILWAY) {
+                    square->base_rent = apply_percentage(square->base_rent, 100 + 25);
+                }
+                break;
+            case ELECTRICAL_TARIFF_REVISION:
+                if (square->square_type == UTILITY) {
+                    square->base_rent = apply_percentage(square->base_rent, 100 + 20);
+                }
+                break;
+            case LUXURY_PROPERTY_TAX:
+                if (board[i].has_hotel == 1 && board[i].ownership != UNOWNED) {
+                    int maintenance_tax = apply_percentage(square->current_market_value, 25);
+                    
+                    Player *owner = &players[board[i].ownership];
+
+                    if (check_player_bankrupt(board, owner, players, maintenance_tax) == 0) {
+                        execute_tax_collection(owner, maintenance_tax);
+                        printf("\t%s paid LKR %d Luxury Property Tax for hotel on %s.\n", owner->player_name, maintenance_tax, square->square_name);
+                    }
+                }
+                break;
+            default:
+                break;
+        }
     }
 }

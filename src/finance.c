@@ -90,7 +90,11 @@ int calculate_insurance_premium(Square property, InsuranceType insurance_type, E
 
     int premium = apply_percentage(property.current_market_value, rate);
     
-    // TODO: modifiers for regulations/cards will plug in here!
+    if (economy.active_government_regulation == INSURANCE_REGULATION)
+    {
+        premium = apply_percentage(premium, 100 - 15); 
+    }
+
     return premium;
 }
 

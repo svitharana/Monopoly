@@ -32,6 +32,7 @@
 #define MAX_DISASTERS 5
 #define MAX_REGIONAL_DEVELOPMENT_CARDS 12
 #define MAX_ECONOMIC_EVENTS 8
+#define MAX_GOVERNMENT_REGULATIONS 8
 
 // REGIONAL DEVELOPMENT CARDS
 typedef enum RegionalDevelopmentCards {
@@ -60,6 +61,19 @@ typedef enum EconmicEvents {
     GOVERNMENT_HOUSING_PROGRAMME,
     POLITICAL_UNREST
 }  EconmicEvents;
+
+// GOVERNMENT REGULATIONS
+
+typedef enum GovernmentRegulations{
+    INCREASE_PROPERTY_TAX,
+    REDUCE_LOAN_INTEREST,
+    HOUSING_SUBSIDY,
+    LUXURY_PROPERTY_TAX,
+    RAILWAY_MODERNIZATION,
+    ELECTRICAL_TARIFF_REVISION,
+    INSURANCE_REGULATION,
+    ANTI_SPECULATION_ACT
+} GovernmentRegulations;
 
 // PLAYERS
 typedef enum PlayerId
@@ -169,6 +183,7 @@ typedef struct Economy
 
     RegionalDevelopmentCards active_regional_card;   
     EconmicEvents active_economic_event;
+    GovernmentRegulations active_government_regulation;
 } Economy;
 
 typedef enum InsurancetType
