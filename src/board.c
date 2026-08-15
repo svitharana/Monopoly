@@ -166,7 +166,9 @@ int resolve_utilityCompany(Square *board, Square *square, Player *players, Playe
             return 0;
         }
 
-        int rent = player->rolled_value;
+        int rent = square->base_rent;
+
+        rent *= player->rolled_value;
 
         Player *utilityCompany_owner = &players[square->ownership];
         int utilityCompany_count = 0;
@@ -387,6 +389,10 @@ int player_has_monopoly(Square *board, PlayerId playerId, PropertyGroup group)
         if (board[i].ownership != playerId)
         {
             return 0;
+        }
+
+        if (board[i].is_damaged == 1) {
+            continue;
         }
     }
 
@@ -668,6 +674,7 @@ void initialize_board(Square *board)
         if (board[i].square_type == UTILITY)
         {
             board[i].purchase_price = 1500;
+            board[i].base_rent = 1;
         }
 
         if (board[i].square_type == PROPERTY)
