@@ -100,18 +100,6 @@ void tie_breaker(PlayerOrder *playerOrder)
 
 void determine_playerOrder(PlayerOrder *playerOrder)
 {
-
-// TODO: remove before releasing
-#ifdef DEBUG
-    // Debug Mode: Bypass dice roll sorting and set Player 1 as starting player
-    playerOrder[0].player = playerOrder[0].player;
-    playerOrder[0].rolled_value = 12;
-    playerOrder[0].isOrderCorrect = 1;
-
-    print_heading("DEBUG MODE ACTIVE");
-    printf("%s will begin the game (Debug Single-Player Mode).\n\n", playerOrder[0].player->player_name);
-#else
-    // Normal Mode: Original random turn order setup
     printf("\n--- Determining turn order ---\n");
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
@@ -133,7 +121,6 @@ void determine_playerOrder(PlayerOrder *playerOrder)
     }
 
     printf("\n");
-#endif
 }
 
 void initial_msg(Player *players)
@@ -201,17 +188,22 @@ void check_for_monopoly(Square *board, Player *player)
     }
 }
 
-void play_turn(Player *players, PlayerId player_id, Square *board, Economy economy)
+int get_active_player_count(Player *players)
 {
-    for (int i = 0; i < MAX_SQUARES; i++)
+    int count = 0;
+    for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        if (board[i].is_damaged == 1)
+        if (players[i].is_bankrupt == 0)
         {
-            printf("\tRepairing Damamged Buildings (%s)\n", board[i].square_name);
-            repair_damaged_property(&board[i], &players[board[i].ownership]);
+            count++;
         }
     }
+    return count;
+}
 
+
+void play_turn(Player *players, PlayerId player_id, Square *board, Economy economy)
+{
     Player *player = &players[player_id];
 
     for (int i = 0; i < MAX_SQUARES; i++) {
@@ -219,12 +211,13 @@ void play_turn(Player *players, PlayerId player_id, Square *board, Economy econo
             continue;
         }
 
-        if (board[i].is_mortgage == 0) {
-            continue;
+        if (board[i].is_mortgage == 1 && player->cash > board[i].mortgage_value * 2) {
+            execute_unmortgage(&board[i], player);
         }
 
-        if (player->cash > board[i].mortgage_value * 2) {
-            execute_unmortgage(&board[i], player);
+        if (board[i].is_damaged == 1) {
+            printf("\tRepairing Damamged Buildings (%s)\n", board[i].square_name);
+            repair_damaged_property(&board[i], &players[player_id]);
         }
     }
     printf("\n---- %s's turn ----\n", player->player_name);
@@ -246,63 +239,9 @@ void play_turn(Player *players, PlayerId player_id, Square *board, Economy econo
     int dice_1 = 0;
     int dice_2 = 0;
 
-    // TODO: remove before releasing
-
-#ifdef DEBUG
-    // Debug Mode Menu: Interactive movement and state manipulation
-    print_heading("DEBUG TURN MENU");
-    printf("Active Player: %s | Position: Square %d (%s) | Cash: LKR %d\n",
-           player->player_name, player->current_position, board[player->current_position].square_name, player->cash);
-    printf("1. Roll Manual Dice Values\n");
-    printf("2. Teleport directly to a Square (0-39)\n");
-    printf("3. Add/Subtract Cash\n");
-    printf("4. Roll Standard Random Dice\n");
-    printf("Select Choice: ");
-
-    int choice = 1;
-    scanf("%d", &choice);
-
-    if (choice == 1)
-    {
-        printf("Enter Dice 1 and Dice 2 (e.g., 3 4): ");
-        scanf("%d %d", &dice_1, &dice_2);
-    }
-    else if (choice == 2)
-    {
-        int target_square;
-        printf("Enter target Square Index (0 to 39): ");
-        scanf("%d", &target_square);
-
-        if (target_square >= 0 && target_square < MAX_SQUARES)
-        {
-            player->current_position = target_square;
-            printf("%s teleported directly to Square %d (%s).\n",
-                   player->player_name, target_square, board[target_square].square_name);
-        }
-        dice_1 = 0;
-        dice_2 = 0;
-    }
-    else if (choice == 3)
-    {
-        int cash_change;
-        printf("Enter Cash adjustment (+/- LKR): ");
-        scanf("%d", &cash_change);
-        player->cash += cash_change;
-        printf("New Balance: LKR %d.\n", player->cash);
-
-        dice_1 = roll_dice();
-        dice_2 = roll_dice();
-    }
-    else
-    {
-        dice_1 = roll_dice();
-        dice_2 = roll_dice();
-    }
-#else
     // Normal Mode: Automatic random dice rolling
     dice_1 = roll_dice();
     dice_2 = roll_dice();
-#endif
 
     player->rolled_value = dice_1 + dice_2;
 
@@ -469,22 +408,26 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
     printf("\n");
 
     char card_names[][50] = {
-    [SOUTHERN_TOURISM_BOOM] = "Southern Tourism Boom (+40%% Rent)",
-    [PORT_CITY_EXPANSION] = "Port City Expansion (+25%% Value)",
-    [IT_INDUSTRY_GROWTH] = "IT Industry Growth (+20%% Value)",
-    [NORTHERN_DEVELOPMENT_PROGRAMME] = "Northern Development (+30%% Value)",
-    [TEA_EXPORT_BOOM] = "Tea Export Boom (+35%% Value)",
-    [AIRPORT_EXPANSION] = "Airport Expansion (+30%% Rent)",
-    [UNIVERSITY_CITY_GROWTH] = "University City Growth (+20%% Value)",
-    [BEACH_POLLUTION] = "Beach Pollution (-30%% Rent)",
-    [FLOOD_DAMAGE] = "Flood Damage (-20%% Value)",
-    [TRANSPORT_STRIKE] = "Transport Strike (-40%% Railway Rent)",
-    [ELECTRICITY_TARIFF_INCREASE] = "Electricity Tariff Increase (+25%% Rent)",
-    [WATER_SHORTAGE] = "Water Shortage (+20%% Utility, -10%% Value)"
+    [SOUTHERN_TOURISM_BOOM] = "Southern Tourism Boom (+40% Rent)",
+    [PORT_CITY_EXPANSION] = "Port City Expansion (+25% Value)",
+    [IT_INDUSTRY_GROWTH] = "IT Industry Growth (+20% Value)",
+    [NORTHERN_DEVELOPMENT_PROGRAMME] = "Northern Development (+30% Value)",
+    [TEA_EXPORT_BOOM] = "Tea Export Boom (+35% Value)",
+    [AIRPORT_EXPANSION] = "Airport Expansion (+30% Rent)",
+    [UNIVERSITY_CITY_GROWTH] = "University City Growth (+20% Value)",
+    [BEACH_POLLUTION] = "Beach Pollution (-30% Rent)",
+    [FLOOD_DAMAGE] = "Flood Damage (-20% Value)",
+    [TRANSPORT_STRIKE] = "Transport Strike (-40% Railway Rent)",
+    [ELECTRICITY_TARIFF_INCREASE] = "Electricity Tariff Increase (+25% Rent)",
+    [WATER_SHORTAGE] = "Water Shortage (+20% Utility, -10% Value)"
 };
 
-printf("\n* Regional Development Card Drawn (Round %d)\n", game_round);
-printf("  Active Card: %s\n", card_names[economy->active_regional_card]);
+    if (economy->active_regional_card != -1)
+    {
+        printf("\tRegional Development Card\n");
+        printf("\t---------------------------\n");
+        printf("\tActive Card: %s\n\n", card_names[economy->active_regional_card]);
+    }
 
     for (int i = 0; i < MAX_SQUARES; i++)
     {
@@ -639,28 +582,8 @@ void start_game()
     while (game_over == 0)
     {
 
-        // TODO: remove before releasing
-
-#ifdef DEBUG
-        // Debug Mode: Loop executes only for index 0 (your active player)
-        for (int i = 0; i < 1; i++)
-        {
-            play_turn(players, playerOrder[i].player->playerId, board, economy);
-
-            if (check_game_round(players, game_round) == 1)
-            {
-                game_round++;
-                printf("\n========================================\n");
-                printf("  Round %d\n", game_round);
-                printf("========================================\n\n");
-            }
-        }
-#else
-
-        // Normal Mode: Loop executes across all players
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
-            // current_player = &players[playerOrder[i].player->playerId];
             current_player = playerOrder[i].player;
 
             if (current_player->is_bankrupt == 1)
@@ -675,18 +598,23 @@ void start_game()
                 active_players--;
             }
 
-#ifndef NO_EARLY_WIN
-            if (active_players == 1)
+            if (get_active_player_count(players) <= 1)
             {
                 show_winner(players);
                 game_over = 1;
                 break;
             }
-#endif
 
             if (check_game_round(players, game_round) == 1)
             {
                 update_game_data(board, players, game_round, &economy);
+
+                if (get_active_player_count(players) <= 1)
+                {
+                    show_winner(players);
+                    game_over = 1;
+                    break;
+                }
 
                 if (game_round == MAX_ROUNDS)
                 {
@@ -701,6 +629,5 @@ void start_game()
                 // print_summary(players, board);
             }
         }
-#endif
     }
 }
