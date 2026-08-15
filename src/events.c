@@ -38,6 +38,7 @@ void update_dynamic_property_market(Square *board, Economy *economy)
 {
     int boom_grp;
     int decline_grp;
+
     do
     {
         boom_grp = random_generator(0, MAX_PROPERTY_GRPS - 1);
@@ -50,7 +51,7 @@ void update_dynamic_property_market(Square *board, Economy *economy)
 
     do
     {
-        decline_grp = random_generator(0, MAX_PROPERTY_GRPS - 1);
+    decline_grp = random_generator(0, MAX_PROPERTY_GRPS - 1);
 
     } while (economy->boom_decline_grp_cooldown[decline_grp] > 0);
 

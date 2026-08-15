@@ -202,9 +202,11 @@ void check_for_monopoly(Square *board, Player *player)
 }
 
 void play_turn(Player *players, PlayerId player_id, Square *board, Economy economy)
-{ 
-    for (int i = 0; i < MAX_SQUARES; i++) {
-        if (board[i].is_damaged == 1) {
+{
+    for (int i = 0; i < MAX_SQUARES; i++)
+    {
+        if (board[i].is_damaged == 1)
+        {
             printf("\tRepairing Damamged Buildings (%s)\n", board[i].square_name);
             repair_damaged_property(&board[i], &players[board[i].ownership]);
         }
@@ -352,24 +354,23 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
         update_dynamic_property_market(board, economy);
 
         int damaged_property_index = create_disaster(board);
-        if (damaged_property_index != -1) { 
-            
-        Square damaged_property = board[damaged_property_index];
+        if (damaged_property_index != -1)
+        {
 
-        char disasters[][30] = {
-            [FLOOD] = "Flood",
-            [FIRE] = "Fire",
-            [RIOT] = "Riot",
-            [BUILDING_COLLAPSE] = "Building Collapse",
-            [ELECTRICAL_FAILURE] = "Electrical Failure"
-        };
+            Square damaged_property = board[damaged_property_index];
 
-        printf("\tDisaster (%s)\n", disasters[damaged_property.damaged_by]);
-        printf("\t----------------\n");
-        printf("\tAffected Property: %s\n", damaged_property.square_name);
-        printf("\tOwner: %s\n", players[damaged_property.ownership].player_name);
+            char disasters[][30] = {
+                [FLOOD] = "Flood",
+                [FIRE] = "Fire",
+                [RIOT] = "Riot",
+                [BUILDING_COLLAPSE] = "Building Collapse",
+                [ELECTRICAL_FAILURE] = "Electrical Failure"};
+
+            printf("\tDisaster (%s)\n", disasters[damaged_property.damaged_by]);
+            printf("\t----------------\n");
+            printf("\tAffected Property: %s\n", damaged_property.square_name);
+            printf("\tOwner: %s\n", players[damaged_property.ownership].player_name);
         }
-
     }
 
     // boom or decline grp update
@@ -381,7 +382,13 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
         }
     }
 
-    // TODO: add output market conditions
+    if (economy->boom_rounds_remaining > 0) {
+        economy->boom_rounds_remaining--;
+    }
+    if (economy->decline_rounds_remaining > 0) {
+        economy->decline_rounds_remaining--;
+    }
+
     char property_grps[][30] = {
         [BROWN] = "Brown",
         [LIGHT_BLUE] = "Light Blue",
@@ -393,22 +400,25 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
         [DARK_BLUE] = "Dark Blue"};
 
     printf("\n========================================\n");
-    printf("  Current Maret Conditions\n");
+    printf("  Current Market Conditions\n");
     printf("========================================\n\n");
 
-    printf("\tMarket Boom\n");
-    printf("\t----------------\n");
-    printf("\t%s (+%d%%)\n", property_grps[economy->boom_group], 20);
-    printf("\tRounds remaining : %d\n", economy->boom_rounds_remaining);
+    if (economy->boom_rounds_remaining > 0)
+    {
+        printf("\tMarket Boom\n");
+        printf("\t----------------\n");
+        printf("\t%s (+%d%%)\n", property_grps[economy->boom_group], 20);
+        printf("\tRounds remaining : %d\n", economy->boom_rounds_remaining);
 
-    printf("\n");
+        printf("\n");
 
-    printf("\tMarket Decline\n");
-    printf("\t----------------\n");
-    printf("\t%s (-%d%%)\n", property_grps[economy->decline_group], 15);
-    printf("\tRounds remaining : %d\n", economy->decline_rounds_remaining);
+        printf("\tMarket Decline\n");
+        printf("\t----------------\n");
+        printf("\t%s (-%d%%)\n", property_grps[economy->decline_group], 15);
+        printf("\tRounds remaining : %d\n", economy->decline_rounds_remaining);
 
-    printf("\n");
+        printf("\n");
+    }
 
     printf("\tInflation\n");
     printf("\t----------------\n");
@@ -449,6 +459,9 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
 
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
+        if (players[i].is_bankrupt == 1) {
+            continue;
+        }
         printf("\n---- %s's Summary ----\n", players[i].player_name);
 
         printf("\n\tCash : LKR %d.", players[i].cash);
@@ -474,6 +487,14 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
         if (players[i].has_active_loan == 1)
         {
             check_player_loan(board, &players[i], players);
+        }
+    }
+
+    printf("\n\tBankrupt Players.\n");
+    printf("\t---------------------\n");
+    for (int i = 0; i < MAX_PLAYERS; i++){
+        if (players[i].is_bankrupt == 1)  {
+            printf("\t%d. %s\n", i, players[i].player_name);
         }
     }
 }
@@ -515,7 +536,7 @@ void start_game()
     Player players[MAX_PLAYERS] = {0};
     PlayerOrder playerOrder[MAX_PLAYERS] = {0};
 
-    Economy economy;
+    Economy economy = {0};
 
     economy.inflation = 0;
     economy.loan_interest_rate = INITIAL_LOAN_INTEREST_RATE;
@@ -576,12 +597,14 @@ void start_game()
                 active_players--;
             }
 
-            if (active_players == 1)
-            {
-                show_winner(players);
-                game_over = 1;
-                break;
-            }
+            #ifndef NO_EARLY_WIN
+                if (active_players == 1)
+                {
+                    show_winner(players);
+                    game_over = 1;
+                    break;
+                }
+            #endif
 
             if (check_game_round(players, game_round) == 1)
             {
