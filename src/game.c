@@ -175,7 +175,7 @@ void check_for_monopoly(Square *board, Player *player)
 {
     for (int group = 0; group < MAX_PROPERTY_GRPS; group++)
     {
-        if (player_has_monopoly(board, player->playerId, group))
+        if (player_has_monopoly(board, player->playerId, group) == 1)
         {
             int announced = 0;
             while (1)
@@ -213,6 +213,20 @@ void play_turn(Player *players, PlayerId player_id, Square *board, Economy econo
     }
 
     Player *player = &players[player_id];
+
+    for (int i = 0; i < MAX_SQUARES; i++) {
+        if (board[i].ownership != player->playerId){
+            continue;
+        }
+
+        if (board[i].is_mortgage == 0) {
+            continue;
+        }
+
+        if (player->cash > board[i].mortgage_value * 2) {
+            execute_unmortgage(&board[i], player);
+        }
+    }
     printf("\n---- %s's turn ----\n", player->player_name);
 
     if (player->is_in_jail == 1)
@@ -226,6 +240,7 @@ void play_turn(Player *players, PlayerId player_id, Square *board, Economy econo
     }
 
     // TODO: implement unmortgage
+    
     resolve_renovations(board, player);
 
     int dice_1 = 0;
@@ -347,6 +362,14 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
     printf("  Round %d Summary\n", game_round);
     printf("========================================\n\n");
 
+    if (game_round % 15 == 0) {
+        if (economy->active_regional_card != -1) {
+            remove_regional_development_card_effect(board, economy->active_regional_card);
+        }
+
+        draw_regional_development_card(board, economy);
+    }
+
     if (game_round % 10 == 0)
     {
         update_inflation(economy);
@@ -444,6 +467,24 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
     printf("\t%d%%", economy->loan_interest_rate);
 
     printf("\n");
+
+    char card_names[][50] = {
+    [SOUTHERN_TOURISM_BOOM] = "Southern Tourism Boom (+40%% Rent)",
+    [PORT_CITY_EXPANSION] = "Port City Expansion (+25%% Value)",
+    [IT_INDUSTRY_GROWTH] = "IT Industry Growth (+20%% Value)",
+    [NORTHERN_DEVELOPMENT_PROGRAMME] = "Northern Development (+30%% Value)",
+    [TEA_EXPORT_BOOM] = "Tea Export Boom (+35%% Value)",
+    [AIRPORT_EXPANSION] = "Airport Expansion (+30%% Rent)",
+    [UNIVERSITY_CITY_GROWTH] = "University City Growth (+20%% Value)",
+    [BEACH_POLLUTION] = "Beach Pollution (-30%% Rent)",
+    [FLOOD_DAMAGE] = "Flood Damage (-20%% Value)",
+    [TRANSPORT_STRIKE] = "Transport Strike (-40%% Railway Rent)",
+    [ELECTRICITY_TARIFF_INCREASE] = "Electricity Tariff Increase (+25%% Rent)",
+    [WATER_SHORTAGE] = "Water Shortage (+20%% Utility, -10%% Value)"
+};
+
+printf("\n* Regional Development Card Drawn (Round %d)\n", game_round);
+printf("  Active Card: %s\n", card_names[economy->active_regional_card]);
 
     for (int i = 0; i < MAX_SQUARES; i++)
     {
@@ -576,6 +617,8 @@ void start_game()
     economy.loan_interest_rate = INITIAL_LOAN_INTEREST_RATE;
     economy.income_tax_rate = 15;
     economy.community_fund_rate = 10;
+    
+    economy.active_regional_card = -1;
 
     int game_round = 1;
     int active_players = MAX_PLAYERS;

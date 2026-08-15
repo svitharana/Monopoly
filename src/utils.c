@@ -31,6 +31,11 @@ int apply_percentage(int base, int percentage)
     return (base * percentage) / 100;
 }
 
+int remove_percentage(int base, int percentage)
+{
+    return (base * 100) / percentage;
+}
+
 void format_amount(int amount) // formats 30000 -> 30,000
 {
     int arr[5];

@@ -115,6 +115,173 @@ int create_disaster(Square *board) {
     } else {
         return -1;
     }
-    
-    
+}
+
+void remove_regional_development_card_effect(Square *board, RegionalDevelopmentCards card)
+{
+    for (int i = 0; i < MAX_SQUARES; i++)
+    {
+        Square *square = &board[i];
+
+        switch (card)
+        {
+        case SOUTHERN_TOURISM_BOOM:
+            if (square->property_group == YELLOW)
+            {
+                square->base_rent = remove_percentage(square->base_rent, 100 + 40);
+            }
+            break;
+        case PORT_CITY_EXPANSION:
+            if (square->property_group == BROWN || square->property_index == 5) // 5 - Colombo Fort Station
+            {
+                square->current_market_value = remove_percentage(square->current_market_value, 100 + 25);
+            }
+            break;
+        case IT_INDUSTRY_GROWTH:
+            if (square->property_group == PINK)
+            {
+                square->current_market_value = remove_percentage(square->current_market_value, 100 + 20);
+            }
+            break;
+        case NORTHERN_DEVELOPMENT_PROGRAMME:
+            if (square->property_group == GREEN)
+            {
+                square->current_market_value = remove_percentage(square->current_market_value, 100 + 30);
+            }
+            break;
+        case TEA_EXPORT_BOOM:
+            if (square->property_index == 37) // Nuwara Eliya
+            {
+                square->current_market_value = remove_percentage(square->current_market_value, 100 + 35);
+            }
+            break;
+        case AIRPORT_EXPANSION:
+            if (square->property_group == ORANGE)
+            {
+                square->base_rent = remove_percentage(square->base_rent, 100 + 30);
+            }
+            break;
+        case UNIVERSITY_CITY_GROWTH:
+            if (square->property_index == 21 || square->property_index == 23)
+            {
+                square->current_market_value = remove_percentage(square->current_market_value, 100 + 20);
+            }
+            break;
+        case BEACH_POLLUTION:
+            if (square->property_group == YELLOW || square->property_index == 25)
+            {
+                square->base_rent = remove_percentage(square->base_rent, 100 - 30);
+            }
+            break;
+        case FLOOD_DAMAGE:
+            if (square->property_group == LIGHT_BLUE || square->property_group == ORANGE)
+            {
+                square->current_market_value = remove_percentage(square->current_market_value, 100 - 20);
+            }
+            break;
+        case TRANSPORT_STRIKE:
+            if (square->square_type == RAILWAY)
+            {
+                square->base_rent = remove_percentage(square->base_rent, 100 - 40);
+            }
+            break;
+        case ELECTRICITY_TARIFF_INCREASE:
+            if (square->property_index == 12)
+            {
+                square->base_rent = remove_percentage(square->base_rent, 100 + 25);
+            }
+            break;
+        case WATER_SHORTAGE:
+            if (square->property_index == 28)
+            {
+                square->base_rent = remove_percentage(square->base_rent, 100 + 20);
+            }
+            if (square->property_index == 27 || square->property_index == 29) // Unawatuna, Hikkaduwa
+            {
+                square->current_market_value = remove_percentage(square->current_market_value, 100 - 10);
+            }
+            break;
+        default:
+            break;
+        }
+    }
+}
+
+
+void draw_regional_development_card(Square *board, Economy *economy) {
+    RegionalDevelopmentCards card = random_generator(0, MAX_REGIONAL_DEVELOPMENT_CARDS - 1);
+
+    economy->active_regional_card = card;
+
+    for (int i = 0; i < MAX_SQUARES; i++) {
+        Square *square = &board[i];
+
+        switch (card) {
+        case SOUTHERN_TOURISM_BOOM: 
+            if (square->property_group == YELLOW) {
+                square->base_rent = apply_percentage(square->base_rent, 100 + 40);
+            }
+            break;
+        case PORT_CITY_EXPANSION: 
+            if (square->property_group == BROWN || square->property_index == 5) { // 5 - Colombo Fort Station
+                square->current_market_value = apply_percentage(square->current_market_value, 100 + 25);
+            }
+            break;
+        case IT_INDUSTRY_GROWTH: 
+            if (square->property_group == PINK) {
+                square->current_market_value = apply_percentage(square->current_market_value, 100 + 20);
+            }
+            break;
+        case NORTHERN_DEVELOPMENT_PROGRAMME:
+            if (square->property_group == GREEN) {
+                square->current_market_value = apply_percentage(square->current_market_value, 100 + 30);
+            }
+            break;
+        case TEA_EXPORT_BOOM: 
+            if (square->property_index == 37) { // Nuwara-Eliya
+                square->current_market_value = apply_percentage(square->current_market_value, 100 + 35);
+            }
+            break;
+        case AIRPORT_EXPANSION: 
+            if(square->property_group == ORANGE) {
+                square->base_rent = apply_percentage(square->base_rent, 100 + 30);
+            }
+            break;
+        case UNIVERSITY_CITY_GROWTH: 
+            if (square->property_index == 21 || square->property_index == 23) {
+                square->current_market_value = apply_percentage(square->current_market_value, 100 + 20);
+            }
+            break;
+        case BEACH_POLLUTION: 
+            if (square->property_group == YELLOW || square->property_index == 25) {
+                square->base_rent = apply_percentage(square->base_rent, 100 - 30);
+            }
+            break;
+        case FLOOD_DAMAGE:
+            if (square->property_group == LIGHT_BLUE || square->property_group == ORANGE) {
+                square->current_market_value = apply_percentage(square->current_market_value, 100 - 20);
+            }
+            break;
+        case TRANSPORT_STRIKE: 
+            if (square->square_type == RAILWAY) {
+                square->base_rent = apply_percentage(square->base_rent, 100 - 40);
+            }
+            break;
+        case ELECTRICITY_TARIFF_INCREASE: 
+            if (square->property_index == 12) { 
+                square->base_rent = apply_percentage(square->base_rent, 100 + 25);
+            }
+            break;
+        case WATER_SHORTAGE: 
+            if (square->property_index == 28) {
+                square->base_rent = apply_percentage(square->base_rent, 100 + 20);
+            }
+            if (square->property_index == 27 || square->property_index == 29) { // Unawatuna, Hikkaduwa
+                square->current_market_value = apply_percentage(square->current_market_value, 100 - 10);
+            }
+            break;
+        default: 
+            break;
+    }
+    }
 }

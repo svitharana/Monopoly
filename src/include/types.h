@@ -5,7 +5,7 @@
 #define MAX_PLAYERS 4
 #define MAX_SQUARES 40
 #define MAX_HOUSES 4
-#define MAX_ROUNDS 50
+#define MAX_ROUNDS 500
 #define MAX_INSURANCE_ROUNDS 20
 #define MAX_PROPERTY_GRPS 8
 #define MAX_PROPERTIES_IN_GRPS 3
@@ -30,6 +30,23 @@
 #define DAMAGED_BUILDING_REPAIR_PERCENTAGE 25
 
 #define MAX_DISASTERS 5
+#define MAX_REGIONAL_DEVELOPMENT_CARDS 12
+
+// REGIONAL CARDS
+typedef enum RegionalDevelopmentCards {
+    SOUTHERN_TOURISM_BOOM,
+    PORT_CITY_EXPANSION,
+    IT_INDUSTRY_GROWTH,
+    NORTHERN_DEVELOPMENT_PROGRAMME,
+    TEA_EXPORT_BOOM,
+    AIRPORT_EXPANSION,
+    UNIVERSITY_CITY_GROWTH,
+    BEACH_POLLUTION,
+    FLOOD_DAMAGE,
+    TRANSPORT_STRIKE,
+    ELECTRICITY_TARIFF_INCREASE,
+    WATER_SHORTAGE
+} RegionalDevelopmentCards;
 
 // PLAYERS
 typedef enum PlayerId
@@ -136,6 +153,8 @@ typedef struct Economy
     int decline_rounds_remaining;
 
     int boom_decline_grp_cooldown[MAX_PROPERTY_GRPS];
+
+    RegionalDevelopmentCards active_regional_card;   
 } Economy;
 
 typedef enum InsurancetType
