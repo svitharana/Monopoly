@@ -281,7 +281,12 @@ int resolve_income_tax(Square *board, Economy economy, Player *player, Player *p
 {
     // TODO: on what does income tax applied on
     int player_net_worth = calculate_net_worth(board, *player);
+    if (player_net_worth < 0) {
+        player_net_worth = 0;
+    }
+    
     int tax_amount = apply_percentage(player_net_worth, economy.income_tax_rate);
+    
     if (check_player_bankrupt(board, player, players, tax_amount) == 1)
     {
         return -1; // bankrupt
