@@ -4,66 +4,79 @@
 #include "include/types.h"
 #include "include/utils.h"
 
-void repair_damaged_property(Square *property, Player *player) {
+void repair_damaged_property(Square *property, Player *player)
+{
     int repair_cost;
-    
-    if (property->has_hotel == 1) {
+
+    if (property->has_hotel == 1)
+    {
         repair_cost = apply_percentage(property->hotel_constructionCost, DAMAGED_BUILDING_REPAIR_PERCENTAGE);
-    } else {
+    }
+    else
+    {
         repair_cost = apply_percentage(property->house_constructionCost, DAMAGED_BUILDING_REPAIR_PERCENTAGE) * property->house_count;
     }
 
-    if (player->cash >= repair_cost) {
+    if (player->cash >= repair_cost)
+    {
         printf("\t%s spend %d on repairing %s due to a disaster.\n", player->player_name, repair_cost, property->square_name);
-        player->cash -= repair_cost; 
+        player->cash -= repair_cost;
         printf("\tRemaining Balance: LKR %d\n", player->cash);
         property->damaged_by = -1;
-        
+
         property->hotel_condition = 100;
-        for (int i = 0; i < property->house_count; i++) {
+        for (int i = 0; i < property->house_count; i++)
+        {
             property->house_conditons[i] = 100;
         }
         property->is_damaged = 0;
-    } else {
+    }
+    else
+    {
         printf("\t%s does not have enough cash to repair the property\n", player->player_name);
     }
-
 }
 
-
-int calculate_net_worth(Square *board, Player player) 
+int calculate_net_worth(Square *board, Player player)
 {
     int net_worth = 0;
 
-    net_worth += player.cash; 
-    
-    if (player.has_active_loan == 1) {
+    net_worth += player.cash;
+
+    if (player.has_active_loan == 1)
+    {
         net_worth -= player.loan_amount;
     }
 
-    for (int i = 0; i < MAX_SQUARES; i++) {
+    for (int i = 0; i < MAX_SQUARES; i++)
+    {
         Square square = board[i];
 
-        if (square.ownership != player.playerId) {
+        if (square.ownership != player.playerId)
+        {
             continue;
         }
 
         net_worth += square.current_market_value;
 
-        if (square.is_mortgage == 1) {
+        if (square.is_mortgage == 1)
+        {
             net_worth -= square.mortgage_value;
         }
 
-        if (square.has_hotel == 1) {
+        if (square.has_hotel == 1)
+        {
             net_worth += square.hotel_constructionCost;
-        } else if (square.house_count > 0) {
+        }
+        else if (square.house_count > 0)
+        {
             net_worth += square.house_constructionCost * square.house_count;
         }
-    }   
+    }
     return net_worth;
 }
 
-void execute_tax_collection(Player *player, int tax_amount) 
+void execute_tax_collection(Player *player, int tax_amount)
 {
     player->cash -= tax_amount;
     printf("\tRemaining Balance : LKR %d.\n", player->cash);
@@ -192,6 +205,12 @@ void run_auction(Square *square, Player *players)
             continue;
         }
         active_bidders++;
+    }
+
+    if (active_bidders <= 1)
+    {
+        printf("\tNo one to bid.\n");
+        return;
     }
 
     int highest_bid = bidding_price;
@@ -394,6 +413,8 @@ void liquidate_player_assets(Square *board, Player *player, Player *players)
 {
     int forecloased_properties[MAX_SQUARES] = {0};
     int forecloased_property_count = 0;
+    
+    player->cash = 0;
 
     if (player->has_active_loan == 1)
     {
@@ -420,7 +441,6 @@ void liquidate_player_assets(Square *board, Player *player, Player *players)
         board[i].is_loan_locked = 0;
         board[i].has_hotel = 0;
         board[i].house_count = 0;
-        // board[i].builing_condition = 100; // TODO: add conditions
         board[i].is_mortgage = 0;
 
         forecloased_properties[forecloased_property_count] = board[i].property_index;
@@ -442,6 +462,26 @@ int check_player_bankrupt(Square *board, Player *player, Player *players, int de
 
     player->is_bankrupt = 1;
     printf("\n\t%s declares bankrupt.\n", player->player_name);
+
+    int active_player_count = 0;
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        if (players[i].is_bankrupt == 0)
+        {
+            active_player_count++;
+        }
+    }
+
+    #ifndef NO_EARLY_WIN
+
+    #else
+    if (active_player_count == 1)
+        {
+            return 1;
+        }  
+    #endif
+    
+    
     liquidate_player_assets(board, player, players);
 
     return 1; // bankrupt
