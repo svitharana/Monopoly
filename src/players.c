@@ -447,7 +447,15 @@ int risk_decide_construction(Square property, Player player)
 
 int opportunistic_decide_construction(Square property, Player player)
 {
-    return 1; // TODO: check opportunistic construction strategy
+    if (property.house_count < 4)
+    {
+        return player.cash >= property.house_constructionCost;
+    }
+    else if (property.has_hotel == 0)
+    {
+        return player.cash >= property.hotel_constructionCost;
+    }
+    return 0; // TODO: check opportunistic construction strategy
 }
 
 int decide_construction(Square property, Player player)
