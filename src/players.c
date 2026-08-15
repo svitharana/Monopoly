@@ -106,7 +106,7 @@ int decide_renovation(Square square, Player player, int building_condition)
     case CONSERVATIVE_BANKER:
         return conservative_decide_renovation(square, player, building_condition);
     case RISK_TAKER:
-        return player.cash > square.house_constructionCost;
+        return risk_decide_renovation(square, player, building_condition);
     case OPPORTUNISTIC_TRADER:
         return 0; // TODO: add opportunistic renovation strategy
     default:
