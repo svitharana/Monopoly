@@ -307,6 +307,8 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
         }
 
         draw_regional_development_card(board, economy);
+
+        run_economic_event(board, economy);
     }
 
     if (game_round % 10 == 0)
@@ -429,6 +431,23 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
         printf("\tActive Card: %s\n\n", card_names[economy->active_regional_card]);
     }
 
+    char event_names[][40] = {
+        [TOURISM_BOOM] = "Tourism Boom",
+        [FUEL_CRISIS] = "Fuel Crisis",
+        [HEAVY_MONSOON] = "Heavy Monsoon",
+        [ECONOMIC_RECESSION] = "Economic Recession",
+        [STOCK_MARKET_BOOM] = "Stock Market Boom",
+        [FOREIGN_INVESTMENT] = "Foreign Investment",
+        [GOVERNMENT_HOUSING_PROGRAMME] = "Government Housing Programme",
+        [POLITICAL_UNREST] = "Political Unrest"
+    };
+
+    if (economy->active_economic_event != -1) {
+        printf("\tEconomic Event\n");
+        printf("\t----------------\n");
+        printf("\tActive Event: %s\n\n", event_names[economy->active_economic_event]);
+    }
+    
     for (int i = 0; i < MAX_SQUARES; i++)
     {
         Square *square = &board[i];
@@ -562,6 +581,7 @@ void start_game()
     economy.community_fund_rate = 10;
     
     economy.active_regional_card = -1;
+    economy.active_economic_event = -1;
 
     int game_round = 1;
     int active_players = MAX_PLAYERS;

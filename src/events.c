@@ -285,3 +285,79 @@ void draw_regional_development_card(Square *board, Economy *economy) {
     }
     }
 }
+
+void run_economic_event(Square *board, Economy *economy) {
+    EconmicEvents event = random_generator(0, MAX_ECONOMIC_EVENTS - 1);
+
+    economy->active_economic_event = event;
+
+    switch (event) {
+    case ECONOMIC_RECESSION:
+        economy->loan_interest_rate = apply_percentage(economy->loan_interest_rate, 100 + 15);
+        break;
+    case STOCK_MARKET_BOOM:
+        economy->loan_interest_rate = apply_percentage(economy->loan_interest_rate, 100 - 10);
+        break;
+    default:
+        break;
+    }
+
+    for (int i = 0; i < MAX_SQUARES; i++) {
+        Square *square = &board[i];
+
+        switch (event) {
+        case TOURISM_BOOM:
+            if (square->has_hotel == 1) {
+                square->base_rent *= 2;
+            }
+            if (square->property_group == YELLOW || square->property_index == 25) {
+                square->base_rent = apply_percentage(square->base_rent, 100 + 15);
+            }
+            break;
+        case FUEL_CRISIS:
+            if (square->square_type == RAILWAY) {
+                square->base_rent *= 2;
+            }
+
+            if (square->square_type == PROPERTY) {
+                square->hotel_constructionCost = apply_percentage(square->hotel_constructionCost, 100 + 20);
+                square->house_constructionCost = apply_percentage(square->house_constructionCost, 100 + 20);
+            }
+            break;
+        case HEAVY_MONSOON:
+            if (square->property_group == LIGHT_BLUE || square->property_group == ORANGE) {
+                square->current_market_value = apply_percentage(square->current_market_value, 100 - 10);
+            }
+            break;
+        case ECONOMIC_RECESSION:
+            if (square->square_type == PROPERTY || square->square_type == RAILWAY || square->square_type == UTILITY) {
+                square->current_market_value = apply_percentage(square->current_market_value, 100 - 15); 
+                square->base_rent = apply_percentage(square->base_rent, 100 - 10);
+            }
+
+            break;
+        case STOCK_MARKET_BOOM:
+            if (square->square_type == PROPERTY || square->square_type == RAILWAY || square->square_type == UTILITY) {
+                square->current_market_value = apply_percentage(square->current_market_value, 100 + 10); 
+            }
+            break;
+        case GOVERNMENT_HOUSING_PROGRAMME:
+            if (square->square_type == PROPERTY) {
+                square->house_constructionCost = apply_percentage(square->house_constructionCost, 100 - 25);
+            }
+            break;
+        case FOREIGN_INVESTMENT:
+            if (square->property_group == GREEN || square->property_group == DARK_BLUE) {
+                square->current_market_value = apply_percentage(square->current_market_value, 100 + 20);
+            }
+            break;
+        case POLITICAL_UNREST:
+            if (square->has_hotel == 1) {
+                square->base_rent = apply_percentage(square->base_rent, 100 - 50);
+            }
+            break;
+        default:
+            break;
+    }
+    }
+}

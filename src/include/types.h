@@ -31,6 +31,7 @@
 
 #define MAX_DISASTERS 5
 #define MAX_REGIONAL_DEVELOPMENT_CARDS 12
+#define MAX_ECONOMIC_EVENTS 8
 
 // REGIONAL DEVELOPMENT CARDS
 typedef enum RegionalDevelopmentCards {
@@ -55,6 +56,7 @@ typedef enum EconmicEvents {
     HEAVY_MONSOON,
     ECONOMIC_RECESSION,
     STOCK_MARKET_BOOM,
+    FOREIGN_INVESTMENT,
     GOVERNMENT_HOUSING_PROGRAMME,
     POLITICAL_UNREST
 }  EconmicEvents;
@@ -166,6 +168,7 @@ typedef struct Economy
     int boom_decline_grp_cooldown[MAX_PROPERTY_GRPS];
 
     RegionalDevelopmentCards active_regional_card;   
+    EconmicEvents active_economic_event;
 } Economy;
 
 typedef enum InsurancetType
