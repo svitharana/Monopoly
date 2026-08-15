@@ -32,7 +32,7 @@
 #define MAX_DISASTERS 5
 #define MAX_REGIONAL_DEVELOPMENT_CARDS 12
 
-// REGIONAL CARDS
+// REGIONAL DEVELOPMENT CARDS
 typedef enum RegionalDevelopmentCards {
     SOUTHERN_TOURISM_BOOM,
     PORT_CITY_EXPANSION,
@@ -47,6 +47,17 @@ typedef enum RegionalDevelopmentCards {
     ELECTRICITY_TARIFF_INCREASE,
     WATER_SHORTAGE
 } RegionalDevelopmentCards;
+
+// ECONOMIC EVENTS
+typedef enum EconmicEvents {
+    TOURISM_BOOM,
+    FUEL_CRISIS,
+    HEAVY_MONSOON,
+    ECONOMIC_RECESSION,
+    STOCK_MARKET_BOOM,
+    GOVERNMENT_HOUSING_PROGRAMME,
+    POLITICAL_UNREST
+}  EconmicEvents;
 
 // PLAYERS
 typedef enum PlayerId
