@@ -6,16 +6,69 @@
 
 #include <stdio.h>
 
+// --------------- BAIL ------------------------
+int opportunistic_decide_pay_bail(Square *board, Player *player)
+{
+    if (player->cash < BAIL_AMOUNT)
+    {
+        return 0;
+    }
+
+    int unowned_count = 0;
+    for (int i = 0; i < MAX_SQUARES; i++)
+    {
+        if (board[i].ownership == UNOWNED &&
+            (board[i].square_type == PROPERTY || board[i].square_type == RAILWAY || board[i].square_type == UTILITY))
+        {
+            unowned_count++;
+        }
+    }
+
+    if (unowned_count >= 15)
+    {
+        return 1;
+    }
+    return 0;
+}
+
 // --------------- PROPERTY RENOVATION --------------
 int opportunistic_decide_property_renovation(Square property, Player player)
 {
+    int property_depreciation = (property.property_age - 50) / 5;
+    if (property_depreciation >= 15)
+    {
+        int renovation_cost = apply_percentage(property.current_market_value, 10);
+        return player.cash >= renovation_cost;
+    }
+
     return 0;
 }
 
 // --------------- RENOVATION ------------------------
 int opportunistic_decide_renovation(Square square, Player player, int building_condition)
 {
-    return 0; // TODO: add opportunistic renovation strategy
+    // Renovate once depreciation exceeds 15% (condition < 85%) (§3.4)
+    if (building_condition >= 85)
+    {
+        return 0;
+    }
+
+    int renovation_cost = 0;
+    if (square.has_hotel == 1)
+    {
+        renovation_cost = apply_percentage(square.hotel_constructionCost, HOTEL_RENOVATION_COST_PERCENTAGE);
+    }
+    else
+    {
+        renovation_cost = apply_percentage(square.house_constructionCost, HOUSE_RENOVATION_COST_PERCENTAGE);
+    }
+
+    if (building_condition < 60)
+    {
+        renovation_cost = apply_percentage(renovation_cost, 150); // Structural damage penalty
+    }
+
+    return player.cash > renovation_cost;
 }
 
 // --------------- PURCHASE - HELPER ---------------
@@ -435,11 +488,27 @@ int opportunistic_decide_construction(Square property, Player player, Economy ec
 // --------------- INSURANCE ----------------------
 InsuranceType opportunistic_decide_insurance(Square property, Economy economy, Player player)
 {
-    // TODO: Need to implement opportunistic insurance strategy
-    if (property.has_hotel == 1 || property.house_count > 0)
+    if (property.has_hotel == 1)
     {
         return COMPREHENSIVE;
     }
+
+    if (property.house_count >= 3) // YELLOW, GREEN, DARK BLUE
+    {
+        if (property.property_group >= YELLOW && property.property_group <= DARK_BLUE)
+        {
+            return COMPREHENSIVE;
+        }
+    }
+
+    if (economy.active_economic_event == HEAVY_MONSOON || economy.active_government_regulation == INSURANCE_REGULATION)
+    {
+        if (property.house_count >= 2)
+        {
+            return BASIC_PROPERTY;
+        }
+    }
+
     return NO_INSURANCE;
 }
 

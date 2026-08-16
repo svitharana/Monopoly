@@ -3,6 +3,7 @@
 
 #include "types.h"
 
+int opportunistic_decide_pay_bail(Square *board, Player *player);
 int opportunistic_decide_property_renovation(Square property, Player player);
 int opportunistic_decide_renovation(Square square, Player player, int building_condition);
 int opportunistic_decide_purchase(Square *board, Square *square, Player *player, Economy economy);

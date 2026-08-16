@@ -10,7 +10,7 @@
 #include <stdio.h>
 
 // --------------- BAIL ------------------------
-int decide_pay_bail(Player *player)
+int decide_pay_bail(Square *board, Player *player)
 {
     switch (player->strategy)
     {
@@ -21,7 +21,7 @@ int decide_pay_bail(Player *player)
     case RISK_TAKER:
         return player->cash >= BAIL_AMOUNT;
     case OPPORTUNISTIC_TRADER:
-        return 0; // TODO: add opportunistic bail strategy
+        return opportunistic_decide_pay_bail(board, player);
     default:
         return 0;
     }

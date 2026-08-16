@@ -12,7 +12,7 @@ int decide_construction(Square property, Player player, Economy economy);
 int decide_bid(Square square, Player player, int bidding_price, Economy economy);
 int decide_property_renovation(Square square, Player player);
 int decide_renovation(Square square, Player player, int building_condition);
-int decide_pay_bail(Player *player);
+int decide_pay_bail(Square *board, Player *player);
 int decide_loan(Square *board, Player player, Economy economy);
 int decide_loan_extention(Player player);
 int decide_loan_refinance(Square *board, Player player);

@@ -243,7 +243,7 @@ void play_turn(Player *players, PlayerId player_id, Square *board, Economy econo
 
     if (player->is_in_jail == 1)
     {
-        if (decide_pay_bail(player) == 1)
+        if (decide_pay_bail(board, player) == 1)
         {
             pay_bail(player);
             player->is_in_jail = 0;
