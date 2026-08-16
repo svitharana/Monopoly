@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "include/board.h"
+#include "include/events.h"
 #include "include/finance.h"
 #include "include/players.h"
 #include "include/types.h"
@@ -42,11 +43,11 @@ void resolve_renovations(Square *board, Player *player)
 }
 
 // PROPERTY
-int resolve_property(Square *board, Square *square, Player *players, Player *player)
+int resolve_property(Square *board, Square *square, Player *players, Player *player, Economy economy)
 {
     if (square->ownership == UNOWNED)
     {
-        if (decide_purchase(board, square, player) == 0)
+        if (decide_purchase(board, square, player, economy) == 0)
         {
             printf("\n\t%s declined %s for LKR %d.\n", player->player_name, square->square_name, square->purchase_price);
             return 1; // auction
@@ -89,23 +90,35 @@ int resolve_property(Square *board, Square *square, Player *players, Player *pla
             }
         }
 
-        if (check_player_bankrupt(board, player, players, rent) == 1)
+        if (check_player_bankrupt(board, player, players, rent, economy) == 1)
         {
             return -1; // player bankrupted
         }
 
         pay_rent(square, player, property_owner, rent);
     }
+    else
+    {
+        if (square->property_age > 0)
+        {   
+            if (decide_property_renovation(*square, *player) == 1) {
+                execute_property_renovation(square, player);
+                int renovation_cost = apply_percentage(square->current_market_value, 10);
+                square->property_age = 0;
+                printf("\n\t%s renovated %s for LKR %d.\n", player->player_name, square->square_name, renovation_cost);
+            }
+        }
+    }
 
     return 0; // property resolved
 }
 
 // RAILWAY STATION
-int resolve_railwayStation(Square *board, Square *square, Player *players, Player *player)
+int resolve_railwayStation(Square *board, Square *square, Player *players, Player *player, Economy economy)
 {
     if (square->ownership == UNOWNED)
     {
-        if (decide_purchase(board, square, player) == 0)
+        if (decide_purchase(board, square, player, economy) == 0)
         {
             printf("\n\t%s declined %s for LKR %d.\n", player->player_name, square->square_name, square->purchase_price);
             return 1; // auction
@@ -136,7 +149,7 @@ int resolve_railwayStation(Square *board, Square *square, Player *players, Playe
 
         rent *= multiplier;
 
-        if (check_player_bankrupt(board, player, players, rent) == 1)
+        if (check_player_bankrupt(board, player, players, rent, economy) == 1)
         {
             return -1; // player bankrupted
         }
@@ -148,11 +161,11 @@ int resolve_railwayStation(Square *board, Square *square, Player *players, Playe
 }
 
 // UTILITY COMPANIES
-int resolve_utilityCompany(Square *board, Square *square, Player *players, Player *player)
+int resolve_utilityCompany(Square *board, Square *square, Player *players, Player *player, Economy economy)
 {
     if (square->ownership == UNOWNED)
     {
-        if (decide_purchase(board, square, player) == 0)
+        if (decide_purchase(board, square, player, economy) == 0)
         {
             printf("\n\t%s declined %s for LKR %d.\n", player->player_name, square->square_name, square->purchase_price);
             return 1; // auction
@@ -179,9 +192,10 @@ int resolve_utilityCompany(Square *board, Square *square, Player *players, Playe
         }
 
         int standard_rent = player->rolled_value * rent_multiplier[utilityCompany_count];
+        // base_rent acts as a percentage modifier (starts at 100%), adjusted by economic events
         int rent = apply_percentage(standard_rent, square->base_rent);
 
-        if (check_player_bankrupt(board, player, players, rent) == 1)
+        if (check_player_bankrupt(board, player, players, rent, economy) == 1)
         {
             return -1; // player bankrupted
         }
@@ -190,6 +204,77 @@ int resolve_utilityCompany(Square *board, Square *square, Player *players, Playe
     }
 
     return 0; // utility resolved
+}
+
+int get_max_opponent_rent(Square *board, Player player)
+{
+    int max_expense = 0;
+    for (int i = 0; i < MAX_SQUARES; i++)
+    {
+        if (board[i].ownership == player.playerId || board[i].ownership == UNOWNED || board[i].is_mortgage == 1)
+        {
+            continue;
+        }
+
+        if (board[i].square_type == PROPERTY)
+        {
+            int rent_multiplier[] = {1, 2, 3, 5, 7};
+            int rent = board[i].base_rent;
+
+            if (board[i].has_hotel == 1)
+            {
+                rent *= 10;
+            }
+            else
+            {
+                rent *= rent_multiplier[board[i].house_count];
+            }
+
+            if (rent > max_expense)
+            {
+                max_expense = rent;
+            }
+        }
+        else if (board[i].square_type == RAILWAY)
+        {
+            PlayerId railway_owner = board[i].ownership;
+            int count = 0;
+            int rent = board[i].base_rent;
+            for (int j = 0; j < MAX_SQUARES; j++)
+            {
+                if (board[j].square_type == RAILWAY && board[j].ownership == railway_owner && board[j].is_mortgage == 0)
+                {
+                    count++;
+                }
+            }
+            int multiplier = 1 << (count - 1);
+            rent *= multiplier;
+            if (rent > max_expense)
+            {
+                max_expense = rent;
+            }
+        }
+        else if (board[i].square_type == UTILITY)
+        {
+            PlayerId utility_owner = board[i].ownership;
+            int count = 0;
+            int rent_multiplier[] = {0, 4, 10};
+            for (int j = 0; j < MAX_SQUARES; j++)
+            {
+                if (board[j].square_type == UTILITY && board[j].ownership == utility_owner && board[j].is_mortgage == 0)
+                {
+                    count++;
+                }
+            }
+            int standard_rent = 12 * rent_multiplier[count];
+            int rent = apply_percentage(standard_rent, board[i].base_rent);
+            if (rent > max_expense)
+            {
+                max_expense = rent;
+            }
+        }
+    }
+    return max_expense;
 }
 
 int get_eligible_collateral(Square *board, Player *player, int *eligible_properties)
@@ -220,10 +305,14 @@ void handle_loan(Square *board, Player *player, Economy economy)
     int eligible_property_count = get_eligible_collateral(board, player, eligible_properties);
     if (eligible_property_count != 0)
     {
-        //  TODO: decide_loan_collateral(board, player, eligible_properties, eligible_property_count)
-        int loan_amount = calculate_loan_amount(board, eligible_properties, eligible_property_count);
+        int selected_collateral[MAX_SQUARES];
+        int selected_count = decide_loan_collateral(board, *player, eligible_properties, eligible_property_count, selected_collateral, economy);
 
-        issue_loan(board, player, economy, eligible_properties, eligible_property_count, loan_amount);
+        if (selected_count > 0)
+        {
+            int loan_amount = calculate_loan_amount(board, selected_collateral, selected_count);
+            issue_loan(board, player, economy, selected_collateral, selected_count, loan_amount);
+        }
     }
 }
 
@@ -239,13 +328,13 @@ void resolve_bank(Square *board, Player *player, Economy economy)
         {
             repay_loan(board, player, payment_amount);
         }
-        else if (decide_loan_extention(*player) == 1)
-        {
-            loan_period_extention(player);
-        }
         else if (decide_loan_refinance(board, *player) == 1)
         {
             handle_loan(board, player, economy);
+        }
+        else if (decide_loan_extention(*player) == 1)
+        {
+            loan_period_extention(player);
         }
         else
         {
@@ -255,7 +344,7 @@ void resolve_bank(Square *board, Player *player, Economy economy)
     }
     else
     {
-        if (decide_loan(board, *player) == 1)
+        if (decide_loan(board, *player, economy) == 1)
         {
             handle_loan(board, player, economy);
         }
@@ -276,15 +365,18 @@ void resolve_jail(Square *square, Player *player)
 // INCOME TAX
 int resolve_income_tax(Square *board, Economy economy, Player *player, Player *players)
 {
-    // TODO: on what does income tax applied on
-    int player_net_worth = calculate_net_worth(board, *player);
-    if (player_net_worth < 0) {
-        player_net_worth = 0;
+
+    // int player_net_worth = calculate_net_worth(board, *player);
+    // if (player_net_worth < 0) {
+    //     player_net_worth = 0;}
+    int taxable_cash = player->cash;
+    if (taxable_cash < 0) {
+        taxable_cash = 0;
     }
     
-    int tax_amount = apply_percentage(player_net_worth, economy.income_tax_rate);
+    int tax_amount = apply_percentage(taxable_cash, economy.income_tax_rate);
     
-    if (check_player_bankrupt(board, player, players, tax_amount) == 1)
+    if (check_player_bankrupt(board, player, players, tax_amount, economy) == 1)
     {
         return -1; // bankrupt
     }
@@ -296,7 +388,7 @@ int resolve_income_tax(Square *board, Economy economy, Player *player, Player *p
 }
 
 // EVENTS
-int resolve_event_square(Square *board, Square *square, Player *player, Economy economy, Player *players)
+int resolve_event_square(Square *board, Square *square, Player *player, Economy economy, Player *players, NationalEventCards *cards)
 {
     if (square->property_index == COMMUNITY_DEVELOPMENT_FUND_SQUARE)
     {
@@ -312,12 +404,17 @@ int resolve_event_square(Square *board, Square *square, Player *player, Economy 
         }
 
         int tax_amount = apply_percentage(property_assets, economy.community_fund_rate);
-        if (check_player_bankrupt(board, player, players, tax_amount) == 1) {
+        if (check_player_bankrupt(board, player, players, tax_amount, economy) == 1) {
             return -1;
         }
 
         printf("\n\t%s paid LKR %d as community development fund payment.\n", player->player_name, tax_amount);
         execute_tax_collection(player, tax_amount);
+    }
+    else
+    {
+        NationalEventCards drawn_card = draw_national_event_card(cards, player);
+        apply_national_event_effect(board, &economy, drawn_card, player, players);
     }
 
     return 0;
@@ -393,15 +490,13 @@ int player_has_monopoly(Square *board, PlayerId playerId, PropertyGroup group)
             return 0;
         }
 
-        if (board[i].is_damaged == 1) {
-            continue;
-        }
+
     }
 
     return 1;
 }
 
-void resolve_landingSquare(Square *board, Player *players, Player *player, Economy economy)
+void resolve_landingSquare(Square *board, Player *players, Player *player, Economy economy, NationalEventCards *cards)
 {
     Square *square = &board[player->current_position];
 
@@ -409,13 +504,13 @@ void resolve_landingSquare(Square *board, Player *players, Player *player, Econo
     switch (square->square_type)
     {
     case PROPERTY:
-        shouldRunAuction = resolve_property(board, square, players, player);
+        shouldRunAuction = resolve_property(board, square, players, player, economy);
         break;
     case RAILWAY:
-        shouldRunAuction = resolve_railwayStation(board, square, players, player);
+        shouldRunAuction = resolve_railwayStation(board, square, players, player, economy);
         break;
     case UTILITY:
-        shouldRunAuction = resolve_utilityCompany(board, square, players, player);
+        shouldRunAuction = resolve_utilityCompany(board, square, players, player, economy);
         break;
     case BANK:
         resolve_bank(board, player, economy);
@@ -430,7 +525,7 @@ void resolve_landingSquare(Square *board, Player *players, Player *player, Econo
         resolve_income_tax(board, economy, player, players);
         break;
     case EVENT:
-        resolve_event_square(board, square, player, economy, players);
+        resolve_event_square(board, square, player, economy, players, cards);
         break;
 
     default:
@@ -440,7 +535,7 @@ void resolve_landingSquare(Square *board, Player *players, Player *player, Econo
     {
         if (shouldRunAuction == 1)
         {
-            run_auction(square, players);
+            run_auction(square, players, economy);
         }
     }
 }

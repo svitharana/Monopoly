@@ -30,7 +30,7 @@ void bubble_sort(PlayerOrder *playerOrder)
 
         for (int i = 0; i < MAX_PLAYERS - 1; i++)
         {
-            PlayerOrder player = playerOrder[i];
+
             if (playerOrder[i].isOrderCorrect || playerOrder[i + 1].isOrderCorrect)
             {
                 continue;
@@ -158,9 +158,9 @@ void player_in_jail(Player *player, int dice_1, int dice_2)
     }
 }
 
-void check_for_monopoly(Square *board, Player *player)
+void check_for_monopoly(Square *board, Player *player, Economy economy)
 {
-    for (int group = 0; group < MAX_PROPERTY_GRPS; group++)
+    for (int group = MAX_PROPERTY_GRPS - 1; group >= 0; group--)
     {
         if (player_has_monopoly(board, player->playerId, group) == 1)
         {
@@ -172,8 +172,19 @@ void check_for_monopoly(Square *board, Player *player)
                 {
                     break;
                 }
+                int cost = 0;
+                if (board[property_index].has_hotel == 0 && board[property_index].house_count == MAX_HOUSES){
+                    cost = board[property_index].hotel_constructionCost;
+                    
+                } else if (board[property_index].house_count < 4) {
+                    cost = board[property_index].house_constructionCost;
+                }
 
-                if (decide_construction(board[property_index], *player) == 0)
+                if (decide_mortgage_for_construction(board, *player, cost) == 1) {
+                    finance_construction_by_mortgage(board, player, cost);
+                }
+
+                if (decide_construction(board[property_index], *player, economy) == 0)
                 {
                     break;
                 }
@@ -181,6 +192,7 @@ void check_for_monopoly(Square *board, Player *player)
                 if (announced == 0)
                 {
                     printf("\n%s has monopoly.\n", player->player_name);
+                    announced = 1;
                 }
                 execute_construction(&board[property_index], player);
             }
@@ -202,9 +214,11 @@ int get_active_player_count(Player *players)
 }
 
 
-void play_turn(Player *players, PlayerId player_id, Square *board, Economy economy)
+void play_turn(Player *players, PlayerId player_id, Square *board, Economy economy, NationalEventCards *cards)
 {
     Player *player = &players[player_id];
+
+    printf("\n---- %s's turn ----\n", player->player_name);
 
     for (int i = 0; i < MAX_SQUARES; i++) {
         if (board[i].ownership != player->playerId){
@@ -220,7 +234,6 @@ void play_turn(Player *players, PlayerId player_id, Square *board, Economy econo
             repair_damaged_property(&board[i], &players[player_id]);
         }
     }
-    printf("\n---- %s's turn ----\n", player->player_name);
 
     if (player->is_in_jail == 1)
     {
@@ -257,9 +270,9 @@ void play_turn(Player *players, PlayerId player_id, Square *board, Economy econo
         move_player(player, player->rolled_value, board);
     }
 
-    resolve_landingSquare(board, players, player, economy);
+    resolve_landingSquare(board, players, player, economy, cards);
 
-    check_for_monopoly(board, player);
+    check_for_monopoly(board, player, economy);
 }
 
 int check_game_round(Player *players, int game_round)
@@ -305,13 +318,20 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
         if (economy->active_regional_card != -1) {
             remove_regional_development_card_effect(board, economy->active_regional_card);
         }
-
         draw_regional_development_card(board, economy);
 
+        if (economy->active_economic_event != -1)
+        {
+            remove_economic_event(board, economy, economy->active_economic_event);
+        }
         run_economic_event(board, economy);
     }
 
     if (game_round% 20 == 0) {
+        if (economy->active_government_regulation != -1)
+        {
+            remove_government_regulation(board, economy, economy->active_government_regulation);
+        }
         run_government_regulations(board, economy, players);
     }
 
@@ -493,6 +513,21 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
                 }
             }
 
+            square->property_age++;
+            if (square->property_age > 50)
+            {
+                if (game_round % 5 == 0) {
+                    int property_depreciation = (square->property_age - 50) / 5;
+                    if (property_depreciation <= 30)
+                    {
+                        square->current_market_value = apply_percentage(square->current_market_value, 100 - 1);
+                        printf("\tProperty Depreciation\n");
+                        printf("\tProperty %s has depreciated by 1%% (Total: %d%%).\n", square->square_name, property_depreciation);
+                        printf("\tCurrent Value: LKR %d.\n", square->current_market_value);
+                    }
+                }
+            }
+
             if (square->insurance_rounds_remaining > 0)
             {
                 square->insurance_rounds_remaining--;
@@ -539,11 +574,12 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
         }
         printf("\n\tProperties : %d.", property_count);
         printf("\n\tHotels : %d.", hotel_count);
+        printf("\n\tNet Worth : LKR %d.", calculate_net_worth(board, players[i]));
 
         // LOANs
         if (players[i].has_active_loan == 1)
         {
-            check_player_loan(board, &players[i], players);
+            check_player_loan(board, &players[i], players, *economy);
         }
     }
 
@@ -569,9 +605,10 @@ void show_winner(Player *players)
     }
 }
 
-void check_winner(Player *players)
+void check_winner(Square *board, Player *players)
 {
-    Player winner = players[0];
+    int highest_net_worth = -1;
+    int winner_index = 0;
 
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
@@ -580,13 +617,15 @@ void check_winner(Player *players)
             continue;
         }
 
-        if (players[i].cash > winner.cash)
+        int net_worth = calculate_net_worth(board, players[i]);
+        if (net_worth > highest_net_worth)
         {
-            winner = players[i];
+            highest_net_worth = net_worth;
+            winner_index = i;
         }
     }
 
-    printf("\n================= %s won the game by maximum assets =================\n", winner.player_name);
+    printf("\n================= %s won the game by maximum net worth (LKR %d) =================\n", players[winner_index].player_name, highest_net_worth);
 }
 
 void start_game()
@@ -596,6 +635,9 @@ void start_game()
     PlayerOrder playerOrder[MAX_PLAYERS] = {0};
 
     Economy economy = {0};
+
+    NationalEventCards national_event_cards[MAX_NATIONAL_EVENT_CARDS] = {0};
+    initialize_national_event_cards(national_event_cards);
 
     economy.inflation = 0;
     economy.loan_interest_rate = INITIAL_LOAN_INTEREST_RATE;
@@ -607,7 +649,6 @@ void start_game()
     economy.active_government_regulation = -1;
 
     int game_round = 1;
-    int active_players = MAX_PLAYERS;
 
     initialize_board(board);
     initialize_players(players, playerOrder);
@@ -634,12 +675,7 @@ void start_game()
                 continue;
             }
 
-            play_turn(players, current_player->playerId, board, economy);
-
-            if (current_player->is_bankrupt == 1)
-            {
-                active_players--;
-            }
+            play_turn(players, current_player->playerId, board, economy, national_event_cards);
 
             if (get_active_player_count(players) <= 1)
             {
@@ -662,7 +698,7 @@ void start_game()
                 if (game_round == MAX_ROUNDS)
                 {
                     game_over = 1;
-                    check_winner(players);
+                    check_winner(board, players);
                     break;
                 }
                 game_round++;

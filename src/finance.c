@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "include/finance.h"
+#include "include/board.h"
 #include "include/players.h"
 #include "include/types.h"
 #include "include/utils.h"
@@ -98,6 +99,14 @@ int calculate_insurance_premium(Square property, InsuranceType insurance_type, E
     return premium;
 }
 
+void execute_property_renovation(Square *property, Player *player) {
+    int renovation_cost = apply_percentage(property->current_market_value, 10);
+    property->property_age = 0;
+    printf("\n\t%s renovated %s for LKR %d.\n", player->player_name, property->square_name, renovation_cost);
+    player->cash -= renovation_cost;
+    printf("\tRemaining Balance : LKR %d.\n", player->cash);
+}
+
 void execute_insurance_transaction(Square *property, Player *player, InsuranceType insurance_type, Economy economy) {
 
     char insurance_types[][30] = {
@@ -188,11 +197,11 @@ int check_building_rent(int condition)
     }
     else if (condition >= 50 && condition <= 74)
     {
-        return 80;
+        return 75;
     }
     else if (condition >= 25 && condition <= 49)
     {
-        return 70;
+        return 50;
     }
     else
     {
@@ -281,8 +290,53 @@ void execute_construction(Square *property, Player *player)
     }
 }
 
+int finance_construction_by_mortgage(Square *board, Player *player, int target_cost)
+{
+    while (player->cash < target_cost)
+    {
+        int lowest_index = -1;
+        int lowest_value = 9999999;
+
+        for (int i = 0; i < MAX_SQUARES; i++)
+        {
+            if (board[i].ownership != player->playerId)
+            {
+                continue;
+            }
+
+            if (board[i].is_mortgage == 1 || board[i].is_loan_locked == 1)
+            {
+                continue;
+            }
+
+            if (board[i].square_type == PROPERTY)
+            {
+                if (player_has_monopoly(board, player->playerId, board[i].property_group) == 1) {
+                    continue;
+                }
+            }
+
+            if (board[i].current_market_value < lowest_value)
+            {
+                lowest_value = board[i].current_market_value;
+                lowest_index = i;
+            }
+        }
+
+        if (lowest_index == -1)
+        {
+            break;
+        }
+
+        printf("\n\tMortgaging property %s for finance development.\n", board[lowest_index].square_name);
+        execute_mortgage(&board[lowest_index], player);
+    }
+
+    return player->cash >= target_cost;
+}
+
 // TODO: don't run auction if only one player remains
-void run_auction(Square *square, Player *players)
+void run_auction(Square *square, Player *players, Economy economy)
 {
     int bidding_price = square->current_market_value / 2;
 
@@ -331,7 +385,7 @@ void run_auction(Square *square, Player *players)
             }
 
             Player *player = &players[current_bidding_player];
-            if (decide_bid(*square, *player, bidding_price) == 0)
+            if (decide_bid(*square, *player, bidding_price, economy) == 0)
             {
                 printf("\n\t%s withdrew from the bid at LKR %d.\n", player->player_name, highest_bid);
                 player_has_withdrawn[current_bidding_player] = 1;
@@ -357,7 +411,7 @@ void run_auction(Square *square, Player *players)
     }
 }
 
-void process_loan_default(Square *board, Player *player, Player *players)
+void process_loan_default(Square *board, Player *player, Player *players, Economy economy)
 {
     int forecloased_properties[MAX_SQUARES] = {0};
     int forecloased_property_count = 0;
@@ -397,12 +451,12 @@ void process_loan_default(Square *board, Player *player, Player *players)
 
     for (int i = 0; i < forecloased_property_count; i++)
     {
-        run_auction(&board[forecloased_properties[i]], players);
+        run_auction(&board[forecloased_properties[i]], players, economy);
     }
 }
 
 
-void liquidate_player_assets(Square *board, Player *player, Player *players)
+void liquidate_player_assets(Square *board, Player *player, Player *players, Economy economy)
 {
     int forecloased_properties[MAX_SQUARES] = {0};
     int forecloased_property_count = 0;
@@ -411,7 +465,7 @@ void liquidate_player_assets(Square *board, Player *player, Player *players)
 
     if (player->has_active_loan == 1)
     {
-        process_loan_default(board, player, players);
+        process_loan_default(board, player, players, economy);
     }
 
     printf("\n\tFollowing properties are transferred to Bank:\n");
@@ -442,11 +496,11 @@ void liquidate_player_assets(Square *board, Player *player, Player *players)
 
     for (int i = 0; i < forecloased_property_count; i++)
     {
-        run_auction(&board[forecloased_properties[i]], players);
+        run_auction(&board[forecloased_properties[i]], players, economy);
     }
 }
 
-void check_player_loan(Square *board, Player *player, Player *players)
+void check_player_loan(Square *board, Player *player, Player *players, Economy economy)
 {
     if (player->loan_rounds_remaining > 0)
     {
@@ -468,13 +522,13 @@ void check_player_loan(Square *board, Player *player, Player *players)
             }
             if (active_player_count > 1)
             {
-                liquidate_player_assets(board, player, players);
+                liquidate_player_assets(board, player, players, economy);
             }
         }
     }
     else
     {
-        process_loan_default(board, player, players);
+        process_loan_default(board, player, players, economy);
     }
 }
 
@@ -583,7 +637,7 @@ void execute_unmortgage(Square *square, Player *player) {
     printf("\t  Remaining Balance : LKR %d.\n", player->cash);
 }
 
-int check_player_bankrupt(Square *board, Player *player, Player *players, int debt_amount)
+int check_player_bankrupt(Square *board, Player *player, Player *players, int debt_amount, Economy economy)
 {
     if (player->cash >= debt_amount)
     {
@@ -633,7 +687,7 @@ int check_player_bankrupt(Square *board, Player *player, Player *players, int de
             return 1;
         }    
     
-    liquidate_player_assets(board, player, players);
+    liquidate_player_assets(board, player, players, economy);
 
     return 1; // bankrupt
 }
