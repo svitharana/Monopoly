@@ -3,6 +3,7 @@
 
 #include "types.h"
 
+int count_owned_by_type(Square *board, PlayerId playerId, SquareType type);
 void resolve_renovations(Square *board, Player *player);
 void initialize_board(Square *board);
 void move_player(Player *player, int move_by, Square *board);

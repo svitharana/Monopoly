@@ -173,14 +173,17 @@ void check_for_monopoly(Square *board, Player *player, Economy economy)
                     break;
                 }
                 int cost = 0;
-                if (board[property_index].has_hotel == 0 && board[property_index].house_count == MAX_HOUSES){
+                if (board[property_index].has_hotel == 0 && board[property_index].house_count == MAX_HOUSES)
+                {
                     cost = board[property_index].hotel_constructionCost;
-                    
-                } else if (board[property_index].house_count < 4) {
+                }
+                else if (board[property_index].house_count < 4)
+                {
                     cost = board[property_index].house_constructionCost;
                 }
 
-                if (decide_mortgage_for_construction(board, *player, cost) == 1) {
+                if (decide_mortgage_for_construction(board, *player, cost) == 1)
+                {
                     finance_construction_by_mortgage(board, player, cost);
                 }
 
@@ -213,23 +216,26 @@ int get_active_player_count(Player *players)
     return count;
 }
 
-
 void play_turn(Player *players, PlayerId player_id, Square *board, Economy economy, NationalEventCards *cards)
 {
     Player *player = &players[player_id];
 
     printf("\n---- %s's turn ----\n", player->player_name);
 
-    for (int i = 0; i < MAX_SQUARES; i++) {
-        if (board[i].ownership != player->playerId){
+    for (int i = 0; i < MAX_SQUARES; i++)
+    {
+        if (board[i].ownership != player->playerId)
+        {
             continue;
         }
 
-        if (board[i].is_mortgage == 1 && player->cash > board[i].mortgage_value * 2) {
+        if (board[i].is_mortgage == 1 && player->cash > board[i].mortgage_value * 2)
+        {
             execute_unmortgage(&board[i], player);
         }
 
-        if (board[i].is_damaged == 1) {
+        if (board[i].is_damaged == 1)
+        {
             printf("\tRepairing Damamged Buildings (%s)\n", board[i].square_name);
             repair_damaged_property(&board[i], &players[player_id]);
         }
@@ -246,7 +252,7 @@ void play_turn(Player *players, PlayerId player_id, Square *board, Economy econo
     }
 
     // TODO: implement unmortgage
-    
+
     resolve_renovations(board, player);
 
     int dice_1 = 0;
@@ -314,8 +320,10 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
     printf("  Round %d Summary\n", game_round);
     printf("========================================\n\n");
 
-    if (game_round % 15 == 0) {
-        if (economy->active_regional_card != -1) {
+    if (game_round % 15 == 0)
+    {
+        if (economy->active_regional_card != -1)
+        {
             remove_regional_development_card_effect(board, economy->active_regional_card);
         }
         draw_regional_development_card(board, economy);
@@ -327,7 +335,8 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
         run_economic_event(board, economy);
     }
 
-    if (game_round% 20 == 0) {
+    if (game_round % 20 == 0)
+    {
         if (economy->active_government_regulation != -1)
         {
             remove_government_regulation(board, economy, economy->active_government_regulation);
@@ -434,19 +443,18 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
     printf("\n");
 
     char card_names[][50] = {
-    [SOUTHERN_TOURISM_BOOM] = "Southern Tourism Boom (+40% Rent)",
-    [PORT_CITY_EXPANSION] = "Port City Expansion (+25% Value)",
-    [IT_INDUSTRY_GROWTH] = "IT Industry Growth (+20% Value)",
-    [NORTHERN_DEVELOPMENT_PROGRAMME] = "Northern Development (+30% Value)",
-    [TEA_EXPORT_BOOM] = "Tea Export Boom (+35% Value)",
-    [AIRPORT_EXPANSION] = "Airport Expansion (+30% Rent)",
-    [UNIVERSITY_CITY_GROWTH] = "University City Growth (+20% Value)",
-    [BEACH_POLLUTION] = "Beach Pollution (-30% Rent)",
-    [FLOOD_DAMAGE] = "Flood Damage (-20% Value)",
-    [TRANSPORT_STRIKE] = "Transport Strike (-40% Railway Rent)",
-    [ELECTRICITY_TARIFF_INCREASE] = "Electricity Tariff Increase (+25% Rent)",
-    [WATER_SHORTAGE] = "Water Shortage (+20% Utility, -10% Value)"
-};
+        [SOUTHERN_TOURISM_BOOM] = "Southern Tourism Boom (+40% Rent)",
+        [PORT_CITY_EXPANSION] = "Port City Expansion (+25% Value)",
+        [IT_INDUSTRY_GROWTH] = "IT Industry Growth (+20% Value)",
+        [NORTHERN_DEVELOPMENT_PROGRAMME] = "Northern Development (+30% Value)",
+        [TEA_EXPORT_BOOM] = "Tea Export Boom (+35% Value)",
+        [AIRPORT_EXPANSION] = "Airport Expansion (+30% Rent)",
+        [UNIVERSITY_CITY_GROWTH] = "University City Growth (+20% Value)",
+        [BEACH_POLLUTION] = "Beach Pollution (-30% Rent)",
+        [FLOOD_DAMAGE] = "Flood Damage (-20% Value)",
+        [TRANSPORT_STRIKE] = "Transport Strike (-40% Railway Rent)",
+        [ELECTRICITY_TARIFF_INCREASE] = "Electricity Tariff Increase (+25% Rent)",
+        [WATER_SHORTAGE] = "Water Shortage (+20% Utility, -10% Value)"};
 
     if (economy->active_regional_card != -1)
     {
@@ -463,33 +471,32 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
         [STOCK_MARKET_BOOM] = "Stock Market Boom",
         [FOREIGN_INVESTMENT] = "Foreign Investment",
         [GOVERNMENT_HOUSING_PROGRAMME] = "Government Housing Programme",
-        [POLITICAL_UNREST] = "Political Unrest"
-    };
+        [POLITICAL_UNREST] = "Political Unrest"};
 
-    if (economy->active_economic_event != -1) {
+    if (economy->active_economic_event != -1)
+    {
         printf("\tEconomic Event\n");
         printf("\t----------------\n");
         printf("\tActive Event: %s\n\n", event_names[economy->active_economic_event]);
     }
 
     char regulation_names[][100] = {
-    [INCREASE_PROPERTY_TAX] = "Income Tax increases by 50%",
-    [REDUCE_LOAN_INTEREST] = "Interest decreases by 2%",
-    [HOUSING_SUBSIDY] = "House construction costs reduce by 30%",
-    [LUXURY_PROPERTY_TAX] = "Hotels incur annual maintenance tax of 25% of property value",
-    [RAILWAY_MODERNIZATION] = "Railway rents increase by 25%",
-    [ELECTRICAL_TARIFF_REVISION] = "Utility rent increases by 20%",
-    [INSURANCE_REGULATION] = "Insurance premiums decrease by 15%",
-    [ANTI_SPECULATION_ACT] = "Anti-Speculation Act (Max 3 undeveloped properties)"
-};
+        [INCREASE_PROPERTY_TAX] = "Income Tax increases by 50%",
+        [REDUCE_LOAN_INTEREST] = "Interest decreases by 2%",
+        [HOUSING_SUBSIDY] = "House construction costs reduce by 30%",
+        [LUXURY_PROPERTY_TAX] = "Hotels incur annual maintenance tax of 25% of property value",
+        [RAILWAY_MODERNIZATION] = "Railway rents increase by 25%",
+        [ELECTRICAL_TARIFF_REVISION] = "Utility rent increases by 20%",
+        [INSURANCE_REGULATION] = "Insurance premiums decrease by 15%",
+        [ANTI_SPECULATION_ACT] = "Anti-Speculation Act (Max 3 undeveloped properties)"};
 
-
-    if (economy->active_government_regulation != -1) {
+    if (economy->active_government_regulation != -1)
+    {
         printf("\tGovernment Regulation\n");
         printf("\t-----------------------\n");
         printf("\tActive Regulation: %s\n\n", regulation_names[economy->active_government_regulation]);
     }
-    
+
     for (int i = 0; i < MAX_SQUARES; i++)
     {
         Square *square = &board[i];
@@ -516,7 +523,8 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
             square->property_age++;
             if (square->property_age > 50)
             {
-                if (game_round % 5 == 0) {
+                if (game_round % 5 == 0)
+                {
                     int property_depreciation = (square->property_age - 50) / 5;
                     if (property_depreciation <= 30)
                     {
@@ -554,6 +562,7 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
         {
             continue;
         }
+
         printf("\n---- %s's Summary ----\n", players[i].player_name);
 
         printf("\n\tCash : LKR %d.", players[i].cash);
@@ -581,9 +590,19 @@ void update_game_data(Square *board, Player *players, int game_round, Economy *e
         {
             check_player_loan(board, &players[i], players, *economy);
         }
+
+        if (players[i].national_event_card_rounds_remaining > 0)
+        {
+            players[i].national_event_card_rounds_remaining--;
+            if (players[i].national_event_card_rounds_remaining == 0)
+            {
+                remove_national_event_effect(board, economy, &players[i]);
+                printf("\tNational Event Card effect expired for %s.\n", players[i].player_name);
+            }
+        }
     }
 
-    printf("\n\tBankrupt Players.\n");
+    printf("\n\n\tBankrupt Players.\n");
     printf("\t---------------------\n");
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
@@ -643,7 +662,7 @@ void start_game()
     economy.loan_interest_rate = INITIAL_LOAN_INTEREST_RATE;
     economy.income_tax_rate = 15;
     economy.community_fund_rate = 10;
-    
+
     economy.active_regional_card = -1;
     economy.active_economic_event = -1;
     economy.active_government_regulation = -1;

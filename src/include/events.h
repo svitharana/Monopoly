@@ -6,6 +6,7 @@
 int create_disaster(Square *board);
 void initialize_national_event_cards(NationalEventCards *cards);
 void update_inflation(Economy *economy);
+void remove_national_event_effect(Square *board, Economy *economy, Player *player);
 void update_board_data(Economy *economy, Square *board);
 void update_dynamic_property_market(Square *board, Economy *economy);
 void remove_economic_event(Square *board, Economy *economy, EconmicEvents event);

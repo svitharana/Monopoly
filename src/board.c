@@ -6,6 +6,19 @@
 #include "include/types.h"
 #include "include/utils.h"
 
+int count_owned_by_type(Square *board, PlayerId playerId, SquareType type)
+{
+    int count = 0;
+    for (int i = 0; i < MAX_SQUARES; i++)
+    {
+        if (board[i].square_type == type && board[i].ownership == playerId)
+        {
+            count++;
+        }
+    }
+    return count;
+}
+
 // renovating building
 void resolve_renovations(Square *board, Player *player)
 {
@@ -56,7 +69,8 @@ int resolve_property(Square *board, Square *square, Player *players, Player *pla
     }
     else if (square->ownership != player->playerId)
     {
-        if (square->is_mortgage == 1) {
+        if (square->is_mortgage == 1)
+        {
             printf("\n\t%s is mortgaged. No rent collected.\n", square->square_name);
             return 0;
         }
@@ -100,8 +114,9 @@ int resolve_property(Square *board, Square *square, Player *players, Player *pla
     else
     {
         if (square->property_age > 0)
-        {   
-            if (decide_property_renovation(*square, *player) == 1) {
+        {
+            if (decide_property_renovation(*square, *player) == 1)
+            {
                 execute_property_renovation(square, player);
                 int renovation_cost = apply_percentage(square->current_market_value, 10);
                 square->property_age = 0;
@@ -127,7 +142,8 @@ int resolve_railwayStation(Square *board, Square *square, Player *players, Playe
     }
     else if (square->ownership != player->playerId)
     {
-        if (square->is_mortgage == 1) {
+        if (square->is_mortgage == 1)
+        {
             printf("\n\t%s is mortgaged. No rent collected.\n", square->square_name);
             return 0;
         }
@@ -174,7 +190,8 @@ int resolve_utilityCompany(Square *board, Square *square, Player *players, Playe
     }
     else if (square->ownership != player->playerId)
     {
-        if (square->is_mortgage == 1) {
+        if (square->is_mortgage == 1)
+        {
             printf("\n\t%s is mortgaged. No rent collected.\n", square->square_name);
             return 0;
         }
@@ -370,12 +387,13 @@ int resolve_income_tax(Square *board, Economy economy, Player *player, Player *p
     // if (player_net_worth < 0) {
     //     player_net_worth = 0;}
     int taxable_cash = player->cash;
-    if (taxable_cash < 0) {
+    if (taxable_cash < 0)
+    {
         taxable_cash = 0;
     }
-    
+
     int tax_amount = apply_percentage(taxable_cash, economy.income_tax_rate);
-    
+
     if (check_player_bankrupt(board, player, players, tax_amount, economy) == 1)
     {
         return -1; // bankrupt
@@ -393,18 +411,22 @@ int resolve_event_square(Square *board, Square *square, Player *player, Economy 
     if (square->property_index == COMMUNITY_DEVELOPMENT_FUND_SQUARE)
     {
         int property_assets = 0;
-        for (int i = 0; i < MAX_SQUARES; i++) {
-            if (board[i].ownership != player->playerId){
+        for (int i = 0; i < MAX_SQUARES; i++)
+        {
+            if (board[i].ownership != player->playerId)
+            {
                 continue;
             }
-            
-            if (board[i].square_type == PROPERTY || board[i].square_type == RAILWAY || board[i].square_type == UTILITY) {
+
+            if (board[i].square_type == PROPERTY || board[i].square_type == RAILWAY || board[i].square_type == UTILITY)
+            {
                 property_assets += board[i].current_market_value;
             }
         }
 
         int tax_amount = apply_percentage(property_assets, economy.community_fund_rate);
-        if (check_player_bankrupt(board, player, players, tax_amount, economy) == 1) {
+        if (check_player_bankrupt(board, player, players, tax_amount, economy) == 1)
+        {
             return -1;
         }
 
@@ -421,16 +443,20 @@ int resolve_event_square(Square *board, Square *square, Player *player, Economy 
 }
 
 // INSURANCE
-int resolve_insurance_square(Square *board, Square *square, Player *player, Economy economy, Player *players) {
-    for (int i = 0; i < MAX_SQUARES; i++) {
+int resolve_insurance_square(Square *board, Square *square, Player *player, Economy economy, Player *players)
+{
+    for (int i = 0; i < MAX_SQUARES; i++)
+    {
         Square *property = &board[i];
 
-        if (property->ownership != player->playerId || property->square_type != PROPERTY) {
+        if (property->ownership != player->playerId || property->square_type != PROPERTY)
+        {
             continue;
         }
 
         InsuranceType insurance_type = decide_insurance(*property, economy, *player);
-        if (insurance_type == NO_INSURANCE) {
+        if (insurance_type == NO_INSURANCE)
+        {
             continue;
         }
 
@@ -489,8 +515,6 @@ int player_has_monopoly(Square *board, PlayerId playerId, PropertyGroup group)
         {
             return 0;
         }
-
-
     }
 
     return 1;

@@ -56,7 +56,7 @@ void check_insurance_compensation(Square property, Player *player)
         }
         break;
     case COMPREHENSIVE:
-        // Comprehensive all 
+        // Comprehensive all
         compensation = repair_cost;
         break;
     case BUSINESS_INTERRUPTION:
@@ -72,34 +72,37 @@ void check_insurance_compensation(Square property, Player *player)
     printf("\tRemaining Balance : LKR %d.\n", player->cash);
 }
 
-int calculate_insurance_premium(Square property, InsuranceType insurance_type, Economy economy, Player player) {
+int calculate_insurance_premium(Square property, InsuranceType insurance_type, Economy economy, Player player)
+{
     int rate = 0;
 
-    switch (insurance_type) {
-        case BASIC_PROPERTY:
-            rate = 5;
-            break;
-        case COMPREHENSIVE:
-            rate  = 10;
-            break;
-        case BUSINESS_INTERRUPTION:
-            rate = 15;
-            break;
-        default:
-            return 0;
+    switch (insurance_type)
+    {
+    case BASIC_PROPERTY:
+        rate = 5;
+        break;
+    case COMPREHENSIVE:
+        rate = 10;
+        break;
+    case BUSINESS_INTERRUPTION:
+        rate = 15;
+        break;
+    default:
+        return 0;
     }
 
     int premium = apply_percentage(property.current_market_value, rate);
-    
+
     if (economy.active_government_regulation == INSURANCE_REGULATION)
     {
-        premium = apply_percentage(premium, 100 - 15); 
+        premium = apply_percentage(premium, 100 - 15);
     }
 
     return premium;
 }
 
-void execute_property_renovation(Square *property, Player *player) {
+void execute_property_renovation(Square *property, Player *player)
+{
     int renovation_cost = apply_percentage(property->current_market_value, 10);
     property->property_age = 0;
     printf("\n\t%s renovated %s for LKR %d.\n", player->player_name, property->square_name, renovation_cost);
@@ -107,14 +110,14 @@ void execute_property_renovation(Square *property, Player *player) {
     printf("\tRemaining Balance : LKR %d.\n", player->cash);
 }
 
-void execute_insurance_transaction(Square *property, Player *player, InsuranceType insurance_type, Economy economy) {
+void execute_insurance_transaction(Square *property, Player *player, InsuranceType insurance_type, Economy economy)
+{
 
     char insurance_types[][30] = {
         [NO_INSURANCE] = "",
         [BASIC_PROPERTY] = "Basic Property",
         [COMPREHENSIVE] = "Comprehensive",
-        [BUSINESS_INTERRUPTION] = "Business Interruption"
-    };
+        [BUSINESS_INTERRUPTION] = "Business Interruption"};
 
     int premium = calculate_insurance_premium(*property, insurance_type, economy, *player);
 
@@ -126,7 +129,7 @@ void execute_insurance_transaction(Square *property, Player *player, InsuranceTy
     }
     else
     {
-        // new purchase or update insurance 
+        // new purchase or update insurance
         property->insurance_type = insurance_type;
         property->is_insured = 1;
         printf("\n\t* Purchasing Insurance\n");
@@ -138,7 +141,6 @@ void execute_insurance_transaction(Square *property, Player *player, InsuranceTy
     printf("\tPremium : LKR %d.\n", premium);
     printf("\tRemaining Balance : LKR %d.\n", player->cash);
 }
-
 
 int calculate_net_worth(Square *board, Player player)
 {
@@ -311,7 +313,8 @@ int finance_construction_by_mortgage(Square *board, Player *player, int target_c
 
             if (board[i].square_type == PROPERTY)
             {
-                if (player_has_monopoly(board, player->playerId, board[i].property_group) == 1) {
+                if (player_has_monopoly(board, player->playerId, board[i].property_group) == 1)
+                {
                     continue;
                 }
             }
@@ -455,12 +458,11 @@ void process_loan_default(Square *board, Player *player, Player *players, Econom
     }
 }
 
-
 void liquidate_player_assets(Square *board, Player *player, Player *players, Economy economy)
 {
     int forecloased_properties[MAX_SQUARES] = {0};
     int forecloased_property_count = 0;
-    
+
     player->cash = 0;
 
     if (player->has_active_loan == 1)
@@ -508,15 +510,17 @@ void check_player_loan(Square *board, Player *player, Player *players, Economy e
         player->loan_rounds_remaining--;
         printf("\n\t%s has an outstanding loan of LKR %d.\n", player->player_name, player->loan_amount);
         printf("\tLoan due in %d Rounds.", player->loan_rounds_remaining);
-    
-        if (calculate_net_worth(board, *player) < 0) {
+
+        if (calculate_net_worth(board, *player) < 0)
+        {
             printf("\n\t%s's liabilities exceed total assets! Declared bankrupt.\n", player->player_name);
             player->is_bankrupt = 1;
-            
+
             int active_player_count = 0;
             for (int i = 0; i < MAX_PLAYERS; i++)
             {
-                if (players[i].is_bankrupt == 0) {
+                if (players[i].is_bankrupt == 0)
+                {
                     active_player_count++;
                 }
             }
@@ -619,21 +623,22 @@ void issue_loan(Square *board, Player *player, Economy economy, int *eligible_pr
     printf("\tDuration: %d rounds\n", player->loan_rounds_remaining);
 }
 
-
-void execute_mortgage(Square *square, Player *player) {
+void execute_mortgage(Square *square, Player *player)
+{
     square->is_mortgage = 1;
     player->cash += square->mortgage_value;
 
-    printf("\t%s mortgaged %s for LKR %d.\n",player->player_name, square->square_name, square->mortgage_value);
+    printf("\t%s mortgaged %s for LKR %d.\n", player->player_name, square->square_name, square->mortgage_value);
     printf("\tRemaining cash: LKR %d.\n", player->cash);
 }
 
-void execute_unmortgage(Square *square, Player *player) {
+void execute_unmortgage(Square *square, Player *player)
+{
     player->cash -= square->mortgage_value;
     square->is_mortgage = 0;
 
     printf("\n\t%s unmortgaged %s for LKR %d.\n",
-    player->player_name, square->square_name, square->mortgage_value);
+           player->player_name, square->square_name, square->mortgage_value);
     printf("\t  Remaining Balance : LKR %d.\n", player->cash);
 }
 
@@ -644,7 +649,7 @@ int check_player_bankrupt(Square *board, Player *player, Player *players, int de
         return 0;
     }
 
-    printf("\n\t%s has insufficient cash (LKR %d) to pay LKR %d. Mortgaging properties...\n",player->player_name, player->cash, debt_amount);
+    printf("\n\t%s has insufficient cash (LKR %d) to pay LKR %d. Mortgaging properties...\n", player->player_name, player->cash, debt_amount);
 
     for (int i = 0; i < MAX_SQUARES; i++)
     {
@@ -653,23 +658,26 @@ int check_player_bankrupt(Square *board, Player *player, Player *players, int de
             continue;
         }
 
-        if (board[i].is_mortgage == 1) {
+        if (board[i].is_mortgage == 1)
+        {
             continue;
         }
 
-        if (board[i].is_loan_locked == 1) {
+        if (board[i].is_loan_locked == 1)
+        {
             continue;
         }
 
         // TODO: what if the property is developed
-        
+
         execute_mortgage(&board[i], player);
 
-        if (player->cash >= debt_amount) {
+        if (player->cash >= debt_amount)
+        {
             return 0;
         }
     }
-    
+
     player->is_bankrupt = 1;
     printf("\n\t%s declares bankrupt.\n", player->player_name);
 
@@ -683,10 +691,10 @@ int check_player_bankrupt(Square *board, Player *player, Player *players, int de
     }
 
     if (active_player_count == 1)
-        {
-            return 1;
-        }    
-    
+    {
+        return 1;
+    }
+
     liquidate_player_assets(board, player, players, economy);
 
     return 1; // bankrupt
