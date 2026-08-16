@@ -33,6 +33,14 @@
 #define MAX_REGIONAL_DEVELOPMENT_CARDS 12
 #define MAX_ECONOMIC_EVENTS 8
 #define MAX_GOVERNMENT_REGULATIONS 8
+#define MAX_NATIONAL_EVENT_CARDS 20
+
+// NATIONAL EVENT CARDS
+typedef struct NationalEventCards {
+    int index;
+    char *name;
+    char *effect;
+} NationalEventCards;
 
 // REGIONAL DEVELOPMENT CARDS
 typedef enum RegionalDevelopmentCards {
@@ -116,6 +124,9 @@ typedef struct Player
     int loan_rounds_remaining;
 
     int incured_loss;
+
+    NationalEventCards active_national_event_card;
+    int national_event_card_rounds_remaining;
 
 } Player;
 
@@ -230,6 +241,10 @@ typedef struct Square
     int is_insured;
     InsuranceType insurance_type;
     int insurance_rounds_remaining;
+
+    int property_age;
+
+    int is_closed;
 
 } Square;
 
