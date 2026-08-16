@@ -449,7 +449,6 @@ void update_board_data(Economy *economy, Square *board)
 {
     Square *square;
 
-    // TODO: need to add: insurance premiums, repair costs
     economy->loan_interest_rate = apply_percentage(economy->loan_interest_rate, 100 + economy->inflation);
 
     for (int i = 0; i < MAX_SQUARES; i++)
@@ -468,10 +467,56 @@ void update_board_data(Economy *economy, Square *board)
     }
 }
 
+void remove_dynamic_property_market(Square *board, Economy *economy)
+{
+    if (economy->boom_group != NONE)
+    {
+        for (int i = 0; i < MAX_SQUARES; i++)
+        {
+            Square *property = &board[i];
+            if (property->square_type != PROPERTY)
+            {
+                continue;
+            }
+
+            if (property->property_group == economy->boom_group)
+            {
+                property->purchase_price = remove_percentage(property->purchase_price, 100 + 15);
+                property->mortgage_value = remove_percentage(property->mortgage_value, 100 + 15);
+                property->base_rent = remove_percentage(property->base_rent, 100 + 25);
+                property->house_constructionCost = remove_percentage(property->house_constructionCost, 100 + 10);
+                property->hotel_constructionCost = remove_percentage(property->hotel_constructionCost, 100 + 10);
+                property->current_market_value = remove_percentage(property->current_market_value, 100 + 20);
+            }
+        }
+    }
+
+    if (economy->decline_group != NONE)
+    {
+        for (int i = 0; i < MAX_SQUARES; i++)
+        {
+            Square *property = &board[i];
+            if (property->square_type != PROPERTY)
+            {
+                continue;
+            }
+
+            if (property->property_group == economy->decline_group)
+            {
+                property->mortgage_value = remove_percentage(property->mortgage_value, 100 - 10);
+                property->base_rent = remove_percentage(property->base_rent, 100 - 20);
+                property->current_market_value = remove_percentage(property->current_market_value, 100 - 15);
+            }
+        }
+    }
+}
+
 void update_dynamic_property_market(Square *board, Economy *economy)
 {
-    PropertyGroup boom_grp = -1;
-    PropertyGroup decline_grp = -1;
+    remove_dynamic_property_market(board, economy);
+
+    PropertyGroup boom_grp = NONE;
+    PropertyGroup decline_grp = NONE;
 
     do
     {
@@ -512,7 +557,6 @@ void update_dynamic_property_market(Square *board, Economy *economy)
         }
         else if (property->property_group == economy->decline_group)
         {
-            // TODO: add auction starting price decrease by 25%
             property->mortgage_value = apply_percentage(property->mortgage_value, 100 - 10);
             property->base_rent = apply_percentage(property->base_rent, 100 - 20);
             property->current_market_value = apply_percentage(property->current_market_value, 100 - 15);

@@ -66,6 +66,26 @@ int decide_renovation(Square square, Player player, int building_condition)
 // --------------- PURCHASE ------------------------
 int decide_purchase(Square *board, Square *square, Player *player, Economy economy)
 {
+    if (economy.active_government_regulation == ANTI_SPECULATION_ACT && square->square_type == PROPERTY)
+    {
+        int undeveloped_count = 0;
+        for (int i = 0; i < MAX_SQUARES; i++)
+        {
+            if (board[i].square_type != PROPERTY || board[i].ownership != player->playerId)
+            {
+                continue;
+            }
+            if (board[i].house_count == 0 && board[i].has_hotel == 0)
+            {
+                undeveloped_count++;
+            }
+        }
+        if (undeveloped_count >= 3)
+        {
+            return 0;
+        }
+    }
+
     switch (player->strategy)
     {
     case AGGRESSIVE_INVESTOR:

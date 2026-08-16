@@ -7,7 +7,6 @@ int main()
 {
     int seed = time(NULL);
     srand(seed);
-    printf("Seed :%d\n\n", seed);
     start_game();
     return 0;
 }

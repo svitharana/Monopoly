@@ -1,6 +1,5 @@
 #include "include/risk_player.h"
 #include "include/board.h"
-#include "include/finance.h"
 #include "include/types.h"
 #include "include/utils.h"
 

@@ -47,7 +47,6 @@ int opportunistic_decide_property_renovation(Square property, Player player)
 // --------------- RENOVATION ------------------------
 int opportunistic_decide_renovation(Square square, Player player, int building_condition)
 {
-    // Renovate once depreciation exceeds 15% (condition < 85%) (§3.4)
     if (building_condition >= 85)
     {
         return 0;
@@ -65,7 +64,7 @@ int opportunistic_decide_renovation(Square square, Player player, int building_c
 
     if (building_condition < 60)
     {
-        renovation_cost = apply_percentage(renovation_cost, 150); // Structural damage penalty
+        renovation_cost = apply_percentage(renovation_cost, 150);
     }
 
     return player.cash > renovation_cost;

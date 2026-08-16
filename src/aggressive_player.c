@@ -39,7 +39,7 @@ int aggressive_decide_renovation(Square square, Player player, int building_cond
 
     if (building_condition < 60)
     {
-        renovation_cost = apply_percentage(renovation_cost, 150); // Increase cost by 50% if condition is below 60
+        renovation_cost = apply_percentage(renovation_cost, 150);
     }
 
     return player.cash > renovation_cost;
@@ -361,7 +361,6 @@ int aggressive_decide_construction(Square property, Player player)
 // --------------- MORTGAGE FOR CONSTRUCTION ------------------------
 int aggressive_decide_mortgage_for_construction(Square *board, Player player, int target_cost)
 {
-    // Aggressive Investor never voluntarily sells/mortgages properties unless bankruptcy is unavoidable (§3.1)
     return 0;
 }
 

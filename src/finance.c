@@ -49,7 +49,7 @@ void check_insurance_compensation(Square property, Player *player)
     switch (property.insurance_type)
     {
     case BASIC_PROPERTY:
-        // Basic covers fire and flood 80
+        // Basic covers fire and flood 
         if (property.damaged_by == FIRE || property.damaged_by == FLOOD)
         {
             compensation = apply_percentage(repair_cost, 80);
@@ -96,6 +96,11 @@ int calculate_insurance_premium(Square property, InsuranceType insurance_type, E
     if (economy.active_government_regulation == INSURANCE_REGULATION)
     {
         premium = apply_percentage(premium, 100 - 15);
+    }
+
+    if (player.active_national_event_card.index == 15) // Insurance Discount
+    {
+        premium = apply_percentage(premium, 100 - 20);
     }
 
     return premium;
@@ -220,7 +225,7 @@ void execute_renovation(Square *property, Player *player, int house_index)
         renovation_cost = apply_percentage(property->hotel_constructionCost, HOTEL_RENOVATION_COST_PERCENTAGE);
         if (property->hotel_condition < 60)
         {
-            renovation_cost = apply_percentage(renovation_cost, 150); // Increase cost by 50% if condition is below 60
+            renovation_cost = apply_percentage(renovation_cost, 150); 
         }
         player->cash -= renovation_cost;
 
@@ -233,7 +238,7 @@ void execute_renovation(Square *property, Player *player, int house_index)
         renovation_cost = apply_percentage(property->house_constructionCost, HOUSE_RENOVATION_COST_PERCENTAGE);
         if (property->house_conditons[house_index] < 60)
         {
-            renovation_cost = apply_percentage(renovation_cost, 150); // Increase cost by 50% if condition is below 60
+            renovation_cost = apply_percentage(renovation_cost, 150); 
         }
         player->cash -= renovation_cost;
 
@@ -261,11 +266,12 @@ void execute_purchase(Square *square, Player *player, int purchase_price)
 
 void pay_rent(Square *square, Player *player, Player *owner, int rent)
 {
-    printf("\n\t%s owned by %s.\n", square->square_name, owner->player_name);
+    printf("\n\t%s landed on %s.\n", player->player_name, square->square_name);
     printf("\tRent Paid : LKR %d.\n", rent);
+    printf("\tOwner : %s.\n", owner->player_name);
     player->cash -= rent;
     owner->cash += rent;
-    printf("\tRemaining Balance : %d.\n", player->cash);
+    printf("\tRemaining Balance : LKR %d.\n", player->cash);
 }
 
 void execute_construction(Square *property, Player *player)
@@ -278,16 +284,17 @@ void execute_construction(Square *property, Player *player)
             player->cash -= property->hotel_constructionCost;
             property->hotel_condition = 100;
 
-            printf("%s upgraded %s to a Hotel for LKR %d.\n", player->player_name, property->square_name, property->hotel_constructionCost);
-            printf("Remaining Balance: LKR %d.\n", player->cash);
+            printf("\n\t%s upgraded %s to a Hotel.\n", player->player_name, property->square_name);
+            printf("\tRemaining Balance : LKR %d.\n", player->cash);
         }
         else
         {
             property->house_conditons[property->house_count] = 100;
             property->house_count++;
             player->cash -= property->house_constructionCost;
-            printf("%s constructed one house on %s for LKR %d.\n", player->player_name, property->square_name, property->house_constructionCost);
-            printf("Remaining Balance: LKR %d.\n", player->cash);
+            printf("\n\t%s constructed one house on %s.\n", player->player_name, property->square_name);
+            printf("\tConstruction Cost : LKR %d.\n", property->house_constructionCost);
+            printf("\tRemaining Balance : LKR %d.\n", player->cash);
         }
     }
 }
@@ -338,7 +345,6 @@ int finance_construction_by_mortgage(Square *board, Player *player, int target_c
     return player->cash >= target_cost;
 }
 
-// TODO: don't run auction if only one player remains
 void run_auction(Square *square, Player *players, Economy economy)
 {
     int bidding_price = square->current_market_value / 2;
@@ -380,6 +386,11 @@ void run_auction(Square *square, Player *players, Economy economy)
     {
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
+            if (active_bidders <= 1 && highest_bidder != -1)
+            {
+                break;
+            }
+
             PlayerId current_bidding_player = i;
 
             if (player_has_withdrawn[current_bidding_player] == 1)
@@ -410,7 +421,7 @@ void run_auction(Square *square, Player *players, Economy economy)
     }
     else
     {
-        printf("\n\tNo bids were placed, %s remaind unowned.\n", square->square_name);
+        printf("\n\tNo bids were placed, %s remained unowned.\n", square->square_name);
     }
 }
 
@@ -419,8 +430,8 @@ void process_loan_default(Square *board, Player *player, Player *players, Econom
     int forecloased_properties[MAX_SQUARES] = {0};
     int forecloased_property_count = 0;
 
-    printf("\n\t%s has defaulted.", player->player_name);
-    printf("\n\tFollowing collateral has been foreclosed:");
+    printf("\n\t%s has defaulted.\n", player->player_name);
+    printf("\tCollateral has been foreclosed:\n");
     for (int i = 0; i < MAX_SQUARES; i++)
     {
 
@@ -434,14 +445,15 @@ void process_loan_default(Square *board, Player *player, Player *players, Econom
             continue;
         }
 
-        // TODO: running auction
-        printf("\n\t\t - %s", board[i].square_name);
+        printf("\t\t- %s\n", board[i].square_name);
         board[i].ownership = UNOWNED;
         board[i].is_loan_locked = 0;
         board[i].has_hotel = 0;
         board[i].house_count = 0;
-        // board[i].builing_condition = 100;
         board[i].is_mortgage = 0;
+        board[i].is_insured = 0;
+        board[i].insurance_type = NO_INSURANCE;
+        board[i].insurance_rounds_remaining = 0;
 
         forecloased_properties[forecloased_property_count] = board[i].property_index;
         forecloased_property_count++;
@@ -451,6 +463,7 @@ void process_loan_default(Square *board, Player *player, Player *players, Econom
     player->loan_interest_rate = 0;
     player->loan_rounds_remaining = 0;
     player->has_active_loan = 0;
+    printf("\tOutstanding debt cleared.\n");
 
     for (int i = 0; i < forecloased_property_count; i++)
     {
@@ -483,7 +496,6 @@ void liquidate_player_assets(Square *board, Player *player, Player *players, Eco
             continue;
         }
 
-        // TODO: Need to add insurance policy
         printf("\n\t\t - %s", board[i].square_name);
 
         board[i].ownership = UNOWNED;
@@ -491,6 +503,9 @@ void liquidate_player_assets(Square *board, Player *player, Player *players, Eco
         board[i].has_hotel = 0;
         board[i].house_count = 0;
         board[i].is_mortgage = 0;
+        board[i].is_insured = 0;
+        board[i].insurance_type = NO_INSURANCE;
+        board[i].insurance_rounds_remaining = 0;
 
         forecloased_properties[forecloased_property_count] = board[i].property_index;
         forecloased_property_count++;
@@ -547,8 +562,9 @@ void repay_loan(Square *board, Player *player, int payment_amount)
     player->cash -= payment_amount;
     player->loan_amount -= payment_amount;
 
-    if (player->loan_amount == 0)
+    if (player->loan_amount <= 0)
     {
+        player->loan_amount = 0;
         player->loan_interest_rate = 0;
         player->loan_rounds_remaining = 0;
         player->has_active_loan = 0;
@@ -566,7 +582,7 @@ void repay_loan(Square *board, Player *player, int payment_amount)
     else
     {
         printf("\t%s repaid LKR %d.\n", player->player_name, payment_amount);
-        printf("\tOutstanding: LKR %d.\n", player->loan_amount);
+        printf("\tOutstanding Balance : LKR %d.\n", player->loan_amount);
     }
 }
 
@@ -595,22 +611,21 @@ void issue_loan(Square *board, Player *player, Economy economy, int *eligible_pr
         player->loan_interest_rate = economy.loan_interest_rate;
         player->loan_rounds_remaining = MAX_LOAN_ROUNDS;
 
-        printf("\n\t%s has obtained a secured loan\n", player->player_name);
-        printf("\t\tLoan amount: LKR %d.\n", loan_amount);
-
-        printf("\t\tCollateral:\n");
+        printf("\n\t%s obtained a secured loan.\n", player->player_name);
+        printf("\tLoan Amount : LKR %d.\n", loan_amount);
+        printf("\tCollateral :\n");
         for (int i = 0; i < eligible_property_count; i++)
         {
-            printf("\t\t\t%s\n", board[eligible_properties[i]].square_name);
+            printf("\t\t- %s\n", board[eligible_properties[i]].square_name);
         }
     }
     else
     {
-        printf("\n\t%s has increased the loan amount by LKR %d.\n", player->player_name, loan_amount);
-        printf("\t\tAdditional Collateral:\n");
+        printf("\n\t%s increased the loan amount by LKR %d.\n", player->player_name, loan_amount);
+        printf("\tAdditional Collateral :\n");
         for (int i = 0; i < eligible_property_count; i++)
         {
-            printf("\t\t\t%s\n", board[eligible_properties[i]].square_name);
+            printf("\t\t- %s\n", board[eligible_properties[i]].square_name);
         }
     }
 
@@ -619,8 +634,8 @@ void issue_loan(Square *board, Player *player, Economy economy, int *eligible_pr
         board[eligible_properties[i]].is_loan_locked = 1;
     }
 
-    printf("\n\tInterest rate: %d%% \n", player->loan_interest_rate);
-    printf("\tDuration: %d rounds\n", player->loan_rounds_remaining);
+    printf("\tInterest Rate : %d%%\n", player->loan_interest_rate);
+    printf("\tDuration : %d Rounds\n", player->loan_rounds_remaining);
 }
 
 void execute_mortgage(Square *square, Player *player)
@@ -666,9 +681,11 @@ int check_player_bankrupt(Square *board, Player *player, Player *players, int de
         if (board[i].is_loan_locked == 1)
         {
             continue;
-        }
+        }   
 
-        // TODO: what if the property is developed
+        if (board[i].has_hotel == 1 || board[i].house_count > 0) {
+            continue;
+        }
 
         execute_mortgage(&board[i], player);
 

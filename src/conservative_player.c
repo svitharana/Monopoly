@@ -39,7 +39,7 @@ int conservative_decide_renovation(Square square, Player player, int building_co
 
     if (building_condition < 60)
     {
-        renovation_cost = apply_percentage(renovation_cost, 150); // Increase cost by 50% if condition is below 60
+        renovation_cost = apply_percentage(renovation_cost, 150); 
     }
 
     return player.cash > renovation_cost;
@@ -66,11 +66,8 @@ int conservative_decide_purchase(Square *square, Player *player, Economy economy
 // ---------------- LOANS ----------------------
 int conservative_decide_loan(Square *board, Player player, Economy economy)
 {
-    (void)economy;
-    // Avoid loans unless bankruptcy is imminent.
     int max_expense = get_max_opponent_rent(board, player);
 
-    // If current cash is lower than the max payable expense, bankruptcy is imminent -> take loan
     if (player.cash < max_expense)
     {
         return 1;
@@ -140,7 +137,7 @@ int conservative_decide_loan_collateral(Square *board, Player player, int *eligi
     int accumulated_amount = 0;
     int considered_properties[MAX_SQUARES] = {0};
 
-    // Step 1: Prioritize isolated / non-monopoly regular properties first (starting with lowest mortgage value)
+  
     while (accumulated_amount < desired_amount)
     {
         int suitable_property_index = -1;
@@ -166,7 +163,7 @@ int conservative_decide_loan_collateral(Square *board, Player player, int *eligi
             }
             else if (property.square_type == RAILWAY || property.square_type == UTILITY)
             {
-                continue; // Preserve predictable income sources
+                continue; 
             }
 
             if (property.mortgage_value < lowest_mortgage)
@@ -192,22 +189,18 @@ int conservative_decide_loan_collateral(Square *board, Player player, int *eligi
 // --------------- LOAN - EXTENTION ---------------
 int conservative_decide_loan_extention(Player player)
 {
-    (void)player;
     return 0; // never extend loan
 }
 
 // --------------- LOAN - REFINANCE ---------------
 int conservative_decide_loan_refinance(Square *board, Player player)
 {
-    (void)board;
-    (void)player;
-    return 0; // Conservative Banker never refinances loans
+    return 0; 
 }
 
 // --------------- CONSTRUCTION ------------------------
 int conservative_decide_construction(Square property, Player player, Economy economy)
 {
-    // Avoid investments during economic recessions
     if (economy.active_economic_event == ECONOMIC_RECESSION)
     {
         return 0;
@@ -219,7 +212,6 @@ int conservative_decide_construction(Square property, Player player, Economy eco
     }
     else if (property.has_hotel == 0 && player.has_active_loan == 0)
     {
-        // Never develops hotels until all outstanding loans have been settled
         return player.cash >= property.hotel_constructionCost * 2;
     }
 
@@ -228,19 +220,13 @@ int conservative_decide_construction(Square property, Player player, Economy eco
 
 // --------------- MORTGAGE FOR CONSTRUCTION ------------------------
 int conservative_decide_mortgage_for_construction(Square *board, Player player, int target_cost)
-{
-    (void)board;
-    (void)player;
-    (void)target_cost;
-    // Conservative Banker avoids unnecessary risks and debt (§3.2)
+{ 
     return 0;
 }
 
 // --------------- INSURANCE ----------------------
 InsuranceType conservative_decide_insurance(Square property, Economy economy, Player player)
 {
-    (void)economy;
-    (void)player;
     if (property.has_hotel == 1 || property.house_count > 0)
     {
         return COMPREHENSIVE;
@@ -251,7 +237,7 @@ InsuranceType conservative_decide_insurance(Square property, Economy economy, Pl
 // --------------- AUCTION ------------------------
 int conservative_decide_bid(Square square, Player player, int bidding_price, Economy economy)
 {
-    // Avoid investments during economic recessions
+    
     if (economy.active_economic_event == ECONOMIC_RECESSION)
     {
         return 0;

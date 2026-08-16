@@ -74,6 +74,16 @@ int resolve_property(Square *board, Square *square, Player *players, Player *pla
             printf("\n\t%s is mortgaged. No rent collected.\n", square->square_name);
             return 0;
         }
+        if (square->is_closed == 1)
+        {
+            printf("\n\t%s is closed. No rent collected.\n", square->square_name);
+            return 0;
+        }
+        if (square->is_damaged == 1)
+        {
+            printf("\n\t%s is damaged. No rent collected.\n", square->square_name);
+            return 0;
+        }
         int rent = square->base_rent;
         int rent_multiplier[] = {1, 2, 3, 5, 7};
 
@@ -577,7 +587,7 @@ void move_player(Player *player, int move_by, Square *board)
         printf("\tCollected LKR %d.\n", GO_PASSED_AMOUNT);
         player->cash += GO_PASSED_AMOUNT;
 
-        printf("\tCurrent Balance : %d.\n", player->cash);
+        printf("\tCurrent Balance : LKR %d.\n", player->cash);
         player->player_round++;
     }
 }
@@ -786,6 +796,10 @@ void initialize_board(Square *board)
     for (int i = 0; i < MAX_SQUARES; i++)
     {
 
+        board[i].is_insured = 0;
+        board[i].insurance_type = NO_INSURANCE;
+        board[i].insurance_rounds_remaining = 0;
+        
         if (board[i].square_type == RAILWAY)
         {
             board[i].purchase_price = 1500;

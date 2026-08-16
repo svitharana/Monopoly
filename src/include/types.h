@@ -44,7 +44,8 @@ typedef struct NationalEventCards {
 
 // REGIONAL DEVELOPMENT CARDS
 typedef enum RegionalDevelopmentCards {
-    SOUTHERN_TOURISM_BOOM,
+    NO_REGIONAL_CARD = -1,
+    SOUTHERN_TOURISM_BOOM = 0,
     PORT_CITY_EXPANSION,
     IT_INDUSTRY_GROWTH,
     NORTHERN_DEVELOPMENT_PROGRAMME,
@@ -60,7 +61,8 @@ typedef enum RegionalDevelopmentCards {
 
 // ECONOMIC EVENTS
 typedef enum EconmicEvents {
-    TOURISM_BOOM,
+    NO_ECONOMIC_EVENT = -1,
+    TOURISM_BOOM = 0,
     FUEL_CRISIS,
     HEAVY_MONSOON,
     ECONOMIC_RECESSION,
@@ -68,12 +70,12 @@ typedef enum EconmicEvents {
     FOREIGN_INVESTMENT,
     GOVERNMENT_HOUSING_PROGRAMME,
     POLITICAL_UNREST
-}  EconmicEvents;
+} EconmicEvents;
 
 // GOVERNMENT REGULATIONS
-
 typedef enum GovernmentRegulations{
-    INCREASE_PROPERTY_TAX,
+    NO_GOVERNMENT_REGULATION = -1,
+    INCREASE_PROPERTY_TAX = 0,
     REDUCE_LOAN_INTEREST,
     HOUSING_SUBSIDY,
     LUXURY_PROPERTY_TAX,
